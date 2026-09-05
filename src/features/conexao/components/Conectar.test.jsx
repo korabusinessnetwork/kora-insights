@@ -26,6 +26,8 @@ import RetornoDaConexao, {
   SEMANAS_ATE_O_DIAGNOSTICO,
   estimarPrimeiroDiagnostico,
 } from './RetornoDaConexao.jsx'
+import { SessaoProvedor } from '../../../context/SessaoContexto.jsx'
+import { TenantProvedor } from '../../../context/TenantContexto.jsx'
 
 vi.mock('../../../lib/index.js', async (importarOriginal) => {
   const original = await importarOriginal()
@@ -68,9 +70,17 @@ function comAmbienteDeProducao() {
  * @returns {import('@testing-library/react').RenderResult}
  */
 function montarRetorno(consulta) {
+  // Com os provedores, como no app: `/conectar/retorno` e rota protegida e
+  // roda dentro deles. O retorno precisa saber em qual espaco de trabalho a
+  // conta entra — montar a tela fora do provedor testaria uma configuracao que
+  // nao existe em lugar nenhum.
   return render(
     <MemoryRouter initialEntries={[`/conectar/retorno${consulta ? `?${consulta}` : ''}`]}>
-      <RetornoDaConexao />
+      <SessaoProvedor>
+        <TenantProvedor>
+          <RetornoDaConexao />
+        </TenantProvedor>
+      </SessaoProvedor>
     </MemoryRouter>,
   )
 }

@@ -106,6 +106,28 @@ function AindaSemVeredito({ titulo, descricao, achado, lacunas, limites }) {
 }
 
 /**
+ * O rotulo do bloco Evidencia: a janela que a REGRA comparou, nao o periodo do
+ * registro.
+ *
+ * O diagnostico cobre o historico inteiro (dezesseis semanas na Casa Oliveira),
+ * mas os numeros do bloco sao das oito recentes. Anunciar "11 de maio a 30 de
+ * agosto" acima de "Contas alcancadas 26.900" faz o cliente afirmar na reuniao
+ * um alcance de quatro meses que a ferramenta nunca calculou.
+ *
+ * @param {{ janela?: { semanas: number, recentes: { inicio: string, fim: string } } }} achado
+ * @returns {string}
+ */
+function rotuloDaJanela(achado) {
+  const janela = achado?.janela
+  if (!janela?.recentes) return ''
+  const periodo = formatarPeriodo(janela.recentes.inicio, janela.recentes.fim)
+  return (
+    `Últimas ${janela.semanas} semanas (${periodo}), comparadas às ` +
+    `${janela.semanas} anteriores`
+  )
+}
+
+/**
  * A tela de diagnostico. E o produto.
  *
  * Ela **le** o diagnostico pronto e o distribui pelo desenho da identidade:
@@ -171,10 +193,7 @@ export default function Diagnostico({ contaId }) {
           {/* Lacuna vem antes da evidencia: quem le os numeros precisa saber
               que dias faltaram antes de acreditar neles (ADR-004). */}
           <AvisoDeLacuna lacunas={cobertura.lacunas} />
-          <PainelDeEvidencia
-            achado={principal}
-            periodo={formatarPeriodo(diagnostico.periodo?.inicio, diagnostico.periodo?.fim)}
-          />
+          <PainelDeEvidencia achado={principal} periodo={rotuloDaJanela(principal)} />
         </div>
 
         <div className="tela-diagnostico__lateral">

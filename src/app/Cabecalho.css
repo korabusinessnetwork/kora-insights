@@ -12,7 +12,7 @@
   flex-wrap: wrap;
   padding: var(--e-3) var(--e-6);
   border-bottom: var(--borda-fina) solid var(--cor-linha);
-  background: var(--cor-fundo-fosco);
+  background: var(--cor-barra);
 }
 
 .ka-cabecalho__identidade {
@@ -32,7 +32,7 @@
   flex: none;
   width: var(--borda-fina);
   height: 1.5rem;
-  background: var(--cor-linha-forte);
+  background: var(--cor-contorno);
 }
 
 .ka-cabecalho__acoes {
@@ -71,7 +71,7 @@
 }
 
 .ka-cabecalho__acao[data-variante='secundario'] {
-  border-color: var(--cor-linha-forte);
+  border-color: var(--cor-contorno);
   color: var(--cor-tinta);
 }
 
@@ -109,4 +109,14 @@
     margin-right: 0;
     white-space: normal;
   }
+}
+
+/* Nome do espaço de trabalho: presente, nunca em disputa com a marca nem com o
+   período. Numa agência com quinze marcas, é o que responde "de quem é esta
+   tela". */
+.ka-cabecalho__tenant {
+  margin: 0;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+  white-space: nowrap;
 }

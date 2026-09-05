@@ -50,18 +50,22 @@ describe('dado-insuficiente sobre o Studio Nove', () => {
 })
 
 describe('dado-insuficiente sobre o Verdejar', () => {
-  const achado = dadoInsuficiente.avaliar(historicoDaFixture(1))
-
-  it('conta as 15 semanas fechadas e a que falta', () => {
-    expect(achado.frase).toBe(
-      'Você tem 15 semanas completas de histórico. Falta 1 para o primeiro diagnóstico ' +
-        'de causa.',
-    )
+  it('nao dispara: a conta tem historico, apesar dos cinco dias sem coleta', () => {
+    // A lacuna custa uma semana completa, nao o diagnostico. Se esta regra
+    // voltar a disparar aqui, ou a fixture encolheu ou o piso do ruleset subiu —
+    // e nos dois casos a demonstracao perde o desfecho "conta saudavel".
+    expect(dadoInsuficiente.avaliar(historicoDaFixture(1))).toBeNull()
   })
 
-  it('explica no apoio que a lacuna de coleta custou a semana', () => {
-    expect(achado.apoio).toContain('5 dias sem coleta no período')
-    expect(achado.apoio).toContain('cada dia que falta tira a semana inteira da comparação')
+  it('a lacuna continua contada no historico, mesmo sem impedir o diagnostico', () => {
+    const verdejar = historicoDaFixture(1)
+    expect(verdejar.lacunas).toEqual([
+      {
+        inicio: '2026-08-10',
+        fim: '2026-08-14',
+        motivo: 'Token expirado: a coleta do dia não aconteceu.',
+      },
+    ])
   })
 })
 

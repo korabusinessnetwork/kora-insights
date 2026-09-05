@@ -113,7 +113,10 @@ describe('montarHistorico — lacunas', () => {
     const semanaDaLacuna = verdejar.semanas.find((s) => s.inicio === '2026-08-10')
     expect(semanaDaLacuna.diasComColeta).toBe(2)
     expect(semanaDaLacuna.completa).toBe(false)
-    expect(verdejar.semanas.filter((s) => s.completa).length).toBe(15)
+    // Dezenove semanas de calendario, uma perdida pela lacuna e uma ainda em
+    // curso: sobram dezessete completas. A conta continua diagnosticavel, e e
+    // esse o ponto — cinco dias sem coleta custam uma semana, nao o diagnostico.
+    expect(verdejar.semanas.filter((s) => s.completa).length).toBe(17)
   })
 
   it('conta com coleta em dia e sem evento de falha nao inventa lacuna', () => {

@@ -38,7 +38,7 @@
 }
 
 .ki-botao[data-variante='secundario'] {
-  border-color: var(--cor-linha-forte);
+  border-color: var(--cor-contorno);
   color: var(--cor-tinta);
 }
 

@@ -107,7 +107,7 @@
 
 .entrar__entrada {
   padding: var(--e-3) var(--e-4);
-  border: var(--borda-fina) solid var(--cor-linha-forte);
+  border: var(--borda-fina) solid var(--cor-contorno);
   border-radius: var(--raio-2);
   background: var(--cor-fundo);
   color: var(--cor-tinta);

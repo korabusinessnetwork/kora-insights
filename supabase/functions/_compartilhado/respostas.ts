@@ -164,12 +164,44 @@ export async function lerCorpo(requisicao: Request): Promise<Record<string, unkn
   }
 }
 
-/** Padroes que nunca podem sair em log: token, chave e segredo em qualquer forma. */
+/** Nomes de campo cujo valor nunca sai em log, seja qual for o conteudo. */
+const CHAVES_SENSIVEIS =
+  /^(access_token|refresh_token|client_secret|app_secret|apikey|api_key|authorization|token|token_ref|senha|password|secret)$/i
+
+/**
+ * Formatos que denunciam um segredo mesmo dentro de um texto livre: token de
+ * usuario da Meta e JWT. Servem para o caso em que o segredo chega concatenado
+ * numa mensagem de erro, onde nao ha chave para inspecionar.
+ */
 const PADROES_SENSIVEIS = [
   /\bEA[A-Za-z0-9]{20,}\b/g,
   /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g,
-  /\b(access_token|client_secret|apikey|api_key|authorization|token)\b\s*[:=]\s*\S+/gi,
 ]
+
+/**
+ * Troca por `[oculto]` o valor de toda chave sensivel, em qualquer profundidade.
+ *
+ * Mascarar **antes** de serializar, e nao depois: a versao anterior rodava a
+ * expressao sobre a saida do `JSON.stringify`, onde o nome do campo vem entre
+ * aspas (`"token":"..."`), e o padrao exigia `token` seguido de `:` — a aspa no
+ * meio fazia o unico padrao generico de segredo nunca casar. Um
+ * `client_secret` passava inteiro para o painel de logs.
+ *
+ * @param valor qualquer valor serializavel
+ * @returns copia com os campos sensiveis ocultos
+ */
+export function mascarar(valor: unknown): unknown {
+  if (Array.isArray(valor)) return valor.map(mascarar)
+  if (valor && typeof valor === 'object') {
+    return Object.fromEntries(
+      Object.entries(valor as Record<string, unknown>).map(([chave, conteudo]) => [
+        chave,
+        CHAVES_SENSIVEIS.test(chave) ? '[oculto]' : mascarar(conteudo),
+      ]),
+    )
+  }
+  return valor
+}
 
 /**
  * Log de operacao com o que for sensivel mascarado.
@@ -183,8 +215,8 @@ const PADROES_SENSIVEIS = [
  * @param dados campos adicionais, ja sem dado pessoal
  */
 export function registrar(evento: string, dados: Record<string, unknown> = {}): void {
-  let linha = JSON.stringify({ evento, ...dados })
-  for (const padrao of PADROES_SENSIVEIS) linha = linha.replace(padrao, '"[oculto]"')
+  let linha = JSON.stringify({ evento, ...(mascarar(dados) as Record<string, unknown>) })
+  for (const padrao of PADROES_SENSIVEIS) linha = linha.replace(padrao, '[oculto]')
   console.log(linha)
 }
 

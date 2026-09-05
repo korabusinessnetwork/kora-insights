@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { CODIGOS, concluirConexao, erroDeServico, urlDeConsentimento } from '../../../lib/index.js'
+import { useTenant } from '../../../context/TenantContexto.jsx'
 
 /**
  * Situacoes da tela que inicia a conexao.
@@ -181,6 +182,9 @@ export function useRetornoDaConexao({
   motivoDaMeta = null,
   relogio = agoraEmIso,
 }) {
+  // Qual espaco de trabalho recebe a conta. A Edge Function so adivinha quando o
+  // usuario pertence a um unico tenant; a interface sabe qual esta em foco.
+  const { tenant } = useTenant()
   const [situacao, setSituacao] = useState(() => ({
     ...classificarRetorno({ codigo, estado, erroDaMeta, motivoDaMeta }),
     conta: null,
@@ -204,7 +208,7 @@ export function useRetornoDaConexao({
 
     ;(async () => {
       try {
-        const envelope = await concluirConexao(codigo ?? '', estado ?? '')
+        const envelope = await concluirConexao(codigo ?? '', estado ?? '', tenant?.id)
         if (!ativo) return
 
         if (envelope?.error) {
@@ -241,7 +245,7 @@ export function useRetornoDaConexao({
     return () => {
       ativo = false
     }
-  }, [codigo, estado, erroDaMeta, motivoDaMeta, relogio])
+  }, [codigo, estado, erroDaMeta, motivoDaMeta, relogio, tenant?.id])
 
   return situacao
 }

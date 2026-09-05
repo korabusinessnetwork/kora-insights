@@ -219,7 +219,7 @@ export async function urlDeConsentimento(estado) {
  * @param {string} estado `state` do retorno do OAuth
  * @returns {Promise<import('./envelope.js').Envelope>} `data`: a conta conectada
  */
-export async function concluirConexao(codigo, estado) {
+export async function concluirConexao(codigo, estado, tenantId) {
   if (!ehCodigoDeOAuth(codigo)) {
     return falha(CODIGOS.ENTRADA_INVALIDA, 'O retorno da Meta veio sem um código válido.')
   }
@@ -246,9 +246,16 @@ export async function concluirConexao(codigo, estado) {
 
   // A Meta exige o mesmo `redirect_uri` da ida na troca do codigo por token, e
   // quem faz a troca e o servidor: por isso ele viaja no corpo.
+  //
+  // `tenantId` tambem: a Edge Function so adivinha o espaco de trabalho quando o
+  // usuario pertence a exatamente um, e responde SEM_PERMISSAO com "escolha o
+  // espaco de trabalho" quando pertence a dois — uma escolha que nao existia em
+  // tela nenhuma. Quem sabe qual espaco esta em foco e a interface; mandar isso
+  // explicito e o que faz a promessa da mensagem de erro ser cumprivel.
   return invocarFuncao(FUNCOES.concluirConexao, {
     codigo,
     redirecionamento: configuracao.redirecionamento,
+    ...(tenantId ? { tenantId } : {}),
   })
 }
 

@@ -16,14 +16,20 @@
 :root {
   /* ── 1. primitivas ───────────────────────────────────────────────────── */
 
-  /* Carvao esverdeado: a base da interface escura. */
+  /* Carvao esverdeado: a base da interface escura. Os tres primeiros valores
+     foram amostrados da identidade (fundo, barra do cabecalho e cartao); os
+     demais sobem ate onde o contraste exige, conferido em contraste.test.js. */
   --kora-carvao-1000: #060908;
   --kora-carvao-900: #0a0e0c;
-  --kora-carvao-800: #131816;
-  --kora-carvao-700: #1b2220;
-  --kora-carvao-600: #222927;
-  --kora-carvao-500: #2b3331;
-  --kora-carvao-400: #38423f;
+  --kora-carvao-800: #161a18;
+  --kora-carvao-700: #262d2b;
+  --kora-carvao-600: #2f3735;
+  --kora-carvao-500: #3a4340;
+  --kora-carvao-400: #4d5754;
+  /* Contorno de controle e barra de grafico: 3:1 sobre TODA superficie escura.
+     Nao e decoracao — e a borda do campo de e-mail da unica porta do produto,
+     e a prova visual da frase do veredito. */
+  --kora-carvao-300: #78827d;
 
   /* Osso: a tinta clara e o papel do relatorio. */
   --kora-osso-100: #f6f5f1;
@@ -31,8 +37,12 @@
   --kora-osso-300: #dddbd3;
   --kora-osso-400: #c8c6bd;
   --kora-osso-500: #a7b1af;
-  --kora-osso-600: #6b7975;
+  /* Piso de tinta: 4,5:1 ate sobre o cartao elevado, a pior superficie do
+     produto. O valor anterior (#6b7975) media 2,69:1 ali, e era a cor do motivo
+     da lacuna de coleta e da explicacao do botao desabilitado. */
+  --kora-osso-600: #94a09b;
   --kora-osso-700: #565249;
+  --kora-osso-750: #6a6558;
   --kora-osso-800: #3b3a34;
 
   /* Ocre: o acento. Claro no escuro, escuro no claro — mesma familia. */
@@ -45,7 +55,7 @@
   --kora-sage-700: #13624b;
 
   /* Tijolo: critico. Usado com parcimonia — quase tudo aqui e "atencao". */
-  --kora-tijolo-300: #dd8071;
+  --kora-tijolo-300: #e6918a;
   --kora-tijolo-700: #8f3527;
 
   /* ── tipografia ───────────────────────────────────────────────────────
@@ -123,10 +133,14 @@
 
   --cor-fundo: var(--tenant-fundo, var(--kora-carvao-900));
   --cor-fundo-fosco: var(--tenant-fundo-fosco, var(--kora-carvao-1000));
-  --cor-superficie: var(--tenant-superficie, var(--kora-carvao-800));
-  --cor-superficie-alta: var(--tenant-superficie-alta, var(--kora-carvao-700));
-  --cor-linha: var(--tenant-linha, var(--kora-carvao-600));
-  --cor-linha-forte: var(--tenant-linha-forte, var(--kora-carvao-500));
+  --cor-superficie: var(--tenant-superficie, var(--kora-carvao-700));
+  --cor-superficie-alta: var(--tenant-superficie-alta, var(--kora-carvao-600));
+  --cor-barra: var(--tenant-barra, var(--kora-carvao-800));
+  --cor-linha: var(--tenant-linha, var(--kora-carvao-500));
+  --cor-linha-forte: var(--tenant-linha-forte, var(--kora-carvao-400));
+  /* Borda de controle: separada da linha decorativa porque tem minimo de
+     contraste a cumprir, e a linha entre cartoes nao tem. */
+  --cor-contorno: var(--tenant-contorno, var(--kora-carvao-300));
 
   --cor-tinta: var(--tenant-tinta, var(--kora-osso-200));
   --cor-tinta-suave: var(--tenant-tinta-suave, var(--kora-osso-500));
@@ -140,9 +154,9 @@
   --cor-atencao: var(--tenant-atencao, var(--kora-ocre-300));
   --cor-critico: var(--tenant-critico, var(--kora-tijolo-300));
 
-  --cor-grafico-barra: var(--kora-carvao-400);
+  --cor-grafico-barra: var(--kora-carvao-300);
   --cor-grafico-linha: var(--kora-osso-200);
-  --cor-grafico-eixo: var(--kora-carvao-600);
+  --cor-grafico-eixo: var(--kora-carvao-500);
 
   --cor-foco: var(--cor-acento);
   --cor-veredito-fundo: var(--kora-osso-200);
@@ -165,12 +179,17 @@
   --cor-fundo-fosco: var(--tenant-papel-fundo-fosco, var(--kora-osso-100));
   --cor-superficie: var(--tenant-papel-superficie, var(--kora-osso-200));
   --cor-superficie-alta: var(--tenant-papel-superficie-alta, var(--kora-osso-100));
+  --cor-barra: var(--tenant-papel-barra, var(--kora-osso-100));
   --cor-linha: var(--tenant-papel-linha, #ddd8cf);
   --cor-linha-forte: var(--tenant-papel-linha-forte, var(--kora-osso-400));
+  --cor-contorno: var(--tenant-papel-contorno, var(--kora-osso-700));
 
-  --cor-tinta: var(--tenant-papel-tinta, #161a18);
+  --cor-tinta: var(--tenant-papel-tinta, var(--kora-osso-800));
   --cor-tinta-suave: var(--tenant-papel-tinta-suave, var(--kora-osso-700));
-  --cor-tinta-fraca: var(--tenant-papel-tinta-fraca, var(--kora-osso-800));
+  /* No papel a tinta fraca precisa ser mais CLARA que a suave, nao mais escura:
+     osso-800 media 9,9:1 contra 6,75:1 da suave, ou seja, a escala estava
+     invertida e o texto "fraco" saia mais forte que o texto de apoio. */
+  --cor-tinta-fraca: var(--tenant-papel-tinta-fraca, var(--kora-osso-750));
 
   --cor-acento: var(--tenant-papel-acento, var(--kora-ocre-700));
   --cor-acento-firme: var(--tenant-papel-acento-firme, var(--kora-ocre-700));
@@ -180,9 +199,9 @@
   --cor-atencao: var(--tenant-papel-atencao, var(--kora-ocre-700));
   --cor-critico: var(--tenant-papel-critico, var(--kora-tijolo-700));
 
-  --cor-grafico-barra: var(--kora-osso-400);
+  --cor-grafico-barra: var(--kora-osso-700);
   --cor-grafico-linha: #161a18;
-  --cor-grafico-eixo: #ddd8cf;
+  --cor-grafico-eixo: var(--kora-osso-400);
 
   --cor-foco: var(--kora-ocre-700);
   --cor-veredito-fundo: transparent;

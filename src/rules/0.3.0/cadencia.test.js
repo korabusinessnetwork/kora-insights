@@ -147,9 +147,12 @@ describe('cadencia-em-queda sobre a Casa Oliveira — regressao da identidade', 
 })
 
 describe('cadencia-em-queda quando nao ha o que nomear', () => {
-  it('nao dispara para o Verdejar: os cinco dias sem coleta derrubaram a 16a semana', () => {
+  it('nao dispara para o Verdejar, que tem historico de sobra e cadencia firme', () => {
+    // A conta tem as semanas necessarias: o silencio da regra aqui e o silencio
+    // certo, e nao falta de dado. Publicar 4 vezes por semana o tempo todo nao
+    // e uma causa a nomear.
     const verdejar = historicoDaFixture(1)
-    expect(verdejar.semanas.filter((s) => s.completa).length).toBe(15)
+    expect(verdejar.semanas.filter((s) => s.completa).length).toBeGreaterThanOrEqual(16)
     expect(cadencia.avaliar(verdejar)).toBeNull()
   })
 

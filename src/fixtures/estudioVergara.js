@@ -277,27 +277,36 @@ const CASA_OLIVEIRA = montarSemanas({
    Verdejar Plantas — conta saudavel, com uma lacuna real de coleta.
    Cinco dias sem coleta em agosto (token expirado e renovado). A tela precisa
    dizer que faltou dado ali, e nao desenhar a queda como se fosse do perfil.
+
+   Ela comeca duas semanas antes das outras de proposito. A lacuna derruba a
+   semana inteira em que cai, e com o mesmo historico da Casa Oliveira a conta
+   ficava com quinze semanas completas — uma a menos que o piso do ruleset — e
+   caia na mesma tela de "ainda nao sei" da Studio Nove. As tres contas
+   deixavam de cobrir tres desfechos e passavam a cobrir dois.
    ──────────────────────────────────────────────────────────────────────────── */
 
 const VERDEJAR = montarSemanas({
   alcance: [
+    7550, 7600, // conectada duas semanas antes das outras: ver PRIMEIRA_SEGUNDA_VERDEJAR
     7600, 7500, 7400, 7500, 7600, 7400, 7500, 7500, //
     7700, 7600, 7700, 7600, 7700, 7700, 7700, 7800,
     7750,
   ],
   seguidores: [
+    8271, 8284, //
     8296, 8309, 8321, 8332, 8344, 8355, 8366, 8378, //
     8384, 8390, 8395, 8399, 8403, 8406, 8409, 8412,
     8418,
   ],
   visitasAoPerfil: [
+    755, 760, //
     760, 750, 740, 750, 760, 740, 750, 750, //
     770, 760, 770, 760, 770, 770, 770, 780,
     775,
   ],
-  salvamentosPorMil: Array.from({ length: 17 }, () => 32.0),
+  salvamentosPorMil: Array.from({ length: 19 }, () => 32.0),
   alcanceDasMidias: [
-    ...Array.from({ length: 8 }, () => [2050, 1980, 1900, 1870]),
+    ...Array.from({ length: 10 }, () => [2050, 1980, 1900, 1870]),
     [2100, 2020, 1930, 1890],
     [2100, 2020, 1930, 1890],
     [2100, 2020, 1930, 1890],
@@ -309,7 +318,7 @@ const VERDEJAR = montarSemanas({
     [2100, 2020, 1930, 1890],
   ],
   tiposDasMidias: [
-    ...Array.from({ length: 8 }, () => ['carrossel', 'imagem', 'reel', 'imagem']),
+    ...Array.from({ length: 10 }, () => ['carrossel', 'imagem', 'reel', 'imagem']),
     ['carrossel', 'imagem', 'reel', 'imagem'],
     ['carrossel', 'imagem', 'reel', 'imagem'],
     ['carrossel', 'imagem', 'reel', 'imagem'],
@@ -379,7 +388,7 @@ export const CONTAS = [
     username: 'verdejarplantas',
     nome: 'Verdejar Plantas',
     fb_page_id: '102000000000002',
-    conectada_em: '2026-05-11T10:00:00.000Z',
+    conectada_em: '2026-04-27T10:00:00.000Z',
     token_expira_em: '2026-12-01T10:00:00.000Z',
     tem_trafego_pago: false,
   },
@@ -400,6 +409,9 @@ export const CONTAS = [
 /** Ultimo dia com coleta possivel: o dia de AGORA. Nada existe depois disso. */
 const ULTIMO_DIA = AGORA.slice(0, 10)
 
+/** Verdejar conectou duas semanas antes: a lacuna custa uma semana completa. */
+const PRIMEIRA_SEGUNDA_VERDEJAR = somarDias(PRIMEIRA_SEGUNDA, -14)
+
 /** Studio Nove conectou 14 semanas depois das outras duas. */
 const PRIMEIRA_SEGUNDA_STUDIO_NOVE = somarDias(PRIMEIRA_SEGUNDA, 14 * 7)
 
@@ -413,7 +425,7 @@ const casaOliveira = expandirPlano({
 const verdejar = expandirPlano({
   contaId: CONTAS[1].id,
   semanas: VERDEJAR,
-  primeiraSegunda: PRIMEIRA_SEGUNDA,
+  primeiraSegunda: PRIMEIRA_SEGUNDA_VERDEJAR,
   ultimoDia: ULTIMO_DIA,
   diasSemColeta: LACUNA_VERDEJAR,
 })

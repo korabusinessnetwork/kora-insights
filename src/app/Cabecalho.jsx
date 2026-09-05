@@ -25,7 +25,7 @@ const PERIODO_INICIAL = Object.freeze({ carregando: true, texto: null })
  * @returns {JSX.Element}
  */
 export default function Cabecalho() {
-  const { contas, contaSelecionada } = useTenant()
+  const { contas, contaSelecionada, tenant } = useTenant()
   const [periodo, setPeriodo] = useState(PERIODO_INICIAL)
 
   const contaId = contaSelecionada?.id ?? null
@@ -68,6 +68,18 @@ export default function Cabecalho() {
         ) : null}
         <SeletorDeConta contas={contas} selecionada={contaSelecionada} />
       </div>
+
+      {/* Qual espaço de trabalho está aberto. A identidade coloca o nome do
+          tenant à direita do cabeçalho, e num produto em que uma agência
+          gerencia várias marcas essa é a única pista de por quem se está
+          respondendo. Sem conta selecionada ele fica sozinho, como na
+          identidade da tela vazia. */}
+      {tenant?.nome ? (
+        <p className="ka-cabecalho__tenant">
+          <span className="apenas-leitor">Espaço de trabalho: </span>
+          {tenant.nome}
+        </p>
+      ) : null}
 
       {contaSelecionada ? (
         <div className="ka-cabecalho__acoes">

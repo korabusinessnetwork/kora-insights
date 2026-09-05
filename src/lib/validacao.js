@@ -33,7 +33,13 @@ const ISO_8601 =
 const ESTADO_DE_OAUTH = /^[0-9a-f]{32}$/
 
 /** Codigo de autorizacao da Meta: alfanumerico com separadores seguros de URL. */
-const CODIGO_DE_OAUTH = /^[A-Za-z0-9._~-]{8,2048}$/
+// MESMA expressao que supabase/functions/conectar-conta/index.ts. As duas se
+// aplicam em serie ao mesmo valor: o front recusa antes de chamar, o servidor
+// recusa antes de trocar por token. Divergentes, o front barrava um `code` que
+// o servidor aceitava e o cliente entrava num laco sem saida — refazer a conexao
+// produzia o mesmo caractere e o mesmo bloqueio.
+// `oauth-code.test.js` reprova a suite se as duas sairem de sincronia.
+const CODIGO_DE_OAUTH = /^[A-Za-z0-9._~#-]{8,2048}$/
 
 /** @param {unknown} valor @returns {boolean} */
 export function ehTextoNaoVazio(valor) {

@@ -162,3 +162,14 @@ describe('Páginas do App Review', () => {
     expect(await screen.findByText(/Modo demonstração/)).toBeInTheDocument()
   })
 })
+
+describe('Cabeçalho — de quem é esta tela', () => {
+  it('mostra o nome do espaço de trabalho', async () => {
+    // Numa agência que gerencia várias marcas, o nome do tenant é a única
+    // pista de por qual assinatura se está respondendo — e a identidade o
+    // desenha no cabeçalho, inclusive na tela sem conta conectada.
+    montar()
+    expect(await screen.findByText('Estúdio Vergara')).toBeInTheDocument()
+    expect(screen.getByText('Espaço de trabalho:')).toBeInTheDocument()
+  })
+})

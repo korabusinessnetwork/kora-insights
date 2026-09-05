@@ -1,12 +1,17 @@
+import { formatarDataCurta, formatarPeriodo } from '../../metricas/index.js'
+
 import './AvisoDeLacuna.css'
 
 /** Titulo fixo do bloco: o que ele anuncia nao muda de tela para tela. */
 const TITULO = 'Dias sem coleta'
 
 /**
- * Descreve o periodo de uma lacuna. Quem exibe pode mandar `rotulo` ja escrito
- * por extenso; sem ele, sobram as datas cruas — feias, porem visiveis, que e o
- * que importa aqui.
+ * Descreve o periodo de uma lacuna em portugues.
+ *
+ * O bloco vai para a tela E para o relatorio impresso que o cliente leva para a
+ * reuniao. "2026-08-10 a 2026-08-14" no meio de um texto que escreve todas as
+ * outras datas por extenso parece defeito, e o cliente desconta credibilidade do
+ * numero ao lado — logo neste bloco, que existe justamente para ser acreditado.
  *
  * @param {{ inicio?: string, fim?: string, rotulo?: string }} lacuna
  * @returns {string}
@@ -14,9 +19,10 @@ const TITULO = 'Dias sem coleta'
 function periodoDaLacuna(lacuna) {
   if (lacuna?.rotulo) return lacuna.rotulo
   if (lacuna?.inicio && lacuna?.fim && lacuna.inicio !== lacuna.fim) {
-    return `${lacuna.inicio} a ${lacuna.fim}`
+    return formatarPeriodo(lacuna.inicio, lacuna.fim)
   }
-  return lacuna?.inicio ?? lacuna?.fim ?? ''
+  const unica = lacuna?.inicio ?? lacuna?.fim
+  return unica ? formatarDataCurta(unica) : ''
 }
 
 /**

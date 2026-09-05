@@ -153,6 +153,17 @@ Deno.serve(async (requisicao: Request) => {
   if (erroDoProtocolo) return responderFalha(CODIGOS.FALHA_INESPERADA, null, origem)
 
   try {
+    // PRIMEIRO passo, antes de apagar qualquer linha: tirar a conta da fila da
+    // coleta. Se algo falhar no meio do caminho, o pior estado possivel passa a
+    // ser "historico apagado e conta parada", nunca "historico apagado e conta
+    // coletando de novo na madrugada seguinte" — que era o que acontecia, e
+    // devolvia dado a um titular que acabara de exercer o direito de eliminacao.
+    const { error: erroDaPausa } = await cliente
+      .from('ig_contas')
+      .update({ status: 'desconectada' })
+      .eq('id', contaId)
+    if (erroDaPausa) throw new Error(`pausa: ${erroDaPausa.code ?? 'erro'}`)
+
     const apagados = await apagarDependentes(cliente, contaId)
 
     // O token sai do cofre antes da linha: com a linha apagada, `token_ref` se
@@ -181,6 +192,14 @@ Deno.serve(async (requisicao: Request) => {
       protocolo,
       causa: erro instanceof Error ? erro.message : 'desconhecida',
     })
+    // Ultima linha de defesa: se ate a pausa falhou, tenta de novo agora. Uma
+    // conta que continua 'ativa' depois de uma exclusao malsucedida volta a ser
+    // coletada, e nenhum alerta le `exclusoes_de_dados` sem `concluido_em`.
+    await cliente
+      .from('ig_contas')
+      .update({ status: 'desconectada' })
+      .eq('id', contaId)
+      .then(undefined, () => undefined)
     // O protocolo fica gravado sem `concluido_em`: e assim que uma exclusao
     // incompleta aparece para quem for auditar, em vez de sumir.
     return responderFalha(

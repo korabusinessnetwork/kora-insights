@@ -40,7 +40,7 @@
   width: 1.375rem;
   height: 1.375rem;
   border-radius: var(--raio-1);
-  background: var(--cor-linha-forte);
+  background: var(--cor-contorno);
 }
 
 .ka-seletor__identificacao {
@@ -78,7 +78,7 @@
 }
 
 .ka-seletor__gatilho[aria-expanded='true'] {
-  border-color: var(--cor-linha-forte);
+  border-color: var(--cor-contorno);
   background: var(--cor-superficie-alta);
 }
 

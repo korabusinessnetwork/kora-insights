@@ -31,12 +31,13 @@ Componente **nunca** usa `--kora-*` direto. Se precisou, falta uma semantica.
 | Token | Hex | Uso |
 |---|---|---|
 | `--kora-carvao-1000` | `#060908` | fundo fosco, atras de sobreposicao |
-| `--kora-carvao-900` | `#0a0e0c` | fundo do app |
-| `--kora-carvao-800` | `#131816` | superficie de cartao |
-| `--kora-carvao-700` | `#1b2220` | superficie elevada |
-| `--kora-carvao-600` | `#222927` | linha, borda, eixo de grafico |
-| `--kora-carvao-500` | `#2b3331` | linha forte |
-| `--kora-carvao-400` | `#38423f` | barra de grafico |
+| `--kora-carvao-900` | `#0a0e0c` | fundo do app — amostrado da identidade |
+| `--kora-carvao-800` | `#161a18` | barra do cabecalho — amostrado da identidade |
+| `--kora-carvao-700` | `#262d2b` | superficie de cartao — amostrado da identidade |
+| `--kora-carvao-600` | `#2f3735` | superficie elevada |
+| `--kora-carvao-500` | `#3a4340` | linha, eixo de grafico |
+| `--kora-carvao-400` | `#4d5754` | linha forte, decorativa |
+| `--kora-carvao-300` | `#78827d` | contorno de controle e barra de grafico (3:1) |
 
 Nao e cinza neutro: tem cast verde. E o que faz o osso parecer papel e nao
 branco de escritorio.
@@ -50,9 +51,10 @@ branco de escritorio.
 | `--kora-osso-300` | `#dddbd3` | linha no papel |
 | `--kora-osso-400` | `#c8c6bd` | linha forte no papel, barra no papel |
 | `--kora-osso-500` | `#a7b1af` | tinta suave no escuro |
-| `--kora-osso-600` | `#6b7975` | tinta fraca no escuro |
+| `--kora-osso-600` | `#94a09b` | tinta fraca no escuro (piso de tinta) |
 | `--kora-osso-700` | `#565249` | tinta suave no papel |
-| `--kora-osso-800` | `#3b3a34` | tinta fraca no papel |
+| `--kora-osso-750` | `#6a6558` | tinta fraca no papel |
+| `--kora-osso-800` | `#3b3a34` | tinta principal no papel |
 
 ### Ocre — o acento
 
@@ -70,7 +72,7 @@ Um so acento no produto inteiro. Ele significa "olhe aqui", nunca "isto e bom".
 |---|---|---|
 | `--kora-sage-300` | `#44c69a` | estavel/positivo sobre carvao |
 | `--kora-sage-700` | `#13624b` | estavel/positivo sobre osso |
-| `--kora-tijolo-300` | `#dd8071` | critico sobre carvao |
+| `--kora-tijolo-300` | `#e6918a` | critico sobre carvao |
 | `--kora-tijolo-700` | `#8f3527` | critico sobre osso |
 
 Sage quer dizer "nao e aqui o problema", nunca "meta batida". Tijolo e raro: a
@@ -78,20 +80,47 @@ maioria dos achados e `atencao`, e inflacionar severidade destroi a escala.
 
 ## Contraste
 
-Alvo: AA (4.5:1) para texto corrido, 3:1 para texto grande e elementos graficos.
+Alvo: AA da WCAG 2.1 — 4,5:1 para texto e 3:1 para elemento grafico e contorno
+de controle.
+
+**Esta tabela nao e escrita a mao.** A primeira versao dela afirmava 4,6:1 para
+um par que media 4,27:1, e o token descrito como piso de tinta reprovava em toda
+superficie de cartao. `src/styles/contraste.test.js` le a paleta do proprio
+`tokens.css` e reprova a suite quando qualquer par cai abaixo do minimo; os
+numeros abaixo saem de la.
 
 | Par | Razao | Veredito |
 |---|---|---|
-| `osso-200` sobre `carvao-900` | ~15,8:1 | AAA |
-| `osso-500` sobre `carvao-900` | ~7,9:1 | AAA |
-| `osso-600` sobre `carvao-900` | ~4,6:1 | AA — piso do texto de apoio |
-| `ocre-300` sobre `carvao-900` | ~9,7:1 | AAA |
-| `sage-300` sobre `carvao-900` | ~9,1:1 | AAA |
-| `carvao-800` sobre `osso-200` | ~14,9:1 | AAA |
-| `ocre-700` sobre `osso-200` | ~6,4:1 | AA |
-| `sage-700` sobre `osso-200` | ~6,8:1 | AA |
+| osso-200 sobre carvao-900 (tinta no fundo) | 16,86:1 | AAA |
+| osso-500 sobre carvao-700 (tinta suave no cartao) | 6,40:1 | AA |
+| osso-600 sobre carvao-600 (piso de tinta, pior superficie) | 4,52:1 | AA |
+| ocre-300 sobre carvao-700 | 7,57:1 | AAA |
+| sage-300 sobre carvao-700 | 6,56:1 | AA |
+| tijolo-300 sobre carvao-600 | 5,11:1 | AA |
+| carvao-300 sobre carvao-600 (contorno e barra do grafico) | 3,08:1 | AA grafico |
+| osso-800 sobre osso-200 (tinta no papel) | 9,90:1 | AAA |
+| osso-700 sobre osso-200 (tinta suave no papel) | 6,75:1 | AA |
+| osso-750 sobre osso-200 (piso de tinta no papel) | 5,04:1 | AA |
+| ocre-700 sobre osso-200 | 6,34:1 | AA |
+| sage-700 sobre osso-200 | 6,34:1 | AA |
 
-`--kora-osso-600` e o **limite inferior** de tinta. Nada de texto abaixo dele.
+Tres correcoes que essa verificacao forcou, e que valem como registro:
+
+1. **O piso de tinta subiu de `#6b7975` para `#94a09b`.** O valor antigo media
+   2,69:1 sobre cartao elevado, e era a cor do motivo da lacuna de coleta e da
+   explicacao de por que um botao esta desabilitado — os dois textos que o
+   produto mais precisa que sejam lidos.
+2. **Contorno de controle virou token proprio (`--cor-contorno`).** Antes ele
+   dividia token com a linha decorativa entre cartoes, media 1,50:1, e era a
+   unica pista visual da borda do campo de e-mail — a unica porta do produto.
+   Linha entre cartoes pode ser discreta; borda de controle nao.
+3. **No papel, a tinta fraca era mais forte que a suave** (9,9:1 contra 6,75:1).
+   A escala estava invertida e o texto "fraco" saia mais escuro que o de apoio.
+
+Onde a acessibilidade e a identidade discordaram, a acessibilidade venceu, e a
+divergencia esta registrada aqui: a identidade desenha as barras do grafico e o
+contorno dos botoes secundarios mais escuros do que 3:1 permite. O grafico e a
+prova visual da frase do veredito; prova que nao da para enxergar nao prova nada.
 
 Cor nunca e o unico portador de significado: severidade sempre vem acompanhada
 de rotulo em texto (`Atencao`, `Estavel`), e variacao sempre traz o numero

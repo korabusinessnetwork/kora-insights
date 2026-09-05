@@ -132,7 +132,7 @@ describe('Diagnostico — lacuna de coleta', () => {
     render(<Diagnostico contaId={VERDEJAR} />)
 
     expect(await screen.findByRole('heading', { name: 'Dias sem coleta' })).toBeInTheDocument()
-    expect(screen.getByText('2026-08-10 a 2026-08-14')).toBeInTheDocument()
+    expect(screen.getByText('10 a 14 de agosto de 2026')).toBeInTheDocument()
     expect(screen.getByText('Token expirado: a coleta do dia não aconteceu.')).toBeInTheDocument()
   })
 })

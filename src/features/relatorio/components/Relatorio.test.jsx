@@ -198,7 +198,7 @@ describe('Relatório — o que a folha não esconde', () => {
 
     const aviso = await screen.findByRole('heading', { name: 'Dias sem coleta' })
     expect(folha(container).contains(aviso)).toBe(true)
-    expect(screen.getByText('2026-08-10 a 2026-08-14')).toBeInTheDocument()
+    expect(screen.getByText('10 a 14 de agosto de 2026')).toBeInTheDocument()
     expect(screen.getByText('Token expirado: a coleta do dia não aconteceu.')).toBeInTheDocument()
   })
 

@@ -32,7 +32,8 @@ const CAMPOS_DA_CONTA =
   'token_expira_em, tem_trafego_pago'
 
 /** Formato do `code` da Meta: opaco, mas nunca com espaco nem caractere de controle. */
-const CODIGO_DE_OAUTH = /^[A-Za-z0-9._\-#]{20,512}$/
+// MESMA expressao que src/lib/validacao.js — ver a nota de la.
+const CODIGO_DE_OAUTH = /^[A-Za-z0-9._~#-]{8,2048}$/
 
 /**
  * Enderecos de retorno aceitos. A `redirect_uri` chega do navegador e precisa
