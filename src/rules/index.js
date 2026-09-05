@@ -6,6 +6,8 @@
 
 import ruleset from './0.3.0/index.js'
 
+export { SEMANAS_PARA_DIAGNOSTICO, SEMANAS_POR_JANELA } from './requisitos.js'
+
 export const versao = ruleset.versao
 
 export const regras = ruleset.regras

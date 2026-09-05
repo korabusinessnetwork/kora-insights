@@ -1,0 +1,73 @@
+/* A tela de diagnostico (identidade, pagina 1).
+
+   O veredito ocupa a largura toda no topo. Abaixo, duas colunas: a larga leva a
+   evidencia, a estreita leva a acao recomendada e os limites. A proporcao nao e
+   arbitraria — a coluna larga precisa caber o grafico com oito semanas legiveis,
+   e a estreita precisa caber uma frase de acao sem virar paragrafo. */
+
+.tela-diagnostico {
+  display: grid;
+  gap: var(--e-6);
+}
+
+.tela-diagnostico__colunas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.tela-diagnostico__evidencia,
+.tela-diagnostico__lateral {
+  display: grid;
+  gap: var(--e-6);
+  align-content: start;
+}
+
+/* Sem veredito a tela vira uma coluna de leitura: a admissao de ignorancia nao
+   se distribui em duas colunas como se fosse um diagnostico completo. */
+.tela-diagnostico[data-fase='sem-veredito'] {
+  max-width: var(--largura-leitura);
+  gap: var(--e-8);
+}
+
+/* ── esqueleto ────────────────────────────────────────────────────────────
+   Blocos vazios com a forma da tela. Nenhum numero, nenhuma frase: o cliente
+   nao pode ler nada aqui que ele leve para a reuniao por engano. */
+
+.tela-diagnostico__esqueleto {
+  display: grid;
+  gap: var(--e-6);
+}
+
+.tela-diagnostico__peca {
+  display: block;
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-superficie);
+  opacity: 0.6;
+}
+
+.tela-diagnostico__peca[data-peca='veredito'] {
+  height: 9rem;
+}
+
+.tela-diagnostico__peca[data-peca='evidencia'] {
+  height: 22rem;
+}
+
+.tela-diagnostico__peca[data-peca='lateral'] {
+  height: 15rem;
+}
+
+/* Empilhado, a evidencia vem primeiro: ela e a prova do veredito, e o cliente
+   rola atras dela antes de procurar a acao. */
+@media (max-width: 1024px) {
+  .tela-diagnostico__colunas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tela-diagnostico__peca[data-peca='evidencia'] {
+    height: 18rem;
+  }
+}

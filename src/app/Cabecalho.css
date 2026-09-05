@@ -1,0 +1,112 @@
+/* Barra superior: uma linha só, filete embaixo, nada de sombra.
+   Ela emoldura o diagnóstico — se disputar atenção com o veredito, está errada. */
+
+.ka-cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-cabecalho);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  padding: var(--e-3) var(--e-6);
+  border-bottom: var(--borda-fina) solid var(--cor-linha);
+  background: var(--cor-fundo-fosco);
+}
+
+.ka-cabecalho__identidade {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  min-width: 0;
+}
+
+.ka-cabecalho__marca {
+  flex: none;
+  border-radius: var(--raio-2);
+  text-decoration: none;
+}
+
+.ka-cabecalho__separador {
+  flex: none;
+  width: var(--borda-fina);
+  height: 1.5rem;
+  background: var(--cor-linha-forte);
+}
+
+.ka-cabecalho__acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.ka-cabecalho__periodo {
+  margin-right: var(--e-2);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  white-space: nowrap;
+}
+
+/* Mesma silhueta do botão do kit, aplicada a um link — a diferença é semântica,
+   não visual: quem navega precisa de <a>, quem age precisa de <button>. */
+.ka-cabecalho__acao {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.375rem;
+  padding: var(--e-2) var(--e-4);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio-3);
+  font-size: var(--texto-apoio);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--duracao-rapida) var(--ease-padrao),
+    border-color var(--duracao-rapida) var(--ease-padrao),
+    color var(--duracao-rapida) var(--ease-padrao);
+}
+
+.ka-cabecalho__acao[data-variante='secundario'] {
+  border-color: var(--cor-linha-forte);
+  color: var(--cor-tinta);
+}
+
+.ka-cabecalho__acao[data-variante='secundario']:hover {
+  border-color: var(--cor-tinta-fraca);
+  background: var(--cor-superficie-alta);
+}
+
+.ka-cabecalho__acao[data-variante='primario'] {
+  border-color: var(--cor-tinta);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+}
+
+.ka-cabecalho__acao[data-variante='primario']:hover {
+  border-color: var(--cor-tinta-suave);
+  background: var(--cor-tinta-suave);
+}
+
+/* Em tela estreita a barra vira duas linhas: a identidade em cima, as ações
+   embaixo. Nada é escondido — período e ações continuam alcançáveis. */
+@media (max-width: 52rem) {
+  .ka-cabecalho {
+    align-items: flex-start;
+    padding: var(--e-3) var(--e-4);
+  }
+
+  .ka-cabecalho__acoes {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .ka-cabecalho__periodo {
+    width: 100%;
+    margin-right: 0;
+    white-space: normal;
+  }
+}

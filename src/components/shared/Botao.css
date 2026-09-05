@@ -1,0 +1,71 @@
+/* Botao: retangulo sobrio, raio pequeno, sem sombra e sem gradiente.
+   A cor de acento nao entra aqui — ela e reservada ao veredito, ao selo de
+   severidade e a variacao (docs/02_DESIGN_SYSTEM/TOKENS.md). */
+
+.ki-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 2.375rem;
+  padding: var(--e-2) var(--e-4);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio-3);
+  background: transparent;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-apoio);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+  text-align: center;
+  transition:
+    background-color var(--duracao-rapida) var(--ease-padrao),
+    border-color var(--duracao-rapida) var(--ease-padrao),
+    color var(--duracao-rapida) var(--ease-padrao);
+}
+
+/* Solido em tinta, rotulo na cor do fundo: no carvao sai claro, no papel sai
+   escuro, e a inversao vem sozinha dos tokens semanticos. */
+.ki-botao[data-variante='primario'] {
+  background: var(--cor-tinta);
+  border-color: var(--cor-tinta);
+  color: var(--cor-fundo);
+}
+
+.ki-botao[data-variante='primario']:hover:not(:disabled) {
+  background: var(--cor-tinta-suave);
+  border-color: var(--cor-tinta-suave);
+}
+
+.ki-botao[data-variante='secundario'] {
+  border-color: var(--cor-linha-forte);
+  color: var(--cor-tinta);
+}
+
+.ki-botao[data-variante='secundario']:hover:not(:disabled) {
+  background: var(--cor-superficie-alta);
+  border-color: var(--cor-tinta-fraca);
+}
+
+.ki-botao[data-variante='texto'] {
+  min-height: auto;
+  padding: 0;
+  border-radius: var(--raio-1);
+  color: var(--cor-tinta-suave);
+  font-weight: var(--peso-normal);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.ki-botao[data-variante='texto']:hover:not(:disabled) {
+  color: var(--cor-tinta);
+}
+
+.ki-botao:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ki-botao__rotulo {
+  display: inline-block;
+}

@@ -1,5 +1,10 @@
 /**
- * Utilitarios de data para fixtures e para o motor.
+ * Semana e aritmetica de data do produto.
+ *
+ * Mora fora de `motor/` e de `fixtures/` de proposito: a fronteira de semana e
+ * uma decisao de produto que o motor, a camada de servicos e a demonstracao
+ * precisam enxergar igual. Se cada um definisse a sua, o numero da tela pararia
+ * de fechar com o numero do banco.
  *
  * Tudo aqui e puro e trabalha em `YYYY-MM-DD` no fuso UTC. Semana e ISO:
  * comeca na segunda. O produto compara janelas de semanas inteiras, entao

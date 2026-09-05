@@ -1,0 +1,25 @@
+/* Evidencia: os tres numeros em linha, o grafico embaixo.
+   A ordem e a da identidade (pagina 1) e nao e estetica — o cliente le o
+   veredito, confere os tres numeros e so entao olha a forma das curvas. */
+
+.painel-evidencia__indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--e-5) var(--e-8);
+  margin-top: var(--e-5);
+}
+
+.painel-evidencia__grafico {
+  margin-top: var(--e-8);
+  padding-top: var(--e-5);
+  border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+/* Abaixo de 560px tres colunas de numero grande viram tres numeros truncados.
+   Empilhar mantem o `--texto-numero` legivel, que e o ponto do indicador. */
+@media (max-width: 560px) {
+  .painel-evidencia__indicadores {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-4);
+  }
+}

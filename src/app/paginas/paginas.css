@@ -1,0 +1,221 @@
+/* Páginas públicas: privacidade e exclusão de dados.
+
+   Coluna de leitura, não painel. São documentos — quem chega aqui veio do
+   App Review, de um link do rodapé ou de uma dúvida sobre o próprio dado, e
+   precisa ler, não operar. */
+
+.ka-pagina {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--cor-fundo);
+}
+
+.ka-pagina__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  padding: var(--e-4) var(--e-6);
+  border-bottom: var(--borda-fina) solid var(--cor-linha);
+}
+
+.ka-pagina__marca,
+.ka-pagina__atalho {
+  border-radius: var(--raio-2);
+  text-decoration: none;
+}
+
+.ka-pagina__atalho {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.ka-pagina__atalho:hover {
+  color: var(--cor-tinta);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.ka-pagina__conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: var(--largura-leitura);
+  margin: 0 auto;
+  padding: var(--e-12) var(--e-6) var(--e-16);
+}
+
+.ka-pagina__sobrenome {
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ka-pagina__titulo {
+  margin-top: var(--e-2);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-veredito);
+  font-weight: var(--peso-normal);
+  letter-spacing: var(--tracking-veredito);
+  line-height: var(--altura-veredito);
+}
+
+.ka-pagina__data {
+  margin-top: var(--e-3);
+  margin-bottom: var(--e-8);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.ka-pagina__secao {
+  margin-top: var(--e-10);
+}
+
+.ka-pagina__secao h2 {
+  margin-bottom: var(--e-3);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+}
+
+.ka-pagina__secao p + p {
+  margin-top: var(--e-4);
+}
+
+.ka-pagina__secao a {
+  color: var(--cor-tinta);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+/* O que ainda não foi decidido fica visível como pendência dentro da frase.
+   Lacuna que some da tela é lacuna que ninguém resolve (CLAUDE.md). */
+.ka-pagina__pendente {
+  display: inline;
+  padding: 0.1em 0.4em;
+  border-left: var(--borda-acento) solid var(--cor-atencao);
+  background: var(--cor-superficie-alta);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.ka-pagina__pendencias,
+.ka-pagina__itens {
+  margin-top: var(--e-3);
+  padding-left: var(--e-5);
+  list-style: disc;
+}
+
+.ka-pagina__pendencias li,
+.ka-pagina__itens li {
+  margin-top: var(--e-1);
+}
+
+.ka-pagina__lista {
+  margin-top: var(--e-4);
+}
+
+.ka-pagina__lista dt {
+  margin-top: var(--e-4);
+  color: var(--cor-tinta);
+  font-weight: var(--peso-medio);
+}
+
+.ka-pagina__lista dd {
+  margin-top: var(--e-1);
+  margin-left: 0;
+  color: var(--cor-tinta-suave);
+}
+
+.ka-pagina__contas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  margin-top: var(--e-5);
+  list-style: none;
+}
+
+.ka-pagina__conta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  padding: var(--e-4);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-superficie);
+}
+
+.ka-pagina__conta-identificacao {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  flex-wrap: wrap;
+}
+
+.ka-pagina__conta-nome {
+  color: var(--cor-tinta);
+  font-weight: var(--peso-medio);
+}
+
+.ka-pagina__conta-arroba {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.ka-pagina__confirmacao {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.ka-pagina__confirmacao-texto {
+  max-width: 34ch;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.ka-pagina__confirmacao-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+}
+
+.ka-pagina__rodape {
+  padding: var(--e-6);
+  border-top: var(--borda-fina) solid var(--cor-linha);
+  text-align: center;
+}
+
+.ka-pagina__rodape a {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  text-decoration: none;
+}
+
+.ka-pagina__rodape a:hover {
+  color: var(--cor-tinta);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+@media (max-width: 52rem) {
+  .ka-pagina__topo,
+  .ka-pagina__conteudo,
+  .ka-pagina__rodape {
+    padding-right: var(--e-4);
+    padding-left: var(--e-4);
+  }
+
+  .ka-pagina__conteudo {
+    padding-top: var(--e-8);
+  }
+}

@@ -21,6 +21,8 @@ export { montarHistorico } from './historico.js'
 
 export {
   compararJanelas,
+  intervaloDaJanela,
+  janelasSaoContiguas,
   mediaPorPublicacao,
   ultimasJanelasCompletas,
   valorDaJanela,

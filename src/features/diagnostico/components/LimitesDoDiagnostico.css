@@ -1,0 +1,15 @@
+/* O bloco de limites vive na coluna estreita, ao lado da acao recomendada
+   (identidade, pagina 1). Nada de cor nem de tipografia proprias: o kit ja
+   resolveu isso. Aqui so se ajusta o que muda por causa da coluna estreita. */
+
+/* Em ~30ch de largura, os limites encostam um no outro e viram um paragrafo so.
+   Mais respiro entre eles mantem cada limite como uma frase inteira. */
+.ki-cartao[data-bloco='limites'] .ki-limites__lista {
+  gap: var(--e-5);
+}
+
+/* A largura de leitura do kit (68ch) e maior que a coluna: quem limita a linha
+   aqui e a propria coluna, e o texto pode usa-la inteira. */
+.ki-cartao[data-bloco='limites'] .ki-limites__item {
+  max-width: none;
+}

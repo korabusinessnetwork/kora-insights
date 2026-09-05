@@ -1,0 +1,24 @@
+/* Limites: paragrafos, nao marcadores. Sao frases inteiras que o cliente le em
+   voz alta na reuniao — bolinha de lista as transformaria em letra miuda. */
+
+.ki-limites__titulo {
+  margin-bottom: var(--e-4);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+}
+
+.ki-limites__lista {
+  list-style: none;
+  display: grid;
+  gap: var(--e-4);
+}
+
+.ki-limites__item {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}

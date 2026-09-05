@@ -13,7 +13,7 @@ import {
   diferencaEmDias,
   segundaDaSemana,
   somarDias,
-} from '../fixtures/calendario.js'
+} from '../calendario/calendario.js'
 import { agregar, metricaExiste } from '../metricas/dicionario.js'
 
 /**

@@ -24,10 +24,9 @@ import * as demonstracao from './demonstracao/repositorio.js'
 /**
  * Campos explicitos (CLAUDE.md: nenhum `select *`).
  *
- * `limites` e `cobertura` sao parte do `Diagnostico` de contratos.md (secao 3) e
- * ainda nao existem em `supabase/schema.sql` — ver nota de conflito no README
- * desta pasta. Sem elas a tela exibiria veredito sem os limites que o sustentam,
- * que e exatamente o que CLAUDE.md proibe.
+ * `limites` e `cobertura` nao sao opcionais na lista: sem elas a tela exibiria
+ * veredito sem os limites que o sustentam, e sem saber separar "esta tudo bem"
+ * de "ainda nao da para saber" (contratos.md, secao 3).
  */
 const CAMPOS =
   'id, ig_conta_id, gerado_em, periodo_inicio, periodo_fim, ruleset_version, achados, ' +

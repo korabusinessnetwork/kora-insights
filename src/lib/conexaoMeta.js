@@ -30,13 +30,16 @@ export const PERMISSOES = Object.freeze([
 ])
 
 /**
- * Edge Functions desta camada. Nome estavel: mudar um deles e mudanca combinada
- * com `supabase/functions/`.
+ * Edge Functions desta camada. O nome e o da pasta em `supabase/functions/`:
+ * `invoke` resolve por ele, entao renomear pasta e mudanca combinada com este
+ * arquivo, no mesmo commit.
+ *
+ * `desconectar-conta` ainda nao tem pasta — ver a nota no README desta pasta.
  */
 export const FUNCOES = Object.freeze({
-  concluirConexao: 'conexao-meta-concluir',
-  desconectarConta: 'conexao-meta-desconectar',
-  excluirDados: 'dados-excluir',
+  concluirConexao: 'conectar-conta',
+  desconectarConta: 'desconectar-conta',
+  excluirDados: 'excluir-dados',
 })
 
 /** Onde o estado do OAuth espera a volta do usuario. */

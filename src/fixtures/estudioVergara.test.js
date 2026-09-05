@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { diferencaEmDias, distribuir, segundaDaSemana, somarDias } from './calendario.js'
+import { diferencaEmDias, distribuir, segundaDaSemana, somarDias } from '../calendario/calendario.js'
 import {
   AGORA,
   CONTAS,

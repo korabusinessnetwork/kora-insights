@@ -72,14 +72,52 @@ continua com uma ida ao banco.
 Segredo de servidor **nunca** ganha prefixo `VITE_`: o que tem esse prefixo vai
 para o bundle. O app secret da Meta e a `service_role` não existem neste código.
 
-## Conflitos abertos com `supabase/schema.sql`
+`VITE_META_OAUTH_URL` ainda **não está em `.env.example`** e precisa entrar: sem
+ela, `urlDeConsentimento` devolve falha em vez de montar a URL. Ela é variável, e
+não literal, porque a versão da Graph API vive dentro do endereço do diálogo —
+no dia em que a Meta mudar de versão, quem troca é o ambiente, não o código.
 
-O schema é o esqueleto inicial e ainda não tem colunas que `contratos.md` e a
-fixture exigem. Enquanto a migration não existir, estas leituras falham:
+## Edge Functions chamadas daqui
 
-- `diagnosticos.limites` e `diagnosticos.cobertura` (jsonb) — fazem parte do
-  `Diagnostico` de `contratos.md` (seção 3). Sem elas a tela mostraria veredito
-  sem os limites que o sustentam.
-- `ig_contas.nome` e `ig_contas.tem_trafego_pago` — a fixture já os tem, e o
-  segundo alimenta `recursos.temTrafegoPago` do histórico.
-- `tenants.identidade` (jsonb) — tokens de marca do white-label (`src/tema`).
+`FUNCOES`, em `conexaoMeta.js`, guarda o nome da pasta em `supabase/functions/` —
+é por ele que `invoke` resolve a chamada:
+
+| Função da camada | Pasta |
+|---|---|
+| `concluirConexao` | `conectar-conta` |
+| `solicitarExclusaoDeDados` | `excluir-dados` |
+| `desconectarConta` | `desconectar-conta` — **ainda não existe** |
+
+A pasta de desconexão precisa nascer: apagar o token do Vault é operação de
+`service_role` e não tem caminho pelo front. Enquanto ela não existir,
+`desconectarConta` devolve falha em vez de desconectar.
+
+## Testes
+
+`envelope`, `erros`, `validacao`, `conexaoMeta` e `demonstracao/repositorio` têm
+teste próprio (`npx vitest run src/lib`). Os que mais importam:
+
+- o `scope` do diálogo da Meta é comparado caractere a caractere com as quatro
+  permissões do ADR-002 — permissão a mais reprova no App Review;
+- a mensagem crua do banco não aparece em `error.mensagem`, e `error.detalhe`
+  some quando `import.meta.env.DEV` é falso;
+- o diagnóstico da demonstração é recalculado pelo motor dentro do teste e
+  comparado com o que o repositório serve: se alguém trocar o motor por texto
+  fixo, o teste cai (ADR-005).
+
+## As constantes `CAMPOS` espelham os `grant` do schema
+
+`supabase/schema.sql` não concede a tabela inteira: concede coluna a coluna, e
+`ig_contas.token_ref` fica de fora. Por isso a lista de cada módulo não é
+preferência de estilo — pedir uma coluna a mais faz o banco recusar a consulta
+inteira, e `select *` falha com "permission denied for column token_ref".
+
+| Módulo | Tabela | Base da lista |
+|---|---|---|
+| `tenants.js` | `tenants` | `grant select (id, nome, plan, status, identidade, criado_em)` |
+| `contas.js` | `ig_contas` | o `grant` da tabela, sem `token_ref` |
+| `diagnosticos.js` | `diagnosticos` | colunas do `Diagnostico` (`contratos.md`, seção 3) |
+| `snapshots.js` | `snapshots_conta`, `coleta_eventos` | só o que a série semanal usa |
+| `coleta.js` | `coleta_eventos` | evento e motivo, para a tela nomear a lacuna |
+
+Mudar uma dessas listas é mudança combinada com o schema, no mesmo commit.

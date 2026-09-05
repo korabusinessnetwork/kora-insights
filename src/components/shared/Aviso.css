@@ -1,0 +1,47 @@
+/* Faixa de aviso: largura cheia, um filete de cor a esquerda e nada mais.
+   Ela precisa ser vista todo dia sem cansar — dado de demonstracao apresentado
+   como dado do cliente e a desonestidade que o produto proibe (ADR-007). */
+
+.ki-aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  padding: var(--e-3) var(--e-5);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-left: var(--borda-acento) solid var(--cor-aviso, var(--cor-tinta-suave));
+  border-radius: 0 var(--raio-2) var(--raio-2) 0;
+  background: var(--cor-superficie);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+.ki-aviso[data-variante='informacao'] {
+  --cor-aviso: var(--cor-tinta-suave);
+}
+
+.ki-aviso[data-variante='atencao'] {
+  --cor-aviso: var(--cor-atencao);
+}
+
+.ki-aviso[data-variante='critico'] {
+  --cor-aviso: var(--cor-critico);
+}
+
+.ki-aviso__texto {
+  display: flex;
+  gap: var(--e-2);
+  flex-wrap: wrap;
+  max-width: var(--largura-leitura);
+}
+
+.ki-aviso__titulo {
+  color: var(--cor-aviso);
+  font-weight: var(--peso-medio);
+}
+
+.ki-aviso__acao {
+  flex: none;
+}

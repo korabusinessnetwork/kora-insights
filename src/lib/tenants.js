@@ -14,11 +14,12 @@ import { exigirSessao } from './autenticacao.js'
 import * as demonstracao from './demonstracao/repositorio.js'
 
 /**
- * Campos explicitos (CLAUDE.md: nenhum `select *`).
+ * Campos explicitos (CLAUDE.md: nenhum `select *`), na mesma lista do
+ * `grant select (...) on public.tenants` do schema.
  *
- * `identidade` guarda os tokens de marca do white-label (src/tema). A coluna
- * ainda nao existe em `supabase/schema.sql` — ver nota de conflito no README
- * desta pasta.
+ * `identidade` guarda os tokens de marca do white-label, validados por
+ * `src/tema/identidadeVisual.js` antes de virarem CSS: o banco guarda o que o
+ * tenant mandou, a aplicacao decide o que aplica.
  */
 const CAMPOS = 'id, nome, plan, status, criado_em, identidade'
 

@@ -20,7 +20,7 @@
  * Fixture que muda sozinha nao serve de base para teste.
  */
 
-import { diasDaSemana, distribuir, somarDias } from './calendario.js'
+import { diasDaSemana, distribuir, somarDias } from '../calendario/calendario.js'
 
 /** Momento congelado da demonstracao. Igual ao rodape da identidade. */
 export const AGORA = '2026-09-05T09:12:00.000Z'

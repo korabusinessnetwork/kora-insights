@@ -1,0 +1,62 @@
+/* A tela do relatorio: a barra de acoes em cima, a folha embaixo.
+
+   A tela nao pinta a folha — a folha se pinta sozinha por [data-superficie]
+   (FolhaDoRelatorio.css). Aqui so mora o empilhamento e o esqueleto da espera. */
+
+.tela-relatorio {
+  display: grid;
+  gap: var(--e-6);
+}
+
+/* ── esqueleto ────────────────────────────────────────────────────────────
+   A forma da folha, sem uma linha de texto dentro. O cliente nao pode ler nada
+   aqui que ele leve para a reuniao por engano. */
+
+.tela-relatorio__esqueleto {
+  display: grid;
+  gap: var(--e-6);
+  padding: var(--e-10);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-superficie);
+  opacity: 0.6;
+}
+
+.tela-relatorio__colunas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--e-10);
+}
+
+.tela-relatorio__peca {
+  display: block;
+  border-radius: var(--raio-2);
+  background: var(--cor-superficie-alta);
+}
+
+.tela-relatorio__peca[data-peca='cabecalho'] {
+  height: 3rem;
+}
+
+.tela-relatorio__peca[data-peca='leitura'] {
+  height: 20rem;
+}
+
+.tela-relatorio__peca[data-peca='prova'] {
+  height: 20rem;
+}
+
+@media (max-width: 64rem) {
+  .tela-relatorio__esqueleto {
+    padding: var(--e-6);
+  }
+
+  .tela-relatorio__colunas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-6);
+  }
+
+  .tela-relatorio__peca[data-peca='prova'] {
+    height: 14rem;
+  }
+}

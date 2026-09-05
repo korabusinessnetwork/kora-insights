@@ -62,6 +62,10 @@ export const CATALOGO_DE_LIMITES = {
     'por si, formato que converte mais.',
   'dispersao-nao-explica-causa':
     'A dispersão mostra o quanto o resultado varia, não por que ele varia.',
+  'janela-nao-contigua':
+    'Uma ou mais semanas ficaram de fora da comparação por falha de coleta. As ' +
+    'janelas comparadas têm oito semanas completas cada, mas não são oito ' +
+    'semanas seguidas de calendário.',
   'historico-curto':
     'Com menos de 16 semanas completas o motor não compara janelas e não nomeia ' +
     'nenhuma causa.',

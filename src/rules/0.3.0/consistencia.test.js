@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { diasDaSemana, somarDias } from '../../fixtures/calendario.js'
+import { diasDaSemana, somarDias } from '../../calendario/calendario.js'
 import {
   AGORA,
   CONTAS,

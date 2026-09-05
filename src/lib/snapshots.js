@@ -8,7 +8,7 @@
  * a tela de serie e a tela de diagnostico discordarem sobre o mesmo mes.
  */
 
-import { segundaDaSemana, somarDias } from '../fixtures/calendario.js'
+import { segundaDaSemana, somarDias } from '../calendario/calendario.js'
 import { montarHistorico } from '../motor/historico.js'
 import { falha, falhaDeErro, ok, ORIGEM_DEMONSTRACAO } from './envelope.js'
 import { CODIGOS } from './erros.js'

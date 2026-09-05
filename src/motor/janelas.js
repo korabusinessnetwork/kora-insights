@@ -9,6 +9,7 @@
  */
 
 import { agregar, obterMetrica } from '../metricas/dicionario.js'
+import { diferencaEmDias } from '../calendario/calendario.js'
 import { media, variacao } from './estatistica.js'
 
 /**
@@ -43,16 +44,65 @@ export function ultimasJanelasCompletas(historico, quantidade) {
  * Valor de uma metrica de conta em um bloco de semanas, respeitando a agregacao
  * do dicionario: fluxo soma, estoque vale o ultimo saldo.
  *
+ * **Soma exige a metrica em todas as semanas do bloco.** A protecao de "semana
+ * incompleta nao entra em comparacao" vale por dia coletado, e uma semana pode
+ * ter os sete dias e mesmo assim voltar sem `alcance` — a chamada de insights
+ * da Meta falha por metrica, nao so por dia. Somar as semanas que sobraram e
+ * chamar o resultado de total da janela produz exatamente a queda inventada que
+ * este arquivo existe para impedir: seis semanas somadas contra oito viram
+ * "25% abaixo" com o alcance real identico nos dois blocos.
+ *
+ * Estoque (`ultimo`) nao tem esse problema: o saldo mais recente vale por si.
+ *
  * @param {import('./historico.js').Janela[]} janelas em ordem cronologica
  * @param {string} metrica codigo canonico
- * @returns {number|null} null quando nenhuma semana do bloco tem a metrica
+ * @returns {number|null} null quando a metrica falta no bloco todo, ou quando
+ *   falta em alguma semana e a agregacao e soma
  */
 export function valorDaJanela(janelas, metrica) {
-  const valores = janelas
-    .filter((janela) => metrica in janela.valores)
-    .map((janela) => janela.valores[metrica])
-  if (valores.length === 0) return null
-  return agregar(metrica, valores)
+  if (janelas.length === 0) return null
+  const presentes = janelas.filter((janela) => metrica in janela.valores)
+  if (presentes.length === 0) return null
+  if (obterMetrica(metrica).agregacao === 'soma' && presentes.length !== janelas.length) return null
+  return agregar(
+    metrica,
+    presentes.map((janela) => janela.valores[metrica]),
+  )
+}
+
+/**
+ * As semanas completas selecionadas cobrem um intervalo continuo do calendario?
+ *
+ * `ultimasJanelasCompletas` pula semana incompleta, entao um bloco de oito pode
+ * atravessar uma falha de coleta e abranger nove semanas de calendario. Isso e
+ * preferivel a comparar com uma semana quebrada, mas nao pode ser silencioso: a
+ * tela precisa dizer que houve semana fora da conta (ADR-004).
+ *
+ * @param {import('./historico.js').Janela[]} janelas em ordem cronologica
+ * @returns {boolean}
+ */
+export function janelasSaoContiguas(janelas) {
+  if (janelas.length < 2) return true
+  return janelas.every(
+    (janela, i) => i === 0 || diferencaEmDias(janelas[i - 1].inicio, janela.inicio) === 7,
+  )
+}
+
+/**
+ * O intervalo de calendario que um bloco de semanas cobre, para a tela anunciar
+ * o periodo que ela realmente comparou — e nao o periodo inteiro do historico.
+ *
+ * @param {import('./historico.js').Janela[]} janelas em ordem cronologica
+ * @returns {{ inicio: string, fim: string, semanas: number, contiguo: boolean }|null}
+ */
+export function intervaloDaJanela(janelas) {
+  if (janelas.length === 0) return null
+  return {
+    inicio: janelas[0].inicio,
+    fim: janelas[janelas.length - 1].fim,
+    semanas: janelas.length,
+    contiguo: janelasSaoContiguas(janelas),
+  }
 }
 
 /**

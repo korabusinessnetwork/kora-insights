@@ -14,15 +14,14 @@ import { exigirSessao } from './autenticacao.js'
 import * as demonstracao from './demonstracao/repositorio.js'
 
 /**
- * Campos explicitos (CLAUDE.md: nenhum `select *`). `token_ref` esta fora, e
- * essa ausencia e a regra, nao esquecimento.
- *
- * `nome` e `tem_trafego_pago` ainda nao existem em `supabase/schema.sql` — ver
- * nota de conflito no README desta pasta.
+ * Campos explicitos (CLAUDE.md: nenhum `select *`). E exatamente a lista do
+ * `grant select (...) on public.ig_contas` do schema: `token_ref` esta fora, e
+ * essa ausencia e a regra, nao esquecimento. Pedir uma coluna a mais aqui nao
+ * vazaria o cofre — o banco recusaria a consulta inteira.
  */
 const CAMPOS =
-  'id, tenant_id, ig_user_id, username, nome, fb_page_id, conectada_em, token_expira_em, ' +
-  'tem_trafego_pago'
+  'id, tenant_id, ig_user_id, username, nome, fb_page_id, status, conectada_em, ' +
+  'token_expira_em, tem_trafego_pago'
 
 /**
  * @typedef {object} Conta
@@ -32,6 +31,7 @@ const CAMPOS =
  * @property {string} username
  * @property {string} nome
  * @property {string|null} fbPageId Pagina do Facebook vinculada (ADR-002)
+ * @property {string} status `ativa`, `pausada`, `token_expirado`, `desconectada`
  * @property {string} conectadaEm ISO
  * @property {string|null} tokenExpiraEm ISO
  * @property {boolean} temTrafegoPago
@@ -51,6 +51,11 @@ export function converterConta(linha) {
     // o @ e o que o cliente reconhece.
     nome: linha.nome ?? linha.username,
     fbPageId: linha.fb_page_id ?? null,
+    // A coleta so roda em `ativa` (schema.sql). A tela precisa deste campo para
+    // dizer que a conta parou de coletar em vez de mostrar diagnostico velho
+    // como se fosse de ontem. A coluna e `not null` no banco: o padrao aqui
+    // cobre so a fixture da demonstracao, onde toda conta esta conectada.
+    status: linha.status ?? 'ativa',
     conectadaEm: linha.conectada_em,
     tokenExpiraEm: linha.token_expira_em ?? null,
     temTrafegoPago: Boolean(linha.tem_trafego_pago),

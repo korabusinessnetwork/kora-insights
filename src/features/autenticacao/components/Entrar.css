@@ -1,0 +1,153 @@
+/* Tela de entrada: uma coluna estreita e centralizada, sem casca e sem menu.
+   Quem ainda nao entrou nao tem espaco de trabalho para navegar — a unica
+   decisao possivel aqui e digitar o e-mail, e o layout diz isso. */
+
+.entrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--e-10) var(--e-4);
+  background: var(--cor-fundo);
+}
+
+.entrar__folha {
+  display: grid;
+  gap: var(--e-6);
+  width: 100%;
+  max-width: 38rem;
+}
+
+.entrar__bloco {
+  display: grid;
+  gap: var(--e-4);
+  padding: var(--e-8);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-3);
+  background: var(--cor-superficie);
+}
+
+/* O titulo e serifa porque e a primeira frase do produto que a pessoa le:
+   mesma familia do veredito, um degrau abaixo no tamanho. */
+.entrar__titulo {
+  max-width: var(--largura-leitura);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-densa);
+  letter-spacing: var(--tracking-veredito);
+  color: var(--cor-tinta);
+}
+
+.entrar__subtitulo {
+  margin-top: var(--e-2);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-suave);
+}
+
+.entrar__apoio {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  line-height: var(--altura-corpo);
+}
+
+.entrar__endereco {
+  color: var(--cor-tinta);
+  font-weight: var(--peso-medio);
+  word-break: break-all;
+}
+
+.entrar__nota,
+.entrar__rodape {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+.entrar__lista {
+  display: grid;
+  gap: var(--e-2);
+  list-style: none;
+}
+
+.entrar__item {
+  position: relative;
+  padding-left: var(--e-5);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+.entrar__item::before {
+  position: absolute;
+  left: 0;
+  content: '—';
+  color: var(--cor-tinta-fraca);
+}
+
+.entrar__formulario {
+  display: grid;
+  gap: var(--e-4);
+  margin-top: var(--e-2);
+}
+
+.entrar__campo {
+  display: grid;
+  gap: var(--e-2);
+}
+
+.entrar__rotulo {
+  font-size: var(--texto-rotulo);
+  color: var(--cor-tinta-suave);
+}
+
+.entrar__entrada {
+  padding: var(--e-3) var(--e-4);
+  border: var(--borda-fina) solid var(--cor-linha-forte);
+  border-radius: var(--raio-2);
+  background: var(--cor-fundo);
+  color: var(--cor-tinta);
+  font-size: var(--texto-corpo);
+}
+
+.entrar__entrada::placeholder {
+  color: var(--cor-tinta-fraca);
+}
+
+.entrar__entrada:disabled {
+  opacity: 0.6;
+}
+
+/* O estado invalido entra por atributo de dado, e a cor sai do token de tom:
+   nenhum componente escolhe cor, e o white-label troca as duas de uma vez. */
+.entrar__entrada[data-tom='ruim'] {
+  border-color: var(--cor-tom);
+}
+
+.entrar__erro {
+  color: var(--cor-tom);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+.entrar__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  margin-top: var(--e-2);
+}
+
+@media (max-width: 600px) {
+  .entrar {
+    align-items: flex-start;
+    padding: var(--e-6) var(--e-3);
+  }
+
+  .entrar__bloco {
+    padding: var(--e-5);
+  }
+}

@@ -14,10 +14,11 @@
  * Pura: sem rede, sem DOM, sem relogio.
  */
 
-import { diferencaEmDias } from '../../fixtures/calendario.js'
+import { diferencaEmDias } from '../../calendario/calendario.js'
+import { SEMANAS_PARA_DIAGNOSTICO } from '../requisitos.js'
 
 /** Oito semanas recentes contra oito anteriores: o piso do diagnostico de causa. */
-const SEMANAS_NECESSARIAS = 16
+const SEMANAS_NECESSARIAS = SEMANAS_PARA_DIAGNOSTICO
 
 /**
  * @param {number} quantidade

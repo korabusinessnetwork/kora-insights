@@ -1,43 +1,57 @@
-# 04 — MODELAGEM · Kora Insights
+# 04 — Modelagem
 
-> Estrutura de dados: entities, relationships, schema. Single source of truth do banco.
+> Como o dado do Kora Insights é guardado, e por quê. A fonte de verdade
+> **técnica** é `supabase/schema.sql`; este diretório explica as decisões que o
+> SQL não consegue explicar sozinho.
+> Última revisão: 2026-09-05.
 
-## O que vive aqui
+## O documento
 
-- **Entidades**: descrição de cada tabela, seu propósito, ciclo de vida
-- **Relacionamentos**: FK, cardinalidades, constraints, índices
-- **Schema**: DDL (CREATE TABLE...), migrations, versionamento
-- **Multi-tenancy**: como RLS (Row Level Security) isola dados por tenant
-- **Padrões de dados**: soft delete, timestamps (created/updated), status enums
-- **Diagramas ER**: visual do relacionamento entre tabelas
+| Documento | O que traz |
+|---|---|
+| [`esquema.md`](esquema.md) | diagrama ER, tabela a tabela com o porquê de cada coluna, a estratégia de RLS em português e a política de retenção e exclusão |
+
+## A hierarquia de verdade
+
+1. **`supabase/schema.sql`** — o estado final do banco. Se o código diverge
+   dele, o código está errado.
+2. **`supabase/migrations/`** — como o banco chega àquele estado, na ordem do
+   nome do arquivo. Migration e `schema.sql` mudam no **mesmo commit**.
+3. **`esquema.md`** — o porquê. Se a explicação daqui contradiz o SQL, a
+   explicação está desatualizada e é corrigida (CLAUDE.md).
+
+## Três regras que valem para qualquer tabela nova
+
+- **RLS habilitada e com política.** Habilitar sem política nega tudo em
+  silêncio: o erro mais caro possível aqui, porque passa em review e só aparece
+  com cliente na tela. Os dois erros contam como falha (`contratos.md`, seção 7).
+- **`grant` explícito depois de `revoke`.** O Supabase concede tudo por padrão
+  em tabela nova. O `revoke all ... from anon, authenticated` do schema vale
+  para as tabelas que existiam quando ele rodou: **tabela criada depois nasce
+  com o grant amplo de novo**, e a migration que a cria precisa repetir o
+  próprio revoke/grant.
+- **Teste de isolamento entre tenants na definição de pronto.** O teste que
+  existe hoje (`supabase/politicas.test.js`) lê o SQL como texto e prova que a
+  política **existe**; ele não prova que ela **filtra certo**. O roteiro manual
+  com banco real está em `supabase/README.md`.
+
+## Nomes
+
+Tabela e coluna em **português**, como manda a regra de nomear domínio
+(`memory/patterns.md`). O ADR-005 cita a tabela como `diagnoses`; a grafia
+correta é `diagnosticos`, e o ADR foi emendado em vez de reescrito — decisão não
+se apaga, se emenda.
 
 ## O que NÃO vive aqui
 
-- Queries/endpoints que usam os dados → `07_APIS/`
-- Regras de como usar os dados → `03_REGRAS_DE_NEGOCIO/`
-- Componentes que exibem os dados → `06_COMPONENTES/`
-- Infra do banco (backup, replicação) → `01_ARQUITETURA/`
-
-## Arquivos sugeridos
-
-- `entities.md` — lista de tabelas com descrição, campos, tipos
-- `relationships.md` — diagrama e documentação de FKs e cardinalidades
-- `database-schema.md` — DDL organizado, com comentários
-- `migrations.md` — histórico e convenção de nomes (ex: 2026-01-15_create_users.sql)
-- `diagramas/er.md` — diagrama ER (Mermaid ou similar)
-- `multi-tenancy.md` — estratégia RLS, como garantir isolamento
-
-## Como preencher
-
-1. **Desenhe o ER primeiro**: entidades, relacionamentos, cardinalidades
-2. **Schema em produção prevalece**: `supabase/schema.sql` é a verdade; doc descreve + explica
-3. **Toda nova tabela tem migration**: nunca muda schema direto (rollback possível)
-4. **Nomes em inglês, comentários em português**: `usuarios` → `users`, `describe table`
-5. **Multi-tenant por padrão**: toda tabela pensa em tenant_id, RLS, isolamento
+- Consultas e endpoints que usam as tabelas → `docs/07_APIS/`
+- Regras que decidem o conteúdo das linhas → `docs/03_REGRAS_DE_NEGOCIO/`
+- Sequência de chamadas → `docs/05_FLUXOS/`
+- Como o token é protegido, e de quem → `docs/11_SEGURANCA/`
 
 ## Ligações
 
-- `supabase/schema.sql` — schema real (fonte de verdade técnica)
-- `supabase/migrations/` — histórico de mudanças
-- `02_DESIGN_SYSTEM/` — padrões visuais que refletem estrutura (ex: fields)
-- `03_REGRAS_DE_NEGOCIO/` — o que as regras esperam da modelagem
+- `supabase/schema.sql` e `supabase/migrations/` — o SQL
+- `supabase/README.md` — como subir o banco e rodar o teste de políticas
+- `docs/01_ARQUITETURA/contratos.md`, seção 7 — o contrato do banco
+- `docs/08_DECISOES/adr-003`, `adr-004`, `adr-005` — as decisões que o schema aplica

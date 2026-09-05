@@ -1,0 +1,139 @@
+/* Seletor de conta: o quadrado, o nome e o arroba da identidade (página 1 do
+   PDF). Prefixo `ka-` porque isto é casca de aplicação, não kit visual — o
+   `ki-` continua sendo só de src/components/shared. */
+
+.ka-seletor {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.ka-seletor__gatilho,
+.ka-seletor__item {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-width: 0;
+  padding: var(--e-2) var(--e-3);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio-3);
+  background: transparent;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-densa);
+  text-align: left;
+  text-decoration: none;
+  transition:
+    background-color var(--duracao-rapida) var(--ease-padrao),
+    border-color var(--duracao-rapida) var(--ease-padrao);
+}
+
+.ka-seletor__gatilho:hover,
+.ka-seletor__item:hover {
+  background: var(--cor-superficie-alta);
+}
+
+/* O quadrado da identidade: marcador de conta, não avatar de rede social. */
+.ka-seletor__avatar {
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: var(--raio-1);
+  background: var(--cor-linha-forte);
+}
+
+.ka-seletor__identificacao {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  min-width: 0;
+}
+
+.ka-seletor__nome {
+  overflow: hidden;
+  color: var(--cor-tinta);
+  font-weight: var(--peso-medio);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* O arroba recua um passo de tinta: identifica sem competir com o nome. */
+.ka-seletor__arroba {
+  overflow: hidden;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ka-seletor__seta {
+  flex: none;
+  width: 0;
+  height: 0;
+  margin-left: var(--e-1);
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-top: 5px solid var(--cor-tinta-fraca);
+}
+
+.ka-seletor__gatilho[aria-expanded='true'] {
+  border-color: var(--cor-linha-forte);
+  background: var(--cor-superficie-alta);
+}
+
+.ka-seletor__menu {
+  position: absolute;
+  top: calc(100% + var(--e-2));
+  left: 0;
+  z-index: var(--z-sobreposicao);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  min-width: 17rem;
+  max-width: min(24rem, 90vw);
+  padding: var(--e-2);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-superficie);
+}
+
+.ka-seletor__rotulo {
+  padding: var(--e-2) var(--e-3) var(--e-1);
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-micro);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* A conta aberta ganha um filete de acento à esquerda; nada de marca de seleção
+   colorida no texto, que competiria com o veredito da tela. */
+.ka-seletor__item[data-selecionada='sim'] {
+  border-left-color: var(--cor-acento);
+  border-left-width: var(--borda-acento);
+  padding-left: calc(var(--e-3) - var(--borda-acento) + var(--borda-fina));
+}
+
+.ka-seletor__status {
+  flex: none;
+  margin-left: auto;
+  color: var(--cor-atencao);
+  font-size: var(--texto-micro);
+}
+
+.ka-seletor__item[data-status='desconectada'] .ka-seletor__status {
+  color: var(--cor-tinta-fraca);
+}
+
+.ka-seletor__item[data-acao='conectar'] {
+  margin-top: var(--e-1);
+  padding-top: var(--e-3);
+  border-top: var(--borda-fina) solid var(--cor-linha);
+  border-radius: 0 0 var(--raio-3) var(--raio-3);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.ka-seletor__item[data-acao='conectar']:hover {
+  color: var(--cor-tinta);
+}

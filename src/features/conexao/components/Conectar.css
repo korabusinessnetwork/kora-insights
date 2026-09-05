@@ -1,0 +1,64 @@
+/* Tela de conexao: uma coluna, de cima para baixo, na ordem em que a decisao
+   acontece — o que precisa ser verdade, o que a gente le, o que nao faz e, por
+   ultimo, o botao. O bloco da acao e a unica superficie elevada da tela: ele e
+   o fim do caminho, nao o comeco. */
+
+.conectar {
+  display: grid;
+  gap: var(--e-10);
+  padding-block: var(--e-8) var(--e-12);
+}
+
+.conectar__abertura {
+  display: grid;
+  gap: var(--e-3);
+  max-width: var(--largura-leitura);
+}
+
+.conectar__titulo {
+  font-family: var(--fonte-display);
+  font-size: var(--texto-veredito);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-veredito);
+  letter-spacing: var(--tracking-veredito);
+  color: var(--cor-tinta);
+  max-width: var(--largura-veredito);
+}
+
+.conectar__apoio {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+}
+
+.conectar__acao {
+  max-width: 46rem;
+}
+
+.conectar__linha {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+}
+
+.conectar__linha + .conectar__linha {
+  margin-top: var(--e-3);
+}
+
+/* O prazo e a parte que evita a frustracao da semana seguinte: destaque de
+   tinta cheia, para nao passar como letra miuda. */
+.conectar__linha[data-papel='prazo'] {
+  color: var(--cor-tinta);
+}
+
+.conectar__botao {
+  margin-top: var(--e-5);
+}
+
+@media (max-width: 900px) {
+  .conectar {
+    gap: var(--e-8);
+    padding-block: var(--e-6) var(--e-10);
+  }
+}

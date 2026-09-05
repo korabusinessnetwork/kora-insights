@@ -1,0 +1,83 @@
+/* Grafico de cadencia: dois tracos e um eixo. Nenhuma grade, nenhuma area
+   preenchida, nenhum brilho — o grafico e a prova do veredito, nao o produto
+   (memory/identity.md). */
+
+.ki-grafico {
+  margin: 0;
+}
+
+.ki-grafico__legenda {
+  display: flex;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+  margin-bottom: var(--e-5);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+  line-height: var(--altura-densa);
+}
+
+.ki-grafico__chave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.ki-grafico__amostra {
+  flex: none;
+  display: inline-block;
+}
+
+.ki-grafico__amostra[data-forma='barra'] {
+  width: 0.625rem;
+  height: 0.625rem;
+  background: var(--cor-grafico-barra);
+}
+
+.ki-grafico__amostra[data-forma='linha'] {
+  width: 1.125rem;
+  height: 2px;
+  background: var(--cor-grafico-linha);
+}
+
+/* No celular o desenho rola dentro do proprio quadro: quem rola e este bloco,
+   nunca a pagina. */
+.ki-grafico__area {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.ki-grafico__desenho {
+  display: block;
+  width: 100%;
+  min-width: 30rem;
+  height: auto;
+}
+
+.ki-grafico__eixo {
+  stroke: var(--cor-grafico-eixo);
+  stroke-width: 1;
+}
+
+.ki-grafico__barras rect {
+  fill: var(--cor-grafico-barra);
+}
+
+.ki-grafico__linha polyline {
+  fill: none;
+  stroke: var(--cor-grafico-linha);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ki-grafico__linha circle {
+  fill: var(--cor-grafico-linha);
+}
+
+.ki-grafico__nota {
+  margin-top: var(--e-4);
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}

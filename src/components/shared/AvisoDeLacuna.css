@@ -1,0 +1,41 @@
+/* Lacuna: borda tracejada, porque o bloco fala justamente do que falta.
+   Discreto no peso, nunca escondido — a serie com buraco mostra o buraco. */
+
+.ki-lacuna {
+  padding: var(--e-4) var(--e-5);
+  border: var(--borda-fina) dashed var(--cor-linha-forte);
+  border-radius: var(--raio-3);
+  color: var(--cor-tinta-suave);
+}
+
+.ki-lacuna__titulo {
+  margin-bottom: var(--e-3);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+}
+
+.ki-lacuna__lista {
+  list-style: none;
+  display: grid;
+  gap: var(--e-2);
+}
+
+.ki-lacuna__item {
+  display: flex;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+.ki-lacuna__periodo {
+  color: var(--cor-tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.ki-lacuna__motivo {
+  color: var(--cor-tinta-fraca);
+}

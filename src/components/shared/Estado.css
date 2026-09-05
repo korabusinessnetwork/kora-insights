@@ -1,0 +1,76 @@
+/* Estado: mesma estrutura para os tres, pesos diferentes.
+   O vazio ganha o titulo em serifa grande porque ele e a tela (identidade,
+   pagina 2); carregando e erro sao passagem, e nao merecem o mesmo tamanho. */
+
+.ki-estado {
+  display: block;
+  max-width: var(--largura-leitura);
+}
+
+.ki-estado__titulo {
+  margin: 0;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-display);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+}
+
+.ki-estado[data-tipo='vazio'] .ki-estado__titulo {
+  max-width: var(--largura-veredito);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-veredito);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-veredito);
+  letter-spacing: var(--tracking-veredito);
+  text-wrap: balance;
+}
+
+.ki-estado__descricao {
+  margin-top: var(--e-4);
+  max-width: 46ch;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+}
+
+.ki-estado[data-tipo='erro'] .ki-estado__descricao {
+  color: var(--cor-critico);
+}
+
+.ki-estado__conteudo {
+  margin-top: var(--e-6);
+}
+
+/* Barra fina e indeterminada: diz "ainda estamos buscando" sem fingir progresso
+   que ninguem mediu. prefers-reduced-motion desliga a animacao em base.css. */
+.ki-estado__pulso {
+  display: block;
+  width: 4rem;
+  height: 2px;
+  margin-bottom: var(--e-4);
+  background: var(--cor-linha-forte);
+  overflow: hidden;
+  position: relative;
+}
+
+.ki-estado__pulso::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cor-tinta-suave);
+  transform-origin: left center;
+  animation: ki-estado-pulso 1.2s var(--ease-padrao) infinite;
+}
+
+@keyframes ki-estado-pulso {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}

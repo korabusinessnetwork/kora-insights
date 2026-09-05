@@ -1,0 +1,25 @@
+/* Titulo de secao: pequeno e discreto. Ele organiza, nao compete com o veredito. */
+
+.ki-titulo-secao {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--e-4);
+}
+
+.ki-titulo-secao__rotulo {
+  margin: 0;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+}
+
+.ki-titulo-secao__apoio {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+  line-height: var(--altura-densa);
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { diasDaSemana, somarDias } from '../../fixtures/calendario.js'
+import { diasDaSemana, somarDias } from '../../calendario/calendario.js'
 import {
   AGORA,
   CONTAS,
@@ -197,5 +197,133 @@ describe('cadencia-em-queda quando a queda vem acompanhada', () => {
       'Seu alcance não caiu. Sua frequência caiu 67% e o alcance seguiu junto.',
     )
     expect(achado.evidencias[2].tom).toBe('neutro')
+  })
+})
+
+/**
+ * Historico com controle separado de alcance de CONTA e alcance por MIDIA.
+ *
+ * `historicoSintetico` deriva o alcance da conta da soma das midias, o que
+ * torna impossivel montar os casos em que os dois divergem — e e justamente na
+ * divergencia entre eles que a regra decide o que dizer.
+ *
+ * @param {{pubs: number, alcance?: number, porPost: number}[]} planos
+ * @returns {object} Historico
+ */
+function historicoDivergente(planos) {
+  return {
+    contaId: 'conta-sintetica',
+    primeiroDado: '2026-01-05',
+    lacunas: [],
+    recursos: { temTrafegoPago: false, temConcorrentes: false },
+    semanas: planos.map((plano, indice) => {
+      const inicio = somarDias('2026-01-05', indice * 7)
+      const valores = { publicacoes: plano.pubs }
+      // Ausencia proposital: a semana esta completa em dias e mesmo assim sem a
+      // metrica, que e como a chamada de insights da Meta falha de verdade.
+      if (plano.alcance !== undefined) valores.alcance = plano.alcance
+      return {
+        inicio,
+        fim: diasDaSemana(inicio)[6],
+        valores,
+        diasComColeta: 7,
+        completa: true,
+        midias: Array.from({ length: plano.pubs }, (_, i) => ({
+          id: `${inicio}-${i}`,
+          tipo: 'carrossel',
+          publicadaEm: `${somarDias(inicio, i)}T12:00:00.000Z`,
+          metricas: { alcance: plano.porPost },
+        })),
+      }
+    }),
+  }
+}
+
+const OITO_ANTERIORES = Array(8).fill({ pubs: 3, alcance: 6000, porPost: 2000 })
+
+describe('cadencia so nomeia causa quando o alcance total caiu de verdade', () => {
+  it('publicar menos e alcancar o mesmo nao e problema, e a regra nao manda desfazer', () => {
+    // O caso que reprovava a regra: cadencia -33%, alcance por publicacao +50%,
+    // alcance total identico. A versao anterior mandava "volte para 3 por semana"
+    // e chamava de causa nomeada uma melhora de eficiencia.
+    const achado = cadencia.avaliar(
+      historicoDivergente([...OITO_ANTERIORES, ...Array(8).fill({ pubs: 2, alcance: 6000, porPost: 3000 })]),
+    )
+    expect(achado.severidade).toBe('ok')
+    expect(achado.frase).toContain('o alcance total não caiu')
+    expect(achado.acao).not.toContain('Volte para')
+    expect(achado.peso).toBeLessThan(90)
+  })
+
+  it('o tom de cada evidencia sai da propria variacao que a linha mostra', () => {
+    const achado = cadencia.avaliar(
+      historicoDivergente([...OITO_ANTERIORES, ...Array(8).fill({ pubs: 2, alcance: 6000, porPost: 3000 })]),
+    )
+    const [publicacoes, alcance, porPublicacao] = achado.evidencias
+    expect(publicacoes.tom).toBe('neutro')
+    expect(alcance.tom).toBe('neutro')
+    // Uma alta de 50% pintada de vermelho contradiria o numero ao lado dela.
+    expect(porPublicacao.tom).toBe('bom')
+  })
+
+  it('cadencia e alcance por publicacao caindo juntos sobem a severidade', () => {
+    const achado = cadencia.avaliar(
+      historicoDivergente([...OITO_ANTERIORES, ...Array(8).fill({ pubs: 2, alcance: 3000, porPost: 1500 })]),
+    )
+    expect(achado.severidade).toBe('critico')
+    expect(achado.frase).toContain('Não é só volume')
+  })
+})
+
+describe('cadencia se cala em vez de imprimir numero que nao tem', () => {
+  it('sem alcance no escopo conta a regra devolve null, nunca "caiu null%"', () => {
+    const achado = cadencia.avaliar(
+      historicoDivergente([
+        ...Array(8).fill({ pubs: 3, porPost: 2000 }),
+        ...Array(8).fill({ pubs: 1, porPost: 2000 }),
+      ]),
+    )
+    expect(achado).toBeNull()
+  })
+
+  it('semana completa sem a metrica invalida a soma da janela, e nao vira queda', () => {
+    // Alcance real identico nas duas janelas; duas semanas recentes voltaram sem
+    // a metrica. Somar as seis que sobraram imprimiria "25% abaixo".
+    const achado = cadencia.avaliar(
+      historicoDivergente([
+        ...Array(8).fill({ pubs: 3, alcance: 5000, porPost: 2000 }),
+        ...Array(6).fill({ pubs: 2, alcance: 5000, porPost: 2000 }),
+        ...Array(2).fill({ pubs: 2, porPost: 2000 }),
+      ]),
+    )
+    expect(achado).toBeNull()
+  })
+})
+
+describe('a faixa de confirmacao acompanha a ordem de grandeza da conta', () => {
+  it('conta pequena nao recebe meta de zero', () => {
+    const achado = cadencia.avaliar(
+      historicoDivergente([
+        ...Array(8).fill({ pubs: 3, alcance: 500, porPost: 160 }),
+        ...Array(8).fill({ pubs: 1, alcance: 170, porPost: 160 }),
+      ]),
+    )
+    expect(achado.confirmacao).not.toContain('faixa de 0')
+    expect(achado.confirmacao).toContain('faixa de 4 mil')
+  })
+})
+
+describe('a regra declara a janela que ela comparou', () => {
+  it('devolve o intervalo de cada bloco, e nao o periodo do historico inteiro', () => {
+    const achado = cadencia.avaliar(historicoDaFixture(0))
+    expect(achado.janela.semanas).toBe(8)
+    expect(achado.janela.recentes).toEqual({
+      inicio: '2026-07-06',
+      fim: '2026-08-30',
+      semanas: 8,
+      contiguo: true,
+    })
+    expect(achado.janela.anteriores.inicio).toBe('2026-05-11')
+    expect(achado.janela.anteriores.fim).toBe('2026-07-05')
   })
 })
