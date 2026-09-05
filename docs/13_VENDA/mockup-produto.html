@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kora Insights — esboço da tela de diagnóstico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --base:#101820;
+    --surface:#18222C;
+    --surface-2:#1E2A35;
+    --line:#28363F;
+    --ink:#EAF0F4;
+    --ink-2:#93A6B4;
+    --ink-3:#6B7F8D;
+    --amber:#D9A05B;
+    --sage:#74A38B;
+    --brick:#C06B60;
+    --steel:#5B8CA8;
+    --serif:"Fraunces",Georgia,serif;
+    --sans:"IBM Plex Sans",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--base);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--steel);outline-offset:3px;border-radius:2px}
+
+  .shell{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+
+  /* ── barra lateral ── */
+  .rail{background:var(--surface);border-right:1px solid var(--line);padding:22px 18px;display:flex;flex-direction:column;gap:26px}
+  .brand{font-family:var(--serif);font-size:20px;letter-spacing:-.01em}
+  .brand span{color:var(--ink-3)}
+  .rail h2{font-size:12px;font-weight:500;color:var(--ink-3);margin:0 0 10px;letter-spacing:.02em}
+  .conta{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;margin:0 -10px;
+    border-radius:6px;cursor:pointer;background:none;border:0;width:calc(100% + 20px);
+    color:var(--ink-2);font:inherit;text-align:left;
+  }
+  .conta:hover{background:var(--surface-2);color:var(--ink)}
+  .conta[aria-current="true"]{background:var(--surface-2);color:var(--ink)}
+  .dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot.ok{background:var(--sage)}
+  .dot.atencao{background:var(--amber)}
+  .dot.critico{background:var(--brick)}
+  .conta small{display:block;color:var(--ink-3);font-size:12px}
+  .rail footer{margin-top:auto;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:14px}
+
+  /* ── cabeçalho ── */
+  main{min-width:0}
+  .topo{
+    display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    padding:22px 34px 0;
+  }
+  .perfil{font-size:19px;font-weight:600;margin:0}
+  .perfil em{font-style:normal;color:var(--ink-3);font-weight:400}
+  .periodo{color:var(--ink-2);font-size:13px}
+
+  .abas{display:flex;gap:2px;padding:16px 34px 0;border-bottom:1px solid var(--line)}
+  .aba{
+    background:none;border:0;border-bottom:2px solid transparent;color:var(--ink-3);
+    font:inherit;padding:9px 14px;cursor:pointer;margin-bottom:-1px;
+  }
+  .aba:hover{color:var(--ink-2)}
+  .aba[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+
+  .painel{padding:30px 34px 60px;max-width:1080px}
+  .painel[hidden]{display:none}
+
+  /* ── o veredito: o herói da tela ── */
+  .veredito{border-left:3px solid var(--amber);padding:2px 0 2px 22px;margin-bottom:34px}
+  .veredito .sev{font-size:13px;color:var(--amber);margin:0 0 8px}
+  .veredito p{
+    font-family:var(--serif);font-size:clamp(26px,3.4vw,40px);line-height:1.18;
+    font-weight:400;letter-spacing:-.015em;margin:0;max-width:20ch;
+  }
+  .veredito .apoio{
+    font-family:var(--sans);font-size:15px;color:var(--ink-2);
+    margin-top:14px;max-width:62ch;line-height:1.6;
+  }
+
+  /* ── evidência ── */
+  .secao{margin-bottom:34px}
+  .secao > h3{font-size:13px;font-weight:600;color:var(--ink-2);margin:0 0 14px}
+  .evidencia{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .metrica{background:var(--surface);padding:16px 18px}
+  .metrica dt{font-size:13px;color:var(--ink-2);margin-bottom:7px}
+  .metrica dd{margin:0;display:flex;align-items:baseline;gap:9px}
+  .metrica b{font-size:26px;font-weight:600;letter-spacing:-.02em}
+  .delta{font-size:13px;font-variant-numeric:tabular-nums}
+  .delta.desce{color:var(--brick)}
+  .delta.sobe{color:var(--sage)}
+  .delta.plano{color:var(--ink-3)}
+  .metrica p{margin:7px 0 0;font-size:12.5px;color:var(--ink-3);line-height:1.45}
+
+  /* ── gráfico ── */
+  .grafico{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px 22px}
+  .legenda{display:flex;gap:20px;font-size:13px;color:var(--ink-2);margin-bottom:16px}
+  .legenda i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:7px}
+  svg{display:block;width:100%;height:auto}
+  .nota-grafico{font-size:12.5px;color:var(--ink-3);margin:14px 0 0}
+
+  /* ── ação ── */
+  .acao{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:20px 22px}
+  .acao ol{margin:0;padding-left:20px}
+  .acao li{margin-bottom:11px;color:var(--ink);max-width:70ch}
+  .acao li:last-child{margin-bottom:0}
+  .acao li span{color:var(--ink-2);display:block;font-size:13.5px;margin-top:3px}
+
+  /* ── limite honesto ── */
+  .limite{
+    border:1px dashed var(--line);border-radius:8px;padding:15px 18px;
+    color:var(--ink-2);font-size:13.5px;line-height:1.6;max-width:72ch;
+  }
+  .limite strong{color:var(--ink);font-weight:500}
+
+  /* ── relatório ── */
+  .folha{
+    background:#F7F5F0;color:#1A1A1A;border-radius:6px;padding:38px 42px;max-width:660px;
+    font-family:var(--sans);box-shadow:0 1px 0 rgba(0,0,0,.4);
+  }
+  .folha h4{font-family:var(--serif);font-size:25px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+  .folha .sub{color:#6B6560;font-size:13.5px;margin:0 0 26px}
+  .folha .chamada{
+    font-family:var(--serif);font-size:20px;line-height:1.32;margin:0 0 22px;
+    border-left:3px solid #C08A3E;padding-left:16px;max-width:34ch;
+  }
+  .folha table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:22px}
+  .folha th{text-align:left;font-weight:500;color:#6B6560;font-size:12.5px;padding:0 0 8px;border-bottom:1px solid #DDD8CF}
+  .folha td{padding:9px 0;border-bottom:1px solid #E8E4DC;font-variant-numeric:tabular-nums}
+  .folha td:last-child,.folha th:last-child{text-align:right}
+  .folha .rodape{font-size:12px;color:#8A837C;border-top:1px solid #DDD8CF;padding-top:14px;margin:0}
+  .barra-acao{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+  .btn{
+    font:inherit;font-size:14px;padding:9px 16px;border-radius:6px;cursor:pointer;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  }
+  .btn:hover{background:var(--surface-2)}
+  .btn.primario{background:var(--amber);border-color:var(--amber);color:#17202A;font-weight:500}
+  .btn.primario:hover{background:#E4AF6C}
+
+  .rodape-esboco{
+    border-top:1px solid var(--line);margin-top:44px;padding-top:16px;
+    font-size:12.5px;color:var(--ink-3);max-width:72ch;
+  }
+
+  @media (max-width:820px){
+    .shell{grid-template-columns:1fr}
+    .rail{flex-direction:row;align-items:center;gap:18px;overflow-x:auto;padding:14px 18px}
+    .rail h2,.rail footer,.conta small{display:none}
+    .painel,.topo,.abas{padding-left:18px;padding-right:18px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="rail">
+    <div class="brand">Kora <span>Insights</span></div>
+    <div>
+      <h2>Contas conectadas</h2>
+      <button class="conta" aria-current="true"><span class="dot atencao"></span><span>Verdejar Plantas<small>@verdejarplantas</small></span></button>
+      <button class="conta"><span class="dot ok"></span><span>Forno Bairro<small>@fornobairro</small></span></button>
+      <button class="conta"><span class="dot critico"></span><span>Studio Nove<small>@studionove.br</small></span></button>
+      <button class="conta"><span class="dot ok"></span><span>Casa Coffee<small>@casacoffeecolab</small></span></button>
+    </div>
+    <footer>Coleta diária às 04:00<br>Última: hoje, 04:07</footer>
+  </nav>
+
+  <main>
+    <header class="topo">
+      <h1 class="perfil">Verdejar Plantas <em>@verdejarplantas</em></h1>
+      <span class="periodo">Diagnóstico de 8 de agosto a 4 de setembro, comparado aos 28 dias anteriores</span>
+    </header>
+
+    <div class="abas" role="tablist">
+      <button class="aba" role="tab" id="t-diag" aria-selected="true" aria-controls="p-diag">Diagnóstico</button>
+      <button class="aba" role="tab" id="t-rel" aria-selected="false" aria-controls="p-rel">Relatório</button>
+      <button class="aba" role="tab" aria-selected="false" disabled title="Fase 2">Concorrentes</button>
+    </div>
+
+    <!-- ── DIAGNÓSTICO ── -->
+    <section class="painel" id="p-diag" role="tabpanel" aria-labelledby="t-diag">
+
+      <div class="veredito">
+        <p class="sev">Atenção · frequência de publicação</p>
+        <p>Seu alcance não caiu. Sua frequência caiu 40% e o alcance seguiu junto.</p>
+        <p class="apoio">O alcance por post está estável há três meses. O que mudou foi o volume: 9 publicações neste período contra 15 no anterior. O problema não é o conteúdo, é a cadência.</p>
+      </div>
+
+      <div class="secao">
+        <h3>A evidência</h3>
+        <dl class="evidencia">
+          <div class="metrica">
+            <dt>Publicações</dt>
+            <dd><b>9</b><span class="delta desce">−40%</span></dd>
+            <p>15 no período anterior</p>
+          </div>
+          <div class="metrica">
+            <dt>Alcance por publicação</dt>
+            <dd><b>2.840</b><span class="delta plano">−2%</span></dd>
+            <p>Dentro da variação normal</p>
+          </div>
+          <div class="metrica">
+            <dt>Alcance total</dt>
+            <dd><b>25.560</b><span class="delta desce">−41%</span></dd>
+            <p>Acompanha a queda de volume</p>
+          </div>
+          <div class="metrica">
+            <dt>Salvamentos por publicação</dt>
+            <dd><b>63</b><span class="delta sobe">+18%</span></dd>
+            <p>O conteúdo que saiu funcionou melhor</p>
+          </div>
+        </dl>
+      </div>
+
+      <div class="secao">
+        <h3>Volume e alcance por publicação, últimos 6 meses</h3>
+        <div class="grafico">
+          <p class="legenda">
+            <span><i style="background:var(--steel)"></i>Publicações no mês</span>
+            <span><i style="background:var(--amber)"></i>Alcance médio por publicação</span>
+          </p>
+          <svg viewBox="0 0 680 210" role="img" aria-label="Gráfico: publicações caem de 16 para 9 nos últimos dois meses enquanto o alcance por publicação permanece estável em torno de 2.900.">
+            <g stroke="#28363F" stroke-width="1">
+              <line x1="44" y1="20"  x2="660" y2="20"></line>
+              <line x1="44" y1="65"  x2="660" y2="65"></line>
+              <line x1="44" y1="110" x2="660" y2="110"></line>
+              <line x1="44" y1="155" x2="660" y2="155"></line>
+            </g>
+            <g fill="#6B7F8D" font-size="11" font-family="IBM Plex Sans">
+              <text x="8" y="24">16</text><text x="8" y="69">12</text><text x="8" y="114">8</text><text x="8" y="159">4</text>
+            </g>
+            <!-- barras: publicações -->
+            <g fill="#5B8CA8">
+              <rect x="66"  y="20"  width="42" height="135" rx="2"></rect>
+              <rect x="167" y="31"  width="42" height="124" rx="2"></rect>
+              <rect x="268" y="20"  width="42" height="135" rx="2"></rect>
+              <rect x="369" y="42"  width="42" height="113" rx="2"></rect>
+              <rect x="470" y="65"  width="42" height="90"  rx="2" opacity=".72"></rect>
+              <rect x="571" y="98"  width="42" height="57"  rx="2" opacity=".55"></rect>
+            </g>
+            <!-- linha: alcance por publicação -->
+            <polyline points="87,74 188,70 289,72 390,68 491,71 592,73"
+                      fill="none" stroke="#D9A05B" stroke-width="2.5"
+                      stroke-linecap="round" stroke-linejoin="round"></polyline>
+            <g fill="#D9A05B">
+              <circle cx="87" cy="74" r="3.5"></circle><circle cx="188" cy="70" r="3.5"></circle>
+              <circle cx="289" cy="72" r="3.5"></circle><circle cx="390" cy="68" r="3.5"></circle>
+              <circle cx="491" cy="71" r="3.5"></circle><circle cx="592" cy="73" r="3.5"></circle>
+            </g>
+            <g fill="#93A6B4" font-size="11.5" font-family="IBM Plex Sans" text-anchor="middle">
+              <text x="87" y="177">abr</text><text x="188" y="177">mai</text><text x="289" y="177">jun</text>
+              <text x="390" y="177">jul</text><text x="491" y="177">ago</text><text x="592" y="177">set</text>
+            </g>
+            <g fill="#6B7F8D" font-size="11" font-family="IBM Plex Sans" text-anchor="middle">
+              <text x="592" y="196">parcial</text>
+            </g>
+          </svg>
+          <p class="nota-grafico">A linha do alcance por publicação praticamente não se move. As barras contam a história.</p>
+        </div>
+      </div>
+
+      <div class="secao">
+        <h3>O que fazer nas próximas duas semanas</h3>
+        <div class="acao">
+          <ol>
+            <li>Voltar para 4 publicações por semana antes de mexer em qualquer outra coisa.
+              <span>Enquanto o volume estiver caindo, nenhum teste de formato dá resultado legível.</span></li>
+            <li>Repetir o formato dos três posts com mais salvamentos do período.
+              <span>Carrossel de cuidado com plantas de sombra. Salvamento subiu 18% e é o sinal mais forte que a conta tem hoje.</span></li>
+            <li>Não trocar horário nem legenda por enquanto.
+              <span>Mudar duas variáveis ao mesmo tempo torna o próximo diagnóstico inconclusivo.</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <p class="limite">
+        <strong>O que este diagnóstico não sabe.</strong>
+        Story de mais de 24 horas não entra na conta: a Meta não devolve esse histórico depois da janela.
+        Dados de tráfego pago não estão conectados. E não há comparação com concorrentes neste período,
+        porque a Meta só expõe seguidores, número de posts e engajamento visível de contas de terceiros.
+      </p>
+
+      <p class="rodape-esboco">
+        Esboço visual, não é o produto rodando. Dados fictícios.
+        Regras aplicadas: ruleset v0.3 (cadência, formato, consistência).
+      </p>
+    </section>
+
+    <!-- ── RELATÓRIO ── -->
+    <section class="painel" id="p-rel" role="tabpanel" aria-labelledby="t-rel" hidden>
+      <div class="barra-acao">
+        <button class="btn primario">Baixar PDF</button>
+        <button class="btn">Copiar link de leitura</button>
+        <button class="btn">Enviar por e-mail</button>
+      </div>
+
+      <div class="folha">
+        <h4>Verdejar Plantas</h4>
+        <p class="sub">Instagram · 8 de agosto a 4 de setembro de 2026 · preparado por Atmosfera Viral</p>
+
+        <p class="chamada">O alcance não caiu. A frequência caiu, e o alcance seguiu junto.</p>
+
+        <table>
+          <thead>
+            <tr><th>Indicador</th><th>Período</th><th>Anterior</th><th>Variação</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Publicações</td><td>9</td><td>15</td><td>−40%</td></tr>
+            <tr><td>Alcance por publicação</td><td>2.840</td><td>2.898</td><td>−2%</td></tr>
+            <tr><td>Alcance total</td><td>25.560</td><td>43.470</td><td>−41%</td></tr>
+            <tr><td>Salvamentos por publicação</td><td>63</td><td>53</td><td>+18%</td></tr>
+            <tr><td>Seguidores</td><td>8.412</td><td>8.390</td><td>+0,3%</td></tr>
+          </tbody>
+        </table>
+
+        <p style="margin:0 0 20px;line-height:1.62;max-width:60ch">
+          O conteúdo publicado teve desempenho melhor que no período anterior, com salvamentos em alta.
+          A queda no resultado total vem do volume, não da qualidade. A recomendação é restabelecer a
+          cadência de quatro publicações semanais antes de alterar formato ou horário.
+        </p>
+
+        <p class="rodape">Kora Insights · gerado em 5 de setembro de 2026 · ruleset v0.3</p>
+      </div>
+
+      <p class="rodape-esboco">
+        O relatório é o mesmo diagnóstico em outro formato, nunca um segundo produto.
+        Na Fase 3 esta folha aceita a marca da agência.
+      </p>
+    </section>
+  </main>
+</div>
+
+<script>
+  const abas = [...document.querySelectorAll('.aba[aria-controls]')];
+  abas.forEach(aba => {
+    aba.addEventListener('click', () => {
+      abas.forEach(b => {
+        const alvo = document.getElementById(b.getAttribute('aria-controls'));
+        const ativa = b === aba;
+        b.setAttribute('aria-selected', String(ativa));
+        alvo.hidden = !ativa;
+      });
+    });
+  });
+
+  document.querySelectorAll('.conta').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.conta').forEach(o => o.setAttribute('aria-current','false'));
+      c.setAttribute('aria-current','true');
+    });
+  });
+</script>
+</body>
+</html>
