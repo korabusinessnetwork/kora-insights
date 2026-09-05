@@ -1,0 +1,129 @@
+/* ============================================================================
+   Kora Insights — base
+   Reset curto, tipografia de origem e regras de acessibilidade que valem para
+   o produto inteiro. Nada de layout aqui: layout mora no CSS do componente.
+   ============================================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--cor-fundo);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis-weight: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+/* Todo numero da interface e comparado em coluna: alinhamento tabular sempre. */
+:where(td, th, .numero, [data-numero]) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visivel e inegociavel: e a unica pista de onde o teclado esta. */
+:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 3px;
+  border-radius: var(--raio-1);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Conteudo so para leitor de tela (rotulo de tabela, contexto de botao). */
+.apenas-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Pular para o conteudo: primeiro tab de qualquer tela. */
+.pular-para-conteudo {
+  position: absolute;
+  left: var(--e-4);
+  top: var(--e-4);
+  z-index: var(--z-aviso);
+  padding: var(--e-2) var(--e-4);
+  background: var(--cor-acento);
+  color: var(--cor-acento-tinta);
+  border-radius: var(--raio-3);
+  font-weight: var(--peso-medio);
+  transform: translateY(-200%);
+  transition: transform var(--duracao-rapida) var(--ease-padrao);
+}
+
+.pular-para-conteudo:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

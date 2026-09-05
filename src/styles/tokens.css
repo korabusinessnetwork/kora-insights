@@ -1,0 +1,219 @@
+/* ============================================================================
+   Kora Insights — design tokens
+   Fonte: docs/02_DESIGN_SYSTEM/TOKENS.md (derivado da identidade visual Kora).
+
+   Tres camadas, nesta ordem, e componente NUNCA pula direto para a primeira:
+     1. primitivas  --kora-*   paleta crua, sem significado
+     2. semanticas  --cor-*    papel na interface (fundo, tinta, acento)
+     3. componente  local, dentro do proprio .module/arquivo CSS
+
+   White-label (Fase 3, docs/02): o tenant sobrescreve as SEMANTICAS em :root
+   via aplicarIdentidadeVisual(). Nenhuma marca, cor ou logo de cliente entra
+   em codigo — vem do registro do tenant. Por isso toda semantica e declarada
+   com var(--tenant-*, <padrao Kora>).
+   ============================================================================ */
+
+:root {
+  /* ── 1. primitivas ───────────────────────────────────────────────────── */
+
+  /* Carvao esverdeado: a base da interface escura. */
+  --kora-carvao-1000: #060908;
+  --kora-carvao-900: #0a0e0c;
+  --kora-carvao-800: #131816;
+  --kora-carvao-700: #1b2220;
+  --kora-carvao-600: #222927;
+  --kora-carvao-500: #2b3331;
+  --kora-carvao-400: #38423f;
+
+  /* Osso: a tinta clara e o papel do relatorio. */
+  --kora-osso-100: #f6f5f1;
+  --kora-osso-200: #f0efe9;
+  --kora-osso-300: #dddbd3;
+  --kora-osso-400: #c8c6bd;
+  --kora-osso-500: #a7b1af;
+  --kora-osso-600: #6b7975;
+  --kora-osso-700: #565249;
+  --kora-osso-800: #3b3a34;
+
+  /* Ocre: o acento. Claro no escuro, escuro no claro — mesma familia. */
+  --kora-ocre-300: #f2b341;
+  --kora-ocre-500: #94723a;
+  --kora-ocre-700: #794d05;
+
+  /* Sage: estavel / positivo. Nunca "meta batida", so "nao e o problema". */
+  --kora-sage-300: #44c69a;
+  --kora-sage-700: #13624b;
+
+  /* Tijolo: critico. Usado com parcimonia — quase tudo aqui e "atencao". */
+  --kora-tijolo-300: #dd8071;
+  --kora-tijolo-700: #8f3527;
+
+  /* ── tipografia ───────────────────────────────────────────────────────
+     O display e o veredito: a frase que o cliente repete em voz alta.
+     Newsreader aproxima a serifa da identidade; trocar aqui troca no produto
+     inteiro (e e assim que o white-label troca de fonte). */
+  --fonte-display: 'Newsreader', 'Spectral', Georgia, 'Times New Roman', serif;
+  --fonte-texto: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --texto-veredito: clamp(1.75rem, 3.4vw, 2.75rem);
+  --texto-display: 1.3125rem;
+  --texto-numero: 1.875rem;
+  --texto-corpo: 0.9375rem;
+  --texto-apoio: 0.875rem;
+  --texto-rotulo: 0.8125rem;
+  --texto-micro: 0.75rem;
+
+  --altura-veredito: 1.16;
+  --altura-corpo: 1.55;
+  --altura-densa: 1.35;
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-forte: 600;
+
+  --tracking-veredito: -0.015em;
+  --tracking-numero: -0.02em;
+
+  /* ── espacamento (base 4) ─────────────────────────────────────────────── */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.25rem;
+  --e-6: 1.5rem;
+  --e-8: 2rem;
+  --e-10: 2.5rem;
+  --e-12: 3rem;
+  --e-16: 4rem;
+
+  /* ── forma ─────────────────────────────────────────────────────────────── */
+  --raio-1: 2px;
+  --raio-2: 4px;
+  --raio-3: 6px;
+  --raio-4: 8px;
+
+  --borda-fina: 1px;
+  --borda-acento: 3px;
+
+  --largura-leitura: 68ch;
+  --largura-veredito: 24ch;
+  --largura-conteudo: 1320px;
+
+  /* ── movimento ─────────────────────────────────────────────────────────── */
+  --duracao-rapida: 120ms;
+  --duracao-normal: 200ms;
+  --ease-padrao: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* ── camadas ───────────────────────────────────────────────────────────── */
+  --z-conteudo: 1;
+  --z-cabecalho: 10;
+  --z-sobreposicao: 100;
+  --z-aviso: 1000;
+}
+
+/* ============================================================================
+   2. semanticas — tema escuro (padrao do produto)
+   Cada uma aceita override do tenant. Sem var(--tenant-*), nao ha white-label.
+   ============================================================================ */
+
+:root,
+[data-tema='escuro'],
+[data-superficie='carvao'] {
+  color-scheme: dark;
+
+  --cor-fundo: var(--tenant-fundo, var(--kora-carvao-900));
+  --cor-fundo-fosco: var(--tenant-fundo-fosco, var(--kora-carvao-1000));
+  --cor-superficie: var(--tenant-superficie, var(--kora-carvao-800));
+  --cor-superficie-alta: var(--tenant-superficie-alta, var(--kora-carvao-700));
+  --cor-linha: var(--tenant-linha, var(--kora-carvao-600));
+  --cor-linha-forte: var(--tenant-linha-forte, var(--kora-carvao-500));
+
+  --cor-tinta: var(--tenant-tinta, var(--kora-osso-200));
+  --cor-tinta-suave: var(--tenant-tinta-suave, var(--kora-osso-500));
+  --cor-tinta-fraca: var(--tenant-tinta-fraca, var(--kora-osso-600));
+
+  --cor-acento: var(--tenant-acento, var(--kora-ocre-300));
+  --cor-acento-firme: var(--tenant-acento-firme, var(--kora-ocre-700));
+  --cor-acento-tinta: var(--tenant-acento-tinta, var(--kora-carvao-900));
+
+  --cor-positivo: var(--tenant-positivo, var(--kora-sage-300));
+  --cor-atencao: var(--tenant-atencao, var(--kora-ocre-300));
+  --cor-critico: var(--tenant-critico, var(--kora-tijolo-300));
+
+  --cor-grafico-barra: var(--kora-carvao-400);
+  --cor-grafico-linha: var(--kora-osso-200);
+  --cor-grafico-eixo: var(--kora-carvao-600);
+
+  --cor-foco: var(--cor-acento);
+  --cor-veredito-fundo: var(--kora-osso-200);
+  --cor-veredito-tinta: var(--kora-carvao-800);
+  --cor-veredito-barra: var(--kora-ocre-700);
+}
+
+/* ============================================================================
+   Tema claro / superficie de papel.
+   [data-superficie="papel"] existe para o relatorio: uma folha clara dentro
+   do app escuro (ver identidade, pagina 3). Mesmos nomes semanticos, outra
+   pele — nenhum componente precisa saber em qual dos dois esta.
+   ============================================================================ */
+
+[data-tema='claro'],
+[data-superficie='papel'] {
+  color-scheme: light;
+
+  --cor-fundo: var(--tenant-papel-fundo, var(--kora-osso-200));
+  --cor-fundo-fosco: var(--tenant-papel-fundo-fosco, var(--kora-osso-100));
+  --cor-superficie: var(--tenant-papel-superficie, var(--kora-osso-200));
+  --cor-superficie-alta: var(--tenant-papel-superficie-alta, var(--kora-osso-100));
+  --cor-linha: var(--tenant-papel-linha, #ddd8cf);
+  --cor-linha-forte: var(--tenant-papel-linha-forte, var(--kora-osso-400));
+
+  --cor-tinta: var(--tenant-papel-tinta, #161a18);
+  --cor-tinta-suave: var(--tenant-papel-tinta-suave, var(--kora-osso-700));
+  --cor-tinta-fraca: var(--tenant-papel-tinta-fraca, var(--kora-osso-800));
+
+  --cor-acento: var(--tenant-papel-acento, var(--kora-ocre-700));
+  --cor-acento-firme: var(--tenant-papel-acento-firme, var(--kora-ocre-700));
+  --cor-acento-tinta: var(--tenant-papel-acento-tinta, var(--kora-osso-100));
+
+  --cor-positivo: var(--tenant-papel-positivo, var(--kora-sage-700));
+  --cor-atencao: var(--tenant-papel-atencao, var(--kora-ocre-700));
+  --cor-critico: var(--tenant-papel-critico, var(--kora-tijolo-700));
+
+  --cor-grafico-barra: var(--kora-osso-400);
+  --cor-grafico-linha: #161a18;
+  --cor-grafico-eixo: #ddd8cf;
+
+  --cor-foco: var(--kora-ocre-700);
+  --cor-veredito-fundo: transparent;
+  --cor-veredito-tinta: var(--cor-tinta);
+  --cor-veredito-barra: var(--kora-ocre-700);
+}
+
+/* Severidade — mapeada por atributo para que o dado (achado.severidade,
+   vindo do motor de regras) escolha a cor sem nenhum if de estilo no JSX. */
+[data-severidade='ok'] {
+  --cor-severidade: var(--cor-positivo);
+}
+[data-severidade='atencao'] {
+  --cor-severidade: var(--cor-atencao);
+}
+[data-severidade='critico'] {
+  --cor-severidade: var(--cor-critico);
+}
+[data-severidade='indeterminado'] {
+  --cor-severidade: var(--cor-tinta-fraca);
+}
+
+/* Direcao de variacao — mesma ideia: o dado dirige a cor.
+   "desce" nao e vermelho por reflexo: quem decide se cair e ruim e a regra,
+   nao o CSS. Por isso o token e neutro e a tela passa data-tom explicito. */
+[data-tom='ruim'] {
+  --cor-tom: var(--cor-atencao);
+}
+[data-tom='bom'] {
+  --cor-tom: var(--cor-positivo);
+}
+[data-tom='neutro'] {
+  --cor-tom: var(--cor-tinta-suave);
+}

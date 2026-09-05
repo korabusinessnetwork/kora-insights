@@ -1,0 +1,70 @@
+/* ============================================================================
+   Kora Insights — impressao
+   O "Baixar PDF" do relatorio e impressao do navegador, de proposito:
+   custo zero (memory/restrictions.md, fase bootstrap) e o PDF sai identico ao
+   que o cliente viu na tela, sem um segundo gerador para manter em sincronia.
+
+   Regra: o relatorio impresso e o MESMO diagnostico, nunca um segundo produto.
+   ============================================================================ */
+
+@media print {
+  /* A folha ja e clara na tela; na impressao ela e a pagina inteira. */
+  :root {
+    --cor-fundo: #ffffff;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+
+  /* Fora da folha, nada vai para o papel: navegacao, abas, botoes de acao. */
+  [data-imprimir='nao'] {
+    display: none !important;
+  }
+
+  [data-imprimir='folha'] {
+    display: block !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* Nunca partir um bloco de sentido ao meio da pagina. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+
+  table,
+  figure,
+  li,
+  [data-bloco] {
+    break-inside: avoid;
+  }
+
+  /* O limite do diagnostico acompanha o relatorio impresso: o cliente leva
+     para a reuniao o que a ferramenta NAO sabe, junto com o que ela sabe. */
+  [data-bloco='limites'] {
+    break-before: auto;
+    break-inside: avoid;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 8pt;
+    color: #555555;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+}
