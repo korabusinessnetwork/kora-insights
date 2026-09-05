@@ -22,6 +22,21 @@ module.exports = {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
   overrides: [
-    { files: ['**/*.test.{js,jsx}'], env: { 'vitest-globals/env': true }, globals: { vi: 'readonly', describe: 'readonly', it: 'readonly', expect: 'readonly', beforeEach: 'readonly', afterEach: 'readonly' } },
+    {
+      // Vitest com globals: true. Declarados a mao para nao trazer mais um plugin
+      // so por causa de um punhado de nomes (memory/restrictions.md, custo).
+      files: ['**/*.test.{js,jsx}', 'vitest.setup.js'],
+      globals: {
+        vi: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        afterAll: 'readonly',
+        afterEach: 'readonly',
+      },
+    },
   ],
 }
