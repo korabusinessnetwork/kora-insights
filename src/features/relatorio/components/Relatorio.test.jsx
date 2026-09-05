@@ -86,13 +86,14 @@ afterEach(() => {
 })
 
 describe('Relatório — a folha da Casa Oliveira', () => {
-  it('encabeça a folha com o cliente, a semana e quem preparou', async () => {
+  it('encabeça a folha com o cliente, a janela comparada e quem preparou', async () => {
     montar(CASA_OLIVEIRA)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Casa Oliveira' })).toBeVisible()
     expect(
       screen.getByText(
-        'Diagnóstico de crescimento no Instagram, semana de 24 a 30 de agosto de 2026',
+        'Diagnóstico de crescimento no Instagram, últimas 8 semanas (6 de julho a ' +
+        '30 de agosto de 2026), comparadas às 8 anteriores',
       ),
     ).toBeInTheDocument()
     expect(screen.getByText('Preparado por')).toBeInTheDocument()

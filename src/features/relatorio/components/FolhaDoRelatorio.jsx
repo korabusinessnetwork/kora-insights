@@ -9,6 +9,7 @@ import {
 } from '../../../components/shared/index.js'
 import {
   formatarDataCurta,
+  formatarJanelaComparada,
   formatarPeriodo,
   formatarValorDeMetrica,
   formatarVariacao,
@@ -125,7 +126,9 @@ const SEM_PERIODO = 'sem período registrado'
  * @param {{ fim?: string }} [periodo]
  * @returns {string}
  */
-function linhaDoAssunto(periodo) {
+function linhaDoAssunto(achado, periodo) {
+  const janela = formatarJanelaComparada(achado?.janela)
+  if (janela) return `${ASSUNTO}, ${janela.longo.toLowerCase()}`
   const inicio = inicioDaSemanaEncerrada(periodo?.fim)
   if (!inicio) return `${ASSUNTO}, ${SEM_PERIODO}`
   return `${ASSUNTO}, semana de ${formatarPeriodo(inicio, periodo.fim)}`
@@ -187,7 +190,7 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
       <header className="folha__cabecalho">
         <div className="folha__identificacao">
           <h1 className="folha__cliente">{conta.nome}</h1>
-          <p className="folha__assunto">{linhaDoAssunto(diagnostico.periodo)}</p>
+          <p className="folha__assunto">{linhaDoAssunto(achado, diagnostico.periodo)}</p>
         </div>
         <div className="folha__assinatura">
           <p className="folha__rotulo-assinatura">{ROTULO_DE_ASSINATURA}</p>

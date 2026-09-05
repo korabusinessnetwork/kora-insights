@@ -15,6 +15,7 @@ import {
   arredondar,
   coeficienteDeVariacao,
   media,
+  intervaloDaJanela,
   ultimasJanelasCompletas,
   valoresPorPublicacao,
 } from '../../motor/index.js'
@@ -59,6 +60,14 @@ export default {
 
     return {
       regra: 'consistencia-de-alcance',
+      // Toda regra declara a janela que olhou. Sem isso o cabecalho nao tem o
+      // que anunciar e cai num "sem diagnostico ainda" com um diagnostico na
+      // tela — o produto contradizendo a si mesmo em duas linhas de distancia.
+      janela: {
+        semanas: SEMANAS_DE_JANELA,
+        recentes: intervaloDaJanela(janelas),
+        anteriores: null,
+      },
       versaoRegra: '0.3.0',
       severidade: alta ? 'atencao' : 'ok',
       rotulo: alta

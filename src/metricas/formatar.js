@@ -173,3 +173,26 @@ export function formatarDataCurta(iso) {
 
   return `${data.dia} de ${MESES[data.mes - 1]} de ${data.ano}`
 }
+
+/**
+ * As duas formas de anunciar a janela que o diagnostico comparou.
+ *
+ * Existe para acabar com um defeito de coerencia: o cabecalho anunciava as
+ * dezesseis semanas do registro, o bloco de evidencia mostrava numeros de oito,
+ * e a folha do relatorio falava de uma semana — tres janelas diferentes para um
+ * unico diagnostico, e o cliente levando qualquer uma delas para a reuniao.
+ *
+ * @param {{ semanas: number, recentes: { inicio: string, fim: string } }|null|undefined} janela
+ * @returns {{ longo: string, curto: string }|null}
+ */
+export function formatarJanelaComparada(janela) {
+  const recentes = janela?.recentes
+  if (!recentes?.inicio || !recentes?.fim || !janela?.semanas) return null
+  return {
+    longo:
+      `Últimas ${janela.semanas} semanas ` +
+      `(${formatarPeriodo(recentes.inicio, recentes.fim)}), comparadas às ` +
+      `${janela.semanas} anteriores`,
+    curto: `${janela.semanas} semanas até ${formatarDataCurta(recentes.fim)}`,
+  }
+}

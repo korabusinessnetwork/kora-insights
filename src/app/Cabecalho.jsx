@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { Marca } from '../components/shared/index.js'
 import { obterDiagnosticoMaisRecente } from '../lib/index.js'
-import { formatarPeriodo } from '../metricas/index.js'
+import { formatarJanelaComparada } from '../metricas/index.js'
 import { ROTAS, rotaDoHistorico, rotaDoRelatorio } from '../constants/rotas.js'
 import { useTenant } from '../context/TenantContexto.jsx'
 import SeletorDeConta from './SeletorDeConta.jsx'
@@ -19,6 +19,8 @@ import './Cabecalho.css'
  */
 
 /** Enquanto a leitura não voltou, o cabeçalho não afirma período nenhum. */
+const SEM_JANELA = 'Histórico ainda curto para comparar janelas'
+
 const PERIODO_INICIAL = Object.freeze({ carregando: true, texto: null })
 
 /**
@@ -44,12 +46,16 @@ export default function Cabecalho() {
     // por isso não têm como divergir. Nada é calculado aqui (ADR-005).
     obterDiagnosticoMaisRecente(contaId).then((envelope) => {
       if (!montado) return
-      const janela = envelope.error ? null : envelope.data?.periodo
-      if (!janela?.inicio || !janela?.fim) {
-        setPeriodo({ carregando: false, texto: null })
-        return
-      }
-      setPeriodo({ carregando: false, texto: formatarPeriodo(janela.inicio, janela.fim) })
+      // A janela do ACHADO, nao o periodo do registro: o registro cobre o
+      // historico inteiro, e anunciar dezesseis semanas sobre uma tela de oito
+      // era a terceira janela diferente do mesmo diagnostico.
+      const achado = envelope.error ? null : envelope.data?.achados?.[0]
+      const rotulo = formatarJanelaComparada(achado?.janela)
+      // Diagnostico sem janela de comparacao existe: e o de historico curto.
+      // Anunciar "sem diagnostico ainda" com um veredito na tela seria o
+      // cabecalho desmentindo o corpo da pagina.
+      const texto = rotulo?.curto ?? (achado ? SEM_JANELA : null)
+      setPeriodo({ carregando: false, texto })
     })
 
     return () => {
@@ -85,11 +91,8 @@ export default function Cabecalho() {
         <div className="ka-cabecalho__acoes">
           {periodo.carregando ? null : (
             <p className="ka-cabecalho__periodo">
-              {/* A identidade escreve "Semana de 24 a 30 de agosto" aqui, mas
-                  `Diagnostico.periodo` é a janela inteira analisada — da
-                  primeira semana do histórico até a última semana completa
-                  (src/motor/motor.js). Anunciar uma semana onde o registro fala
-                  de dezesseis seria o cabeçalho contradizendo a tela. */}
+              {/* A mesma janela que o bloco Evidência e a folha do relatório
+                  anunciam, escrita curta. Um diagnóstico, um período. */}
               <span className="apenas-leitor">Período analisado: </span>
               {periodo.texto ?? 'Sem diagnóstico ainda'}
             </p>

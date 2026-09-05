@@ -49,6 +49,14 @@ export function segmentosDaLinha(pontos) {
 }
 
 /**
+ * Piso da faixa desenhada da linha, como fracao do valor medio da serie.
+ *
+ * Meio da media: uma serie que oscila menos que isso e desenhada quase reta, em
+ * vez de esticada ate as bordas do grafico.
+ */
+const AMPLITUDE_MINIMA_DA_LINHA = 0.5
+
+/**
  * Maior valor finito de uma serie, ou 0 se nao houver nenhum.
  * @param {(number|null|undefined)[]} valores
  * @returns {number}
@@ -82,6 +90,8 @@ function menorValor(valores) {
  * As barras partem do zero, porque comparar volume com base cortada engana. A
  * linha nao tem eixo numerico e ocupa uma faixa propria: ela mostra o desenho da
  * tendencia, e o valor dela e dito por escrito na descricao e nos indicadores.
+ * A faixa da linha tem amplitude minima (ver `AMPLITUDE_MINIMA_DA_LINHA`), para
+ * que uma serie estavel apareca estavel.
  *
  * @param {object} props
  * @param {{ rotulo: string, barra: number|null, linha: number|null }[]} props.pontos
@@ -97,7 +107,17 @@ export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, desc
   const tetoDaBarra = maiorValor(serie.map((ponto) => ponto?.barra))
   const tetoDaLinha = maiorValor(serie.map((ponto) => ponto?.linha))
   const pisoDaLinha = menorValor(serie.map((ponto) => ponto?.linha))
-  const amplitude = tetoDaLinha - pisoDaLinha
+  const centroDaLinha = (tetoDaLinha + pisoDaLinha) / 2
+  // Serie quase plana precisa PARECER plana. Normalizar pelo proprio minimo e
+  // maximo transforma 4% de oscilacao numa escalada de altura total, e o
+  // grafico passa a contradizer a frase logo abaixo dele ("variacao de 4%").
+  // Num produto que vende leitura correta do dado, ruido desenhado como
+  // tendencia e o pior defeito possivel. Por isso a faixa desenhada nunca e
+  // menor que uma fracao da propria media da serie.
+  const amplitude = Math.max(
+    tetoDaLinha - pisoDaLinha,
+    centroDaLinha * AMPLITUDE_MINIMA_DA_LINHA,
+  )
 
   /** Centro horizontal da semana de indice `indice`. */
   const centroDe = (indice) => MARGEM_X + fatia * (indice + 0.5)
@@ -108,7 +128,8 @@ export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, desc
 
   /** Y da linha para `valor`, dentro da faixa reservada a ela. */
   const alturaDaLinha = (valor) => {
-    const posicao = amplitude > 0 ? (valor - pisoDaLinha) / amplitude : 0.5
+    const bruta = amplitude > 0 ? 0.5 + (valor - centroDaLinha) / amplitude : 0.5
+    const posicao = Math.min(1, Math.max(0, bruta))
     return BASE - (PISO_DA_LINHA + posicao * (1 - PISO_DA_LINHA)) * ALTURA_DA_AREA
   }
 
