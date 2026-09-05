@@ -21,3 +21,9 @@ ruleset e grava um registro em `diagnoses` com `ruleset_version`.
   reais anonimizadas.
 - Regra: nenhum diagnostico e calculado na tela. A tela le `diagnoses`.
 - Regra: mudanca de ruleset nunca reescreve diagnostico passado.
+
+## Correcao (2026-09-05)
+O texto acima cita a tabela como `diagnoses`. A grafia correta e **`diagnosticos`**,
+como esta em `supabase/schema.sql` e como manda a regra de nomear dominio em
+portugues (`memory/patterns.md`). O ADR fica registrado com a correcao em vez de
+reescrito: decisao nao se apaga, se emenda.
