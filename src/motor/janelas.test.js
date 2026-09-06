@@ -55,7 +55,7 @@ describe('ultimasJanelasCompletas', () => {
 
   it('devolve em ordem cronologica e nunca mais do que existe', () => {
     const todas = ultimasJanelasCompletas(casaOliveira, 99)
-    expect(todas.length).toBe(16)
+    expect(todas.length).toBe(24)
     expect(todas[0].inicio < todas.at(-1).inicio).toBe(true)
     expect(ultimasJanelasCompletas(casaOliveira, 0)).toEqual([])
   })

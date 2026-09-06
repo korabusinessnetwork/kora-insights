@@ -159,18 +159,17 @@ export async function listarDiagnosticos(contaId, opcoes = {}) {
   const { limite = 12, desde, ate } = opcoes
 
   if (estaEmModoDemonstracao()) {
-    const diagnostico = demonstracao.obterDiagnostico(contaId)
-    if (!diagnostico) {
+    const serie = demonstracao.listarDiagnosticos(contaId, { limite })
+    if (serie.length === 0) {
       return falhaPorAusencia(contaId, {
         codigo: CODIGOS.SEM_DADO_SUFICIENTE,
         mensagem: MENSAGEM_SEM_DIAGNOSTICO,
       })
     }
-    const dentroDoPeriodo =
-      (!desde || diagnostico.geradoEm >= desde) && (!ate || diagnostico.geradoEm.slice(0, 10) <= ate)
-    return ok(dentroDoPeriodo ? [diagnostico].slice(0, limite) : [], {
-      origem: ORIGEM_DEMONSTRACAO,
-    })
+    const naJanela = serie.filter(
+      (d) => (!desde || d.geradoEm >= desde) && (!ate || d.geradoEm.slice(0, 10) <= ate),
+    )
+    return ok(naJanela.slice(0, limite), { origem: ORIGEM_DEMONSTRACAO })
   }
 
   const sessao = await exigirSessao()

@@ -213,27 +213,36 @@ function montarSemanas({
 
 const CASA_OLIVEIRA = montarSemanas({
   alcance: [
+    // Oito semanas antes da janela que a identidade trava. Nao mexem em nenhum
+    // numero dela — as janelas comparadas sao por data absoluta — e existem
+    // para a tela de historico ter passado de verdade para mostrar: o motor
+    // dizendo "esta tudo bem" tres vezes antes de nomear a causa.
+    5300, 5400, 5200, 5350, 5250, 5400, 5300, 5350,
     5400, 5300, 5200, 5100, 5100, 5000, 5100, 5000, // 8 anteriores: soma 41.200
     5200, 4400, 4100, 3900, 3500, 2200, 1900, 1700, // ultimas 8:    soma 26.900
     1650, // semana corrente, incompleta: fica fora de toda comparacao
   ],
   seguidores: [
+    6053, 6060, 6068, 6076, 6083, 6091, 6098, 6100, //
     6108, 6116, 6125, 6133, 6140, 6148, 6155, 6162, //
     6168, 6172, 6175, 6177, 6178, 6178, 6177, 6176,
     6175,
   ],
   visitasAoPerfil: [
+    530, 540, 520, 535, 525, 540, 530, 535, //
     540, 530, 520, 510, 510, 500, 510, 500, //
     520, 440, 410, 390, 350, 220, 190, 170,
     165,
   ],
   // O conteudo que saiu ficou melhor, nao pior: salvamento por mil sobe.
   salvamentosPorMil: [
+    23.0, 23.0, 23.1, 23.1, 23.1, 23.2, 23.2, 23.2, //
     23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, //
     26.0, 26.4, 27.0, 27.4, 27.8, 28.1, 28.1, 28.1,
     28.1,
   ],
   alcanceDasMidias: [
+    ...Array.from({ length: 8 }, () => [2380, 2290, 2200]),
     [2400, 2290, 2180], // cada semana anterior soma 6.870 → media 2.290
     [2350, 2300, 2220],
     [2420, 2270, 2180],
@@ -253,6 +262,7 @@ const CASA_OLIVEIRA = montarSemanas({
     [2040],
   ],
   tiposDasMidias: [
+    ...Array.from({ length: 8 }, () => ['carrossel', 'reel', 'imagem']),
     ['carrossel', 'reel', 'imagem'],
     ['reel', 'carrossel', 'imagem'],
     ['carrossel', 'imagem', 'reel'],
@@ -377,7 +387,7 @@ export const CONTAS = [
     username: 'casa.oliveira',
     nome: 'Casa Oliveira',
     fb_page_id: '102000000000001',
-    conectada_em: '2026-05-11T10:00:00.000Z',
+    conectada_em: '2026-03-16T10:00:00.000Z',
     token_expira_em: '2026-11-08T10:00:00.000Z',
     tem_trafego_pago: false,
   },
@@ -409,6 +419,9 @@ export const CONTAS = [
 /** Ultimo dia com coleta possivel: o dia de AGORA. Nada existe depois disso. */
 const ULTIMO_DIA = AGORA.slice(0, 10)
 
+/** A Casa Oliveira tem oito semanas a mais de passado, para o historico contar algo. */
+const PRIMEIRA_SEGUNDA_CASA_OLIVEIRA = somarDias(PRIMEIRA_SEGUNDA, -56)
+
 /** Verdejar conectou duas semanas antes: a lacuna custa uma semana completa. */
 const PRIMEIRA_SEGUNDA_VERDEJAR = somarDias(PRIMEIRA_SEGUNDA, -14)
 
@@ -418,7 +431,7 @@ const PRIMEIRA_SEGUNDA_STUDIO_NOVE = somarDias(PRIMEIRA_SEGUNDA, 14 * 7)
 const casaOliveira = expandirPlano({
   contaId: CONTAS[0].id,
   semanas: CASA_OLIVEIRA,
-  primeiraSegunda: PRIMEIRA_SEGUNDA,
+  primeiraSegunda: PRIMEIRA_SEGUNDA_CASA_OLIVEIRA,
   ultimoDia: ULTIMO_DIA,
 })
 

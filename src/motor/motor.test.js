@@ -44,8 +44,8 @@ describe('gerarDiagnostico — determinismo', () => {
 
   it('o id e derivado de conta, periodo e versao do ruleset', () => {
     const diagnostico = gerarDiagnostico(historicoDaFixture(0), ruleset, contexto)
-    expect(diagnostico.id).toBe('diag:conta-casa-oliveira:2026-05-11:2026-08-30:0.3.0')
-    expect(diagnostico.periodo).toEqual({ inicio: '2026-05-11', fim: '2026-08-30' })
+    expect(diagnostico.id).toBe('diag:conta-casa-oliveira:2026-03-16:2026-08-30:0.3.0')
+    expect(diagnostico.periodo).toEqual({ inicio: '2026-03-16', fim: '2026-08-30' })
   })
 
   it('ruleset novo gera registro novo, sem reescrever o id do antigo', () => {
@@ -71,10 +71,10 @@ describe('gerarDiagnostico — Casa Oliveira', () => {
     expect(diagnostico.achados.map((achado) => achado.peso)).toEqual([90, 40])
   })
 
-  it('declara cobertura suficiente, com as 16 semanas e sem lacuna', () => {
+  it('declara cobertura suficiente, com todas as semanas fechadas e sem lacuna', () => {
     expect(diagnostico.cobertura).toEqual({
-      semanas: 16,
-      primeiroDado: '2026-05-11',
+      semanas: 24,
+      primeiroDado: '2026-03-16',
       lacunas: [],
       suficiente: true,
     })

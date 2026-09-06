@@ -67,12 +67,12 @@ describe('tenant e contas', () => {
 })
 
 describe('histórico', () => {
-  it('monta 16 semanas completas para a Casa Oliveira', () => {
+  it('monta o historico completo da Casa Oliveira', () => {
     const historico = repositorio.obterHistorico(CASA_OLIVEIRA)
 
     expect(historico.contaId).toBe(CASA_OLIVEIRA)
-    expect(historico.semanas.filter((semana) => semana.completa)).toHaveLength(16)
-    expect(historico.primeiroDado).toBe('2026-05-11')
+    expect(historico.semanas.filter((semana) => semana.completa)).toHaveLength(24)
+    expect(historico.primeiroDado).toBe('2026-03-16')
   })
 
   it('não conta a semana corrente como completa: ela está pela metade', () => {
@@ -81,7 +81,7 @@ describe('histórico', () => {
     expect(semanas[semanas.length - 1].completa).toBe(false)
   })
 
-  it('memoiza: navegar entre telas não recomputa 16 semanas de série', () => {
+  it('memoiza: navegar entre telas não recomputa a série inteira', () => {
     expect(repositorio.obterHistorico(CASA_OLIVEIRA)).toBe(repositorio.obterHistorico(CASA_OLIVEIRA))
   })
 

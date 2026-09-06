@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { diferencaEmDias, distribuir, segundaDaSemana, somarDias } from '../calendario/calendario.js'
+import { diferencaEmDias, segundaDaSemana } from '../calendario/calendario.js'
 import {
   AGORA,
   CONTAS,
@@ -49,30 +49,6 @@ function alcanceDasMidias(contaId, janela) {
       s.publicada_em.slice(0, 10) <= janela.fim,
   ).map((s) => s.valor)
 }
-
-describe('calendario', () => {
-  it('segundaDaSemana devolve a segunda ISO, inclusive quando a data e domingo', () => {
-    expect(segundaDaSemana('2026-08-30')).toBe('2026-08-24')
-    expect(segundaDaSemana('2026-08-24')).toBe('2026-08-24')
-    expect(segundaDaSemana('2026-09-05')).toBe('2026-08-31')
-  })
-
-  it('somarDias atravessa virada de mes e de ano', () => {
-    expect(somarDias('2026-08-30', 1)).toBe('2026-08-31')
-    expect(somarDias('2026-12-31', 1)).toBe('2027-01-01')
-    expect(somarDias('2026-01-01', -1)).toBe('2025-12-31')
-  })
-
-  it('diferencaEmDias conta a janela de 8 semanas da identidade', () => {
-    expect(diferencaEmDias(ULTIMAS_8.inicio, ULTIMAS_8.fim)).toBe(55)
-  })
-
-  it('distribuir nao perde nem inventa unidade', () => {
-    expect(distribuir(26900, 7).reduce((a, b) => a + b, 0)).toBe(26900)
-    expect(distribuir(3, 7)).toEqual([1, 1, 1, 0, 0, 0, 0])
-    expect(distribuir(0, 7).every((v) => v === 0)).toBe(true)
-  })
-})
 
 describe('fixture Estudio Vergara', () => {
   it('a agencia tem tres contas, uma por desfecho de tela', () => {

@@ -1,0 +1,120 @@
+/* Linha do tempo do diagnóstico. Uma lista, não uma tabela: cada entrada é uma
+   frase com contexto, e frase em célula de tabela vira coluna espremida. */
+
+.tela-historico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+  padding: var(--e-8) var(--e-6) var(--e-12);
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+}
+
+.tela-historico__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.tela-historico__explicacao {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  line-height: var(--altura-corpo);
+}
+
+.tela-historico__voltar {
+  align-self: flex-start;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tela-historico__voltar:hover {
+  color: var(--cor-tinta);
+}
+
+.historico__lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.historico__linha {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: var(--e-6);
+  padding: var(--e-5) 0;
+  border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+.historico__linha:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* O diagnóstico em vigor ganha a barra de acento — é o mesmo que está na tela
+   da conta, e a linha do tempo precisa dizer qual é ele sem obrigar a conferir
+   data com data. */
+.historico__linha[data-atual='sim'] {
+  margin-left: calc(-1 * var(--e-4));
+  padding-left: calc(var(--e-4) - var(--borda-acento));
+  border-left: var(--borda-acento) solid var(--cor-acento);
+}
+
+.historico__data {
+  color: var(--cor-tinta);
+  font-size: var(--texto-apoio);
+}
+
+.historico__marca-atual {
+  margin-top: var(--e-1);
+  color: var(--cor-acento);
+  font-size: var(--texto-micro);
+}
+
+.historico__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+}
+
+.historico__cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+.historico__rotulo {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+}
+
+.historico__frase {
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  line-height: var(--altura-densa);
+  letter-spacing: var(--tracking-veredito);
+  max-width: 52ch;
+}
+
+.historico__rodape {
+  display: flex;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-micro);
+}
+
+.historico__ruleset {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .historico__linha {
+    grid-template-columns: 1fr;
+    gap: var(--e-2);
+  }
+}

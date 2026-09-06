@@ -33,7 +33,7 @@ describe('montarHistorico — recorte por conta', () => {
   })
 
   it('primeiroDado e a menor data com snapshot', () => {
-    expect(casaOliveira.primeiroDado).toBe('2026-05-11')
+    expect(casaOliveira.primeiroDado).toBe('2026-03-16')
     expect(studioNove.primeiroDado).toBe('2026-08-17')
   })
 
@@ -53,8 +53,8 @@ describe('montarHistorico — recorte por conta', () => {
 describe('montarHistorico — semanas', () => {
   it('agrupa por semana ISO, de segunda a domingo', () => {
     const primeira = casaOliveira.semanas[0]
-    expect(primeira.inicio).toBe('2026-05-11')
-    expect(primeira.fim).toBe('2026-05-17')
+    expect(primeira.inicio).toBe('2026-03-16')
+    expect(primeira.fim).toBe('2026-03-22')
     expect(new Date(`${primeira.inicio}T00:00:00Z`).getUTCDay()).toBe(1)
   })
 
@@ -63,7 +63,7 @@ describe('montarHistorico — semanas', () => {
     expect(corrente.inicio).toBe('2026-08-31')
     expect(corrente.diasComColeta).toBe(6)
     expect(corrente.completa).toBe(false)
-    expect(casaOliveira.semanas.filter((semana) => semana.completa).length).toBe(16)
+    expect(casaOliveira.semanas.filter((semana) => semana.completa).length).toBe(24)
   })
 
   it('agrega metrica de fluxo por soma e metrica de estoque pelo ultimo saldo', () => {
@@ -91,10 +91,13 @@ describe('montarHistorico — semanas', () => {
   })
 
   it('as 8 semanas anteriores da Casa Oliveira somam 41.200 e as 8 recentes 26.900', () => {
+    // Contadas do fim para tras: o historico tem passado alem da janela que a
+    // identidade trava, e sao as DUAS ULTIMAS janelas de oito que o diagnostico
+    // compara. Fatiar do inicio amarraria o teste ao tamanho da fixture.
     const completas = casaOliveira.semanas.filter((semana) => semana.completa)
     const somar = (janelas) => janelas.reduce((total, j) => total + j.valores.alcance, 0)
-    expect(somar(completas.slice(0, 8))).toBe(41200)
-    expect(somar(completas.slice(8))).toBe(26900)
+    expect(somar(completas.slice(-8))).toBe(26900)
+    expect(somar(completas.slice(-16, -8))).toBe(41200)
   })
 })
 
@@ -153,6 +156,6 @@ describe('montarHistorico — recursos e corte', () => {
     })
     const ultima = ateJulho.semanas[ateJulho.semanas.length - 1]
     expect(ultima.inicio).toBe('2026-06-29')
-    expect(ateJulho.semanas.filter((s) => s.completa).length).toBe(8)
+    expect(ateJulho.semanas.filter((s) => s.completa).length).toBe(16)
   })
 })

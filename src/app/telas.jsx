@@ -11,11 +11,12 @@
 import { Navigate, useParams } from 'react-router-dom'
 
 import { Estado } from '../components/shared/index.js'
-import { ROTAS, rotaDaConta } from '../constants/rotas.js'
+import { rotaDaConta } from '../constants/rotas.js'
 import { useTenant } from '../context/TenantContexto.jsx'
 import { Entrar } from '../features/autenticacao/index.js'
 import { Conectar, RetornoDaConexao } from '../features/conexao/index.js'
 import { Diagnostico } from '../features/diagnostico/index.js'
+import { Historico } from '../features/historico/index.js'
 import { Relatorio } from '../features/relatorio/index.js'
 
 /**
@@ -51,6 +52,16 @@ function RelatorioDaRota() {
  *
  * @returns {JSX.Element}
  */
+/**
+ * O historico de diagnosticos da conta que esta na URL.
+ *
+ * @returns {JSX.Element}
+ */
+function HistoricoDaRota() {
+  const { contaId } = useParams()
+  return <Historico contaId={contaId} />
+}
+
 function ContasDaRota() {
   const { contaSelecionada, carregando } = useTenant()
   if (carregando) return <Estado tipo="carregando" titulo="Buscando suas contas conectadas" />
@@ -59,34 +70,11 @@ function ContasDaRota() {
 }
 
 /**
- * Rota que existe no contrato e ainda não tem tela construída.
+ * Qual feature responde por cada rota do contrato (contratos.md, secao 6).
+ * `telas.test.jsx` cobra que nenhuma entrada aqui fique vazia.
  *
- * Enquanto a feature não chega, a rota diz isso em voz alta. Tela em branco
- * seria a lacuna silenciosa que o produto proíbe — e some do radar de quem
- * for ligar a feature depois.
- *
- * @param {string} rota caminho da rota, como está em `ROTAS`
- * @returns {JSX.Element}
+ * @type {import('./rotas.jsx').Telas}
  */
-function telaAusente(rota) {
-  return (
-    <Estado
-      tipo="erro"
-      titulo="Esta tela ainda não foi construída"
-      descricao={`A rota ${rota} está no contrato, mas nenhuma feature foi ligada a ela ainda.`}
-    />
-  )
-}
-
-/**
- * Rotas do contrato que ainda nao tem tela. Lista explicita para o teste de
- * composicao saber o que cobrar — e para a divida ficar visivel, nao implicita.
- *
- * @type {string[]}
- */
-export const ROTAS_SEM_TELA = ['historico']
-
-/** @type {import('./rotas.jsx').Telas} */
 export const TELAS = {
   entrada: <Entrar />,
   conexao: <Conectar />,
@@ -94,7 +82,7 @@ export const TELAS = {
   contas: <ContasDaRota />,
   diagnostico: <DiagnosticoDaRota />,
   relatorio: <RelatorioDaRota />,
-  historico: telaAusente(ROTAS.historico),
+  historico: <HistoricoDaRota />,
 }
 
 export default TELAS

@@ -21,6 +21,7 @@ import {
   SNAPSHOTS_MIDIA,
   TENANT,
 } from '../../fixtures/estudioVergara.js'
+import { somarDias } from '../../calendario/calendario.js'
 import { montarHistorico } from '../../motor/historico.js'
 import { gerarDiagnostico } from '../../motor/motor.js'
 import * as moduloDeRegras from '../../rules/index.js'
@@ -151,4 +152,55 @@ export function obterDiagnostico(contaId) {
   const diagnostico = gerarDiagnostico(historico, RULESET, { agora: AGORA })
   diagnosticosPorConta.set(contaId, diagnostico)
   return diagnostico
+}
+
+/**
+ * Quantos diagnosticos anteriores a demonstracao mostra, e de quanto em quanto
+ * tempo. Quatro semanas e o passo do teste que o proprio produto recomenda.
+ */
+const DIAGNOSTICOS_ANTERIORES = 3
+const SEMANAS_ENTRE_DIAGNOSTICOS = 4
+
+/**
+ * A serie de diagnosticos da conta, do mais recente para o mais antigo.
+ *
+ * Os anteriores nao sao inventados nem copiados: cada um e o motor rodando
+ * sobre o historico **truncado naquela data**, exatamente o que a coleta teria
+ * produzido se o cliente tivesse aberto a tela naquele dia. E por isso que esta
+ * lista prova, em vez de so afirmar, a regra do ADR-005 de que um diagnostico
+ * antigo carrega a versao de ruleset com que nasceu e nunca e reescrito.
+ *
+ * Na Casa Oliveira ela conta a historia inteira: os diagnosticos antigos nao
+ * acusam nada, e a cadencia so vira causa nomeada depois que o volume cai.
+ *
+ * @param {string} contaId
+ * @param {{ limite?: number }} [opcoes]
+ * @returns {object[]} `Diagnostico[]` de contratos.md, mais recente primeiro
+ */
+export function listarDiagnosticos(contaId, { limite = 12 } = {}) {
+  const conta = obterConta(contaId)
+  if (!conta) return []
+
+  const atual = obterDiagnostico(contaId)
+  if (!atual) return []
+
+  const serie = [atual]
+  for (let volta = 1; volta <= DIAGNOSTICOS_ANTERIORES; volta += 1) {
+    const corte = somarDias(AGORA.slice(0, 10), -volta * SEMANAS_ENTRE_DIAGNOSTICOS * 7)
+    // Antes da conexao nao havia o que diagnosticar, e inventar um registro ali
+    // seria a fixture mentindo sobre quando o cliente comecou a ser atendido.
+    if (corte <= conta.conectada_em.slice(0, 10)) break
+
+    const historico = montarHistorico({
+      conta,
+      snapshotsConta: SNAPSHOTS_CONTA,
+      snapshotsMidia: SNAPSHOTS_MIDIA,
+      eventosDeColeta: EVENTOS,
+      ate: corte,
+    })
+    const anterior = gerarDiagnostico(historico, RULESET, { agora: `${corte}T04:20:00.000Z` })
+    if (anterior) serie.push(anterior)
+  }
+
+  return serie.slice(0, limite)
 }
