@@ -40,7 +40,7 @@ describe('SemContaConectada', () => {
     expect(titulos).toEqual([
       'Você autoriza o acesso',
       'Guardamos o histórico desde hoje',
-      'O primeiro diagnóstico sai em 24 horas',
+      'A primeira leitura sai em 24 horas',
     ])
   })
 

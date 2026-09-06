@@ -48,10 +48,16 @@ export const PASSOS_ATE_O_DIAGNOSTICO = [
       'seu e exportável.',
   },
   {
-    titulo: 'O primeiro diagnóstico sai em 24 horas',
+    // A identidade escreve "O primeiro diagnóstico sai em 24 horas" aqui, com a
+    // descrição falando em semanas. Os dois juntos se contradizem dentro do
+    // mesmo passo, e a contradição só aparece lendo em voz alta. O que é
+    // verdade: em 24 horas a tela existe e diz o que já sabe — que ainda não
+    // sabe. Nomear a causa leva as semanas que o ruleset exige.
+    titulo: 'A primeira leitura sai em 24 horas',
     descricao:
-      `Precisamos de ${SEMANAS_PARA_DIAGNOSTICO} semanas de publicação para nomear uma ` +
-      'causa com segurança. Com menos que isso, dizemos que ainda não sabemos.',
+      'Ela vai dizer que ainda não sabe, e isso é a resposta certa no primeiro dia. ' +
+      `Nomear uma causa com segurança leva ${SEMANAS_PARA_DIAGNOSTICO} semanas de ` +
+      'publicação; antes disso, qualquer veredito seria chute.',
   },
 ]
 
