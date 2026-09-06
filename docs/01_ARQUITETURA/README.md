@@ -1,40 +1,19 @@
-# 01 — ARQUITETURA · Kora Insights
+# 01 — Arquitetura
 
-> Visão técnica da plataforma: stack, componentes, infra e decisões de design.
+> Índice. O conteúdo está nos dois arquivos abaixo.
+> Última revisão: 2026-09-06.
 
-## O que vive aqui
+| Arquivo | O que responde |
+|---|---|
+| `overview.md` | Stack, fronteiras, o caminho do dado ponta a ponta, ambientes |
+| `contratos.md` | O que atravessa fronteira de módulo: envelope, dicionário de métricas, formato do achado, assinaturas da camada de serviços, kit visual, rotas e banco |
 
-- **Tech stack**: linguagens, frameworks, banco de dados, hosting
-- **Diagramas arquiteturais**: componentes, fluxo de dados, deployments
-- **Infraestrutura**: ambientes (dev/staging/prod), CI/CD, monitoramento
-- **Padrões técnicos**: convenções de código, estrutura de pastas, integração
-- **Performance & escalabilidade**: bottlenecks conhecidos, roadmap de otimização
-- **Decisões arquiteturais grandes**: por quê React + Vite + Supabase (Auth, RLS, Edge Functions) + Vercel, por quê não alternativa X
+`contratos.md` é o documento que **muda junto com o código**: quem alterar uma
+assinatura que atravessa camada atualiza os dois no mesmo commit.
 
-## O que NÃO vive aqui
+## Fora daqui
 
-- Decisões formalizadas → `08_DECISOES/` (ADRs)
-- Código em si → `src/`, `lib/` etc.
-- Regras de negócio → `03_REGRAS_DE_NEGOCIO/`
-- Componentes UI → `06_COMPONENTES/`
-
-## Arquivos sugeridos
-
-- `overview.md` — 1 página: stack, deployment, arquitetura em alto nível
-- `tech-stack.md` — justificativa de cada tecnologia principal
-- `infra.md` — ambientes, CI/CD, logging, monitoring
-- `diagramas/` — C4, ER, fluxos de dados (Mermaid/Excalidraw)
-- `padroes.md` — convenções, estrutura de pastas, naming
-
-## Como preencher
-
-1. **Comece por `overview.md`**: uma figura vale 1000 palavras (diagrama C4 Nível 1)
-2. **Tech stack**: lista + uma linha de "por quê" para cada escolha principal
-3. **Mantenha sincronizado**: quando refatorar arquitetura, update aqui + crie ADR em `08_DECISOES/`
-4. **Diagramas**: prefira Mermaid (versionável) a Figma (muda a cada semana)
-
-## Ligações
-
-- `08_DECISOES/` — ADRs que justificam escolhas maiores (ex: "Por que Supabase?")
-- `memory/tech-choices.md` — restrições técnicas do projeto
-- `04_MODELAGEM/` — schema de dados que você vai descrever em diagrama ER
+- Decisão formalizada e o porquê dela → `../08_DECISOES/` (ADRs)
+- Regra de negócio → `../03_REGRAS_DE_NEGOCIO/`
+- Schema e RLS em detalhe → `../04_MODELAGEM/`
+- Cor, tipografia e contraste → `../02_DESIGN_SYSTEM/`
