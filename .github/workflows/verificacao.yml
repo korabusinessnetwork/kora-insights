@@ -10,9 +10,12 @@
 
 name: Verificação
 
+# Push so na main, PR em qualquer branch. Disparar nos dois para a mesma branch
+# rodaria a suite duas vezes por commit — e a primeira versao deste arquivo fazia
+# exatamente isso, gastando o dobro de minuto para produzir o mesmo resultado.
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
 
 # Push novo na mesma branch cancela a execucao anterior: ninguem precisa do
