@@ -80,11 +80,18 @@
       atualizacao. Falha de `gerar-diagnostico` so vai para o log de proposito —
       marca-la como evento de coleta pintaria lacuna que nao existe — e o preco
       era o cliente ler veredito velho como se fosse de hoje
-- [ ] **Monitoramento proprio da coleta e do motor.** O aviso na tela cobre o
-      cliente, nao nos: ele chega por ele, e dois dias depois. Falta saber, do
-      nosso lado, que a rotina parou. Alternativa gratuita provavel: uma consulta
-      de saude no proprio Postgres, lida por quem opera — alerta por servico pago
-      fica adiado por padrao (`memory/restrictions.md`)
+- [x] **Painel de saude da operacao.** `public.saude_das_contas` responde numa
+      consulta so: dias desde a ultima coleta OK, o motivo da ultima falha, dias
+      sem diagnostico e o prazo do token. Ela nao julga — devolve contagem, e o
+      que olhar esta em `supabase/README.md`, porque repetir os limiares em SQL
+      criaria uma segunda verdade. Inalcancavel pelo cliente por duas travas
+      (`security_invoker` e GRANT revogado), cobradas para TODA view do
+      repositorio em `politicas.test.js` e provadas no banco em `20-isolamento`
+- [ ] **Falta o alerta: alguem precisa olhar.** A consulta existe e ninguem e
+      avisado. Notificacao por servico externo e decisao de custo e fica adiada
+      por padrao (`memory/restrictions.md`). Saida gratuita a avaliar: job de
+      `pg_cron` que grava um resumo diario numa tabela, ou e-mail pelo proprio
+      Supabase quando houver plano definido
 
 ### Motor de regras
 - [x] Estrutura do ruleset versionado (ADR-005)

@@ -4,8 +4,8 @@
 ./scripts/testar-isolamento.sh
 ```
 
-Um comando, um PostgreSQL efêmero, duas suítes: **isolamento entre tenants** e
-**cofre do token**.
+Um comando, um PostgreSQL efêmero, três suítes: **isolamento entre tenants**,
+**cofre do token** e **painel de saúde**.
 
 ## Isolamento entre tenants
 
@@ -24,6 +24,7 @@ sem custo.
 | `10-semear.sql` | Estúdio Vergara e Agência Rival, com a **mesma métrica no mesmo dia** e valores diferentes |
 | `20-isolamento.sql` | As asserções de isolamento |
 | `30-cofre.sql` | As asserções do cofre do token |
+| `40-saude.sql` | As asserções do painel de saúde da operação |
 
 O dado das duas agências colide de propósito. Vazamento de multi-tenant não
 aparece como erro na tela: aparece como um número maior do que deveria, e passa
@@ -67,6 +68,23 @@ nenhuma das três, enquanto `service_role` executa as três.
 membro de qualquer tenant pediria o token de qualquer conta pelo PostgREST, e a
 RLS não teria como impedir — a função roda como dono.
 
+## Painel de saúde
+
+`public.saude_das_contas` responde "a coleta parou?" numa consulta só, e uma view
+que devolve número errado ali é pior que view nenhuma: ela diz que está tudo bem
+e o operador para de olhar.
+
+O que o teste cobra não é só a aritmética — é a **escolha do evento**. "Última
+coleta OK" e "último evento de coleta" parecem a mesma coluna e são o oposto uma
+da outra: uma conta que falha todo dia tem evento de hoje e está parada há
+semanas. O cenário monta exatamente essa conta e exige `5`, não `0`. Cobre também
+conta que nunca coletou devolvendo **nulo, nunca zero** (zero diria "coletou
+hoje", e a conta recém-conectada quebrada passaria por saudável), e que uma linha
+não herda o estado da vizinha — o erro clássico de `join` mal escrito.
+
+O acesso à view é cobrado em `20-isolamento.sql`, junto das outras travas: o
+cliente é recusado, o `service_role` não.
+
 ## Ele sabe falhar
 
 Verificado nos dois sentidos: com a política de `snapshots_conta` sabotada para
@@ -86,7 +104,16 @@ reprova com
 FALHOU: renovar devolve a MESMA referencia
 ```
 
-e sai com código 3. Um teste que não sabe falhar não é teste.
+e sai com código 3.
+
+E o do painel: com a view sabotada para olhar o último evento em vez da última
+coleta OK — o bug que ela existe para não ter —, reprova com
+
+```
+FALHOU: conta parada ha 5 dias aparece com 5, e nao com 0 — esperado 5, obtido 0
+```
+
+Um teste que não sabe falhar não é teste.
 
 ## Duas dependências que ele expôs
 

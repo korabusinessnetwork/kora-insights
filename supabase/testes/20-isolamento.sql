@@ -112,6 +112,29 @@ exception
     raise notice 'ok: o cofre e inalcancavel pelo cliente';
 end
 $$;
+
+-- `saude_das_contas` cruza contas de TODOS os tenants — e para isso que ela
+-- serve de painel, e por isso ela nao pode chegar ao navegador. View comum roda
+-- com os privilegios do dono e passaria por cima da RLS; esta declara
+-- `security_invoker`, e o GRANT revogado e a trava que nao depende de eu ter
+-- acertado a primeira.
+do $$
+begin
+  perform 1 from public.saude_das_contas limit 1;
+  raise exception 'FALHOU: authenticated alcancou saude_das_contas';
+exception
+  when insufficient_privilege then
+    raise notice 'ok: o painel de saude e inalcancavel pelo cliente';
+end
+$$;
+commit;
+
+-- E o service_role alcanca, senao a trava acima passaria de graca num banco em
+-- que a view nao existe para ninguem.
+begin;
+set local role service_role;
+select pg_temp.conferir('service_role enxerga as duas contas no painel de saude',
+  (select count(*) from public.saude_das_contas), 2);
 commit;
 
 -- ── Cliente nao escreve linha de coleta ─────────────────────────────────────

@@ -66,3 +66,6 @@ psql -v ON_ERROR_STOP=1 -q -f "$RAIZ/supabase/testes/20-isolamento.sql"
 
 echo "→ asserções do cofre do token"
 psql -v ON_ERROR_STOP=1 -q -f "$RAIZ/supabase/testes/30-cofre.sql"
+
+echo "→ asserções do painel de saúde"
+psql -v ON_ERROR_STOP=1 -q -f "$RAIZ/supabase/testes/40-saude.sql"

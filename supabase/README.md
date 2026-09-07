@@ -208,5 +208,54 @@ pacote pelo npm, e as funções não passam pelo bundler do Vite.
   excluir: apaga o token e para a coleta, mas **preserva o histórico já
   coletado** — e é essa diferença que dá ao cliente uma saída que não custa
   meses de dado.
-- **Teste de isolamento entre tenants com banco real** continua no backlog, como
-  descrito acima.
+- **Teste de isolamento entre tenants com banco real** existe e roda no CI:
+  `./scripts/testar-isolamento.sh` sobe um PostgreSQL efêmero, aplica as
+  migrations reais e faz as asserções descritas em `supabase/testes/README.md`.
+  Junto dele vão as do cofre do token e as do painel de saúde.
+
+---
+
+## Como saber se a coleta parou
+
+Falha de coleta vira linha em `coleta_eventos`; falha do motor vira log. Nenhum
+dos dois avisa ninguém. A tela cobre o **cliente** — declara a idade do
+diagnóstico e pede reconexão quando o token está vencendo —, mas isso chega por
+ele, e dias depois. Num produto em que dia sem coleta não volta, essa é a
+diferença entre perder um dia e perder um mês.
+
+A view `public.saude_das_contas` responde numa consulta só. No SQL editor do
+Supabase (que roda como `service_role`):
+
+```sql
+select username, status, dias_sem_coleta, motivo_da_ultima_falha,
+       dias_sem_diagnostico, dias_ate_o_token_vencer
+  from public.saude_das_contas
+ order by dias_sem_coleta desc nulls first;
+```
+
+O que procurar, e por quê:
+
+| Coluna | Sinal de alarme | Por quê |
+|---|---|---|
+| `dias_sem_coleta` | `null` numa conta `ativa` conectada há mais de um dia | nunca coletou: a conexão nasceu quebrada |
+| `dias_sem_coleta` | maior que 1 | o cron não rodou, ou esta conta falha há dias |
+| `motivo_da_ultima_falha` | `token_expirado` | a renovação automática não deu conta (ADR-009) |
+| `dias_sem_diagnostico` | maior que `dias_sem_coleta` | a coleta anda e o motor não — falha só no log |
+| `dias_ate_o_token_vencer` | menor que 15 numa conta `ativa` | deveria ter renovado sozinho; ver `src/token/validade.js` |
+
+**A view não julga de propósito.** Ela devolve contagem de dias e nada mais: os
+prazos do produto vivem em `src/token/validade.js` e `src/motor/frescor.js`, e
+repeti-los em SQL criaria uma segunda verdade que envelheceria sozinha no
+primeiro ajuste. Os números da tabela acima são leitura de quem opera, não
+constante de código.
+
+**Ela não é alcançável pelo cliente**, e isso é cobrado duas vezes: view comum
+roda com os privilégios do dono e atravessaria a RLS, então esta declara
+`security_invoker` **e** revoga o `GRANT` de `anon` e `authenticated`.
+`supabase/politicas.test.js` cobra as duas travas de **toda** view do
+repositório, não só desta; `20-isolamento.sql` prova no banco que o cliente é
+recusado e o `service_role` não.
+
+O que ainda falta é o alerta: alguém precisa **olhar**. Notificação por serviço
+externo é decisão de custo, e está adiada por padrão (`memory/restrictions.md`).
+A pendência está em `docs/09_BACKLOG`.

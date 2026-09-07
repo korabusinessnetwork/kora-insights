@@ -63,6 +63,20 @@ function semComentarios(codigo) {
   return codigo.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|\s)\/\/[^\n]*/g, '$1')
 }
 
+/**
+ * Todas as migrations, em ordem. Lidas juntas de proposito: a regra vale para
+ * qualquer view do repositorio, e nao para a lista que eu lembrei de escrever.
+ *
+ * @returns {string[]} caminhos absolutos
+ */
+function arquivosDeMigration() {
+  const pasta = join(PASTA, 'migrations')
+  return readdirSync(pasta)
+    .filter((nome) => nome.endsWith('.sql'))
+    .sort()
+    .map((nome) => join(pasta, nome))
+}
+
 const schema = ler('schema.sql')
 const migrationDoEsquema = ler('migrations/20260905120000_esquema_inicial.sql')
 const migrationDasPoliticas = ler('migrations/20260905120100_politicas_rls.sql')
@@ -75,6 +89,23 @@ const migrationDasPoliticas = ler('migrations/20260905120100_politicas_rls.sql')
  */
 function tabelasCriadas(sql) {
   const encontradas = [...sql.matchAll(/create table (?:if not exists )?public\.([a-z0-9_]+)/gi)]
+  return encontradas.map((achado) => achado[1])
+}
+
+/**
+ * Nomes de view criadas em `public` no SQL.
+ *
+ * View e o buraco que a RLS nao tapa sozinha: por padrao ela roda com os
+ * privilegios de quem a criou, entao uma view sobre tabela protegida devolve
+ * linha de todos os tenants para quem puder consulta-la.
+ *
+ * @param {string} sql
+ * @returns {string[]}
+ */
+function viewsCriadas(sql) {
+  const encontradas = [
+    ...sql.matchAll(/create (?:or replace )?view public\.([a-z0-9_]+)/gi),
+  ]
   return encontradas.map((achado) => achado[1])
 }
 
@@ -207,6 +238,43 @@ describe('schema: token_ref nao sai do banco', () => {
       )
       expect(schema).toMatch(revoke)
     }
+  })
+})
+
+describe('view nao vira porta dos fundos', () => {
+  // View comum roda com os privilegios do DONO, entao ela atravessa a RLS das
+  // tabelas de baixo. Uma view sobre `ig_contas` exposta a `authenticated`
+  // devolveria conta de todos os tenants, e nenhuma politica impediria — o
+  // filtro por linha nem chega a ser consultado.
+  //
+  // Sao duas travas, e o teste cobra as duas: `security_invoker` faz a RLS
+  // valer para quem consulta, e o `revoke` tira a view do alcance do cliente.
+  // A regra vale para toda view nova, e nao so para a que existe hoje.
+  const sqlDeTodasAsMigrations = arquivosDeMigration()
+    .map((caminho) => readFileSync(caminho, 'utf8'))
+    .join('\n')
+
+  const views = [...new Set(viewsCriadas(sqlDeTodasAsMigrations))]
+
+  it('ha pelo menos uma view para conferir', () => {
+    // Sem isto, apagar a view faria as asserções abaixo passarem de graca.
+    expect(views.length).toBeGreaterThan(0)
+  })
+
+  it.each(views)('%s declara security_invoker', (view) => {
+    const criacao = new RegExp(
+      `create (?:or replace )?view public\\.${view}\\s+with \\([^)]*security_invoker\\s*=\\s*true`,
+      'i',
+    )
+    expect(sqlDeTodasAsMigrations).toMatch(criacao)
+  })
+
+  it.each(views)('%s e revogada de anon e authenticated', (view) => {
+    const revogacao = new RegExp(
+      `revoke all on public\\.${view} from [^;]*anon[^;]*authenticated`,
+      'i',
+    )
+    expect(sqlDeTodasAsMigrations).toMatch(revogacao)
   })
 })
 
