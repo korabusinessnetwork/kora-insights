@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Aviso, Botao, Estado, Marca } from '../../components/shared/index.js'
-import { solicitarExclusaoDeDados } from '../../lib/index.js'
+import { desconectarConta, solicitarExclusaoDeDados } from '../../lib/index.js'
 import { formatarDataCurta } from '../../metricas/index.js'
 import { ROTAS } from '../../constants/rotas.js'
 import { useSessao } from '../../context/SessaoContexto.jsx'
@@ -14,9 +14,14 @@ import './paginas.css'
  *
  * O App Review exige um caminho público e visível para pedir exclusão de dados,
  * e a LGPD exige o mesmo (docs/11_SEGURANCA/app-review.md, seção 5). As
- * instruções são públicas; o botão que dispara a exclusão só aparece para quem
- * está autenticado, porque apagar o histórico de uma conta é irreversível e não
- * pode depender de alguém digitar um identificador.
+ * instruções são públicas; os botões que agem só aparecem para quem está
+ * autenticado, porque apagar o histórico de uma conta é irreversível e não pode
+ * depender de alguém digitar um identificador.
+ *
+ * São **duas** saídas, e oferecer só a definitiva era um defeito de produto:
+ * quem queria apenas parar a coleta — contrato encerrado, conta em reforma —
+ * precisava apagar meses de histórico para conseguir. Desconectar solta a
+ * autorização e preserva o que já foi coletado.
  */
 
 /** Data da última revisão deste texto. */
@@ -40,12 +45,27 @@ const ITENS_APAGADOS = Object.freeze([
  */
 export default function Dados() {
   const { autenticado, carregando: carregandoSessao } = useSessao()
-  const { contas, carregando: carregandoContas, erro: erroDoTenant } = useTenant()
+  const { contas, carregando: carregandoContas, erro: erroDoTenant, recarregar } = useTenant()
 
+  // A confirmação carrega a ação junto do id: as duas saídas moram na mesma
+  // linha da lista, e um `confirmando` que só guardasse o id abriria as duas ao
+  // mesmo tempo — a pessoa clicaria em "Confirmar" sem saber qual das duas.
   const [confirmando, setConfirmando] = useState(null)
   const [enviando, setEnviando] = useState(null)
   const [comprovante, setComprovante] = useState(null)
+  const [desconectada, setDesconectada] = useState(null)
   const [erro, setErro] = useState(null)
+
+  /**
+   * Confirmação aberta para esta conta e esta ação?
+   *
+   * @param {string} contaId
+   * @param {'excluir'|'desconectar'} acao
+   * @returns {boolean}
+   */
+  function confirmandoAgora(contaId, acao) {
+    return confirmando?.contaId === contaId && confirmando?.acao === acao
+  }
 
   /**
    * Dispara a exclusão de uma conta e guarda o comprovante devolvido.
@@ -54,7 +74,7 @@ export default function Dados() {
    * @returns {Promise<void>}
    */
   async function pedirExclusao(conta) {
-    setEnviando(conta.id)
+    setEnviando({ contaId: conta.id, acao: 'excluir' })
     setErro(null)
     const envelope = await solicitarExclusaoDeDados(conta.id)
     setEnviando(null)
@@ -64,6 +84,31 @@ export default function Dados() {
       return
     }
     setComprovante({ conta, ...envelope.data })
+    // A lista vem do contexto e acabou de ficar velha: sem recarregar, a conta
+    // apagada continua na tela oferecendo ser apagada de novo.
+    recarregar()
+  }
+
+  /**
+   * Desconecta a conta: para a coleta e solta o token, sem apagar histórico.
+   *
+   * @param {import('../../lib/contas.js').Conta} conta
+   * @returns {Promise<void>}
+   */
+  async function pedirDesconexao(conta) {
+    setEnviando({ contaId: conta.id, acao: 'desconectar' })
+    setErro(null)
+    const envelope = await desconectarConta(conta.id)
+    setEnviando(null)
+    setConfirmando(null)
+    if (envelope.error) {
+      setErro(envelope.error)
+      return
+    }
+    setDesconectada(conta)
+    // Mesmo motivo: sem isto, o botao "Desconectar" continua oferecido para uma
+    // conta que acabou de ser desconectada.
+    recarregar()
   }
 
   return (
@@ -121,6 +166,21 @@ export default function Dados() {
         </section>
 
         <section className="ka-pagina__secao">
+          <h2>Parar a coleta sem apagar nada</h2>
+          <p>
+            Desconectar e excluir não são a mesma coisa, e a diferença importa quando a decisão
+            é tomada com pressa. <strong>Desconectar</strong> devolve a autorização à Meta e para
+            a coleta no mesmo instante; o histórico já coletado continua aqui, e reconectar mais
+            tarde recomeça de onde parou. <strong>Excluir</strong> faz tudo isso e apaga o
+            histórico junto, sem volta.
+          </p>
+          <p>
+            Nos dois casos o token sai do nosso cofre. O que muda é o que sobra: com a
+            desconexão, os meses já coletados; com a exclusão, só o protocolo.
+          </p>
+        </section>
+
+        <section className="ka-pagina__secao">
           <h2>Como pedir exclusão</h2>
           <p>A exclusão de uma conta apaga, de uma vez:</p>
           <ul className="ka-pagina__itens">
@@ -135,8 +195,8 @@ export default function Dados() {
           </p>
         </section>
 
-        <section className="ka-pagina__secao" aria-labelledby="pedir-exclusao">
-          <h2 id="pedir-exclusao">Pedir exclusão agora</h2>
+        <section className="ka-pagina__secao" aria-labelledby="agir-agora">
+          <h2 id="agir-agora">Desconectar ou excluir agora</h2>
 
           {carregandoSessao || (autenticado && carregandoContas) ? (
             <Estado tipo="carregando" titulo="Buscando suas contas conectadas" />
@@ -177,7 +237,26 @@ export default function Dados() {
                     <span className="ka-pagina__conta-arroba">@{conta.username}</span>
                   </div>
 
-                  {confirmando === conta.id ? (
+                  {confirmandoAgora(conta.id, 'desconectar') ? (
+                    <div className="ka-pagina__confirmacao" role="group">
+                      <p className="ka-pagina__confirmacao-texto">
+                        Parar de coletar <strong>@{conta.username}</strong>? O histórico já
+                        coletado continua aqui, e reconectar depois é possível.
+                      </p>
+                      <div className="ka-pagina__confirmacao-acoes">
+                        <Botao
+                          variante="primario"
+                          carregando={enviando?.contaId === conta.id}
+                          aoClicar={() => pedirDesconexao(conta)}
+                        >
+                          Confirmar desconexão
+                        </Botao>
+                        <Botao variante="texto" aoClicar={() => setConfirmando(null)}>
+                          Cancelar
+                        </Botao>
+                      </div>
+                    </div>
+                  ) : confirmandoAgora(conta.id, 'excluir') ? (
                     <div className="ka-pagina__confirmacao" role="group">
                       {/* Prevenção de erro vale mais que mensagem de erro
                           (CLAUDE.md): a confirmação é um passo, não um alerta
@@ -189,7 +268,7 @@ export default function Dados() {
                       <div className="ka-pagina__confirmacao-acoes">
                         <Botao
                           variante="primario"
-                          carregando={enviando === conta.id}
+                          carregando={enviando?.contaId === conta.id}
                           aoClicar={() => pedirExclusao(conta)}
                         >
                           Confirmar exclusão
@@ -200,9 +279,27 @@ export default function Dados() {
                       </div>
                     </div>
                   ) : (
-                    <Botao variante="secundario" aoClicar={() => setConfirmando(conta.id)}>
-                      Pedir exclusão dos dados
-                    </Botao>
+                    <div className="ka-pagina__conta-acoes">
+                      {/* A saída reversível vem primeiro, e de propósito: quem
+                          só quer parar a coleta não deve esbarrar antes na ação
+                          que apaga meses de histórico. */}
+                      {conta.status === 'desconectada' ? (
+                        <span className="ka-pagina__conta-status">Já desconectada</span>
+                      ) : (
+                        <Botao
+                          variante="secundario"
+                          aoClicar={() => setConfirmando({ contaId: conta.id, acao: 'desconectar' })}
+                        >
+                          Desconectar
+                        </Botao>
+                      )}
+                      <Botao
+                        variante="texto"
+                        aoClicar={() => setConfirmando({ contaId: conta.id, acao: 'excluir' })}
+                      >
+                        Pedir exclusão dos dados
+                      </Botao>
+                    </div>
                   )}
                 </li>
               ))}
@@ -212,6 +309,14 @@ export default function Dados() {
           {erro ? (
             <Aviso variante="critico" titulo="O pedido não foi concluído">
               {erro.mensagem}
+            </Aviso>
+          ) : null}
+
+          {desconectada ? (
+            <Aviso variante="informacao" titulo="Conta desconectada">
+              A coleta de <strong>@{desconectada.username}</strong> parou e a autorização foi
+              devolvida à Meta. O histórico já coletado continua aqui — para apagá-lo também, use
+              &ldquo;Pedir exclusão dos dados&rdquo;.
             </Aviso>
           ) : null}
 

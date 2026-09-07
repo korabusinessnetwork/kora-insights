@@ -58,8 +58,9 @@ stateDiagram-v2
     token_expirado --> ativa: cliente reconecta pelo mesmo fluxo de OAuth
     ativa --> pausada: SEM ESCRITOR HOJE (ver secao 6)
     pausada --> ativa: SEM ESCRITOR HOJE
-    ativa --> desconectada: desconectar-conta, funcao AINDA NAO EXISTE
+    ativa --> desconectada: desconectar-conta apaga o token e para a coleta
     token_expirado --> desconectada: idem
+    desconectada --> ativa: cliente reconecta pelo mesmo fluxo de OAuth
     ativa --> [*]: excluir-dados apaga a linha e emite protocolo
     token_expirado --> [*]: idem
     desconectada --> [*]: idem
@@ -234,14 +235,27 @@ Desconectar é **diferente** de excluir:
 | Linha em `ig_contas` | mantida, com `status = 'desconectada'` | apagada |
 | Comprovante | nenhum | protocolo em `exclusoes_de_dados` |
 
-**A função `desconectar-conta` ainda não existe.** `src/lib/conexaoMeta.js`
-invoca a pasta `desconectar-conta` em `supabase/functions/`, e a pasta não foi
-escrita por ninguém. Enquanto isso, `desconectarConta(contaId)` devolve falha em
-vez de desconectar — o botão da tela não pode ser oferecido como se funcionasse.
+A função `desconectar-conta` existe, e a tela `/dados` oferece as duas saídas
+lado a lado — a reversível primeiro. Oferecer só a exclusão era um defeito de
+produto: quem queria apenas parar a coleta precisava apagar meses de histórico
+para conseguir.
+
+**A ordem é regra:** `status = 'desconectada'` antes de `apagar_token`. A coleta
+só varre `ativa`, então o status é o que de fato para a coleta; apagar o token
+primeiro e falhar no passo seguinte deixaria a conta na fila da madrugada sem
+token, falhando com "token expirado" — e a tela pediria reconexão a quem acabou
+de pedir desconexão.
+
+`token_ref` continua apontando para o segredo apagado: a coluna é `not null`,
+conta desconectada não é varrida, e reconectar reescreve a referência. O que
+importa é o segredo ter saído do cofre.
+
+Desconectar de novo devolve sucesso com `jaEstava: true`, não erro: quem clicou
+duas vezes quer o mesmo estado final, e erro ali ensinaria o cliente a duvidar de
+uma operação que deu certo.
 
 Apagar o segredo do Vault é operação de `service_role` e não tem caminho pelo
-front: não há atalho aqui. A pendência está registrada em `supabase/README.md`,
-em `src/lib/README.md` e em `docs/09_BACKLOG`.
+front — não há atalho aqui, e é por isso que a operação é uma Edge Function.
 
 ---
 

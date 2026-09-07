@@ -14,7 +14,7 @@
 | `coleta-diaria` | pg_cron, via `disparar_funcao_agendada` | `SUPABASE_SERVICE_ROLE_KEY` | sim |
 | `gerar-diagnostico` | pg_cron, e manualmente no suporte | `SUPABASE_SERVICE_ROLE_KEY` | sim |
 | `excluir-dados` | front, via `src/lib/conexaoMeta.js` | JWT do usuário | sim |
-| `desconectar-conta` | front, via `src/lib/conexaoMeta.js` | JWT do usuário | **não** |
+| `desconectar-conta` | front, via `src/lib/conexaoMeta.js` | JWT do usuário | sim |
 
 Os nomes de pasta são resolvidos por `invoke` a partir de `FUNCOES`, em
 `src/lib/conexaoMeta.js`: **renomear pasta é mudança combinada** com aquele
@@ -204,34 +204,54 @@ apagado.
 
 ---
 
-## 7. `desconectar-conta` — prevista, inexistente
+## 7. `desconectar-conta`
 
-`src/lib/conexaoMeta.js` invoca a pasta `desconectar-conta`, que não foi escrita.
-Enquanto isso, `desconectarConta(contaId)` devolve falha em vez de desconectar, e
-**o botão não pode ser oferecido na tela como se funcionasse**.
+A saída reversível: para a coleta e devolve a autorização, **preservando o
+histórico**. Excluir apaga tudo e emite protocolo. Confundir os dois destrói dado
+que o cliente não pediu para destruir — e oferecer só a exclusão, que era o
+estado anterior, empurrava para essa confusão quem só queria parar de coletar.
 
-Contrato pretendido:
+**Autorização:** JWT do usuário. `service_role` ignora a RLS, então o
+pertencimento ao tenant é conferido na mão — sem essa checagem a função vira um
+desconectador universal de contas alheias.
+
+**Corpo**
+
+| Campo | Tipo | Obrigatório |
+|---|---|---|
+| `contaId` | uuid v4 minúsculo | sim |
+
+**Resposta `data`:** `{ id, status: 'desconectada', jaEstava }`.
+
+`jaEstava: true` quando a conta já estava desconectada. Repetir devolve **sucesso**,
+não erro: quem clicou duas vezes, ou recarregou a página, quer o mesmo estado
+final, e erro ali ensina o cliente a duvidar de uma operação que deu certo.
+
+**Falhas:** `SEM_SESSAO`, `ENTRADA_INVALIDA` (id fora do formato),
+`NAO_ENCONTRADO`, `SEM_PERMISSAO` (conta de outro tenant), `FALHA_INESPERADA`.
+
+**Efeitos, nesta ordem**
 
 ```
-POST desconectar-conta
-Autorizacao: JWT do usuario
-Corpo:       { contaId: uuid }
-Resposta:    { id, status: 'desconectada' }
-
-Efeitos:
-  1. conferir pertencimento ao tenant (service_role ignora RLS)
-  2. apagar_token(conta.token_ref)
-  3. ig_contas.status = 'desconectada'
-  4. NAO apagar snapshots, diagnosticos nem eventos
+1. conferir pertencimento ao tenant (service_role ignora RLS)
+2. ig_contas.status = 'desconectada'   -- e ISTO que para a coleta
+3. apagar_token(conta.token_ref)
+4. NAO apagar snapshots, diagnosticos nem eventos
 ```
 
-Desconectar apaga o token e para a coleta; **preserva o histórico**. Excluir
-apaga tudo e emite protocolo. Confundir os dois destrói dado que o cliente não
-pediu para destruir.
+**Status antes do cofre**, e a ordem é a regra: a coleta só varre `ativa`.
+Apagar o token primeiro e falhar no passo seguinte deixaria a conta na fila da
+madrugada seguinte sem token — ela falharia com "token expirado", e a tela
+pediria reconexão a um cliente que acabou de pedir desconexão.
 
-Apagar o segredo do Vault é operação de `service_role` e não tem caminho pelo
-front: não há atalho. Pendência registrada aqui, em `supabase/README.md`, em
-`src/lib/README.md` e em `docs/09_BACKLOG`.
+Se o token **não** sair do cofre, a resposta é falha mesmo com a coleta já
+parada: autorização viva para uma conta que o cliente pediu para soltar é
+problema de segurança, e não pode virar sucesso silencioso.
+
+`token_ref` continua apontando para o segredo apagado — a coluna é `not null`,
+conta desconectada não é varrida, e reconectar reescreve a referência.
+
+**Ambiente:** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
 
 ---
 

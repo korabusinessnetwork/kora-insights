@@ -86,11 +86,10 @@ no dia em que a Meta mudar de versão, quem troca é o ambiente, não o código.
 |---|---|
 | `concluirConexao` | `conectar-conta` |
 | `solicitarExclusaoDeDados` | `excluir-dados` |
-| `desconectarConta` | `desconectar-conta` — **ainda não existe** |
+| `desconectarConta` | `desconectar-conta` |
 
-A pasta de desconexão precisa nascer: apagar o token do Vault é operação de
-`service_role` e não tem caminho pelo front. Enquanto ela não existir,
-`desconectarConta` devolve falha em vez de desconectar.
+As três existem. Nenhuma delas tem atalho pelo front: apagar ou gravar segredo no
+Vault é operação de `service_role`, e o token nunca chega ao navegador.
 
 ## Testes
 

@@ -55,6 +55,9 @@
       (ADR-009). O aviso e o ultimo recurso: se ele aparece, a renovacao ja teve
       mais de uma semana de tentativas
 - [x] Dicionario de metricas canonicas + primeiro adaptador (ADR-003)
+- [x] Desconectar sem excluir: `desconectar-conta` escrita e as duas saidas
+      lado a lado em `/dados`. Antes, so a exclusao era oferecida — quem queria
+      parar a coleta tinha de apagar meses de historico
 - [ ] **Conta `pausada` nao renova token.** A renovacao vive dentro da coleta, e
       a coleta so varre `ativa`. Uma pausa de mais de 60 dias mata o token e a
       pausa vira desconexao de fato. Divida aberta por ADR-009; a saida provavel

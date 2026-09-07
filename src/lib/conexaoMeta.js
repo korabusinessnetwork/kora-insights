@@ -34,7 +34,8 @@ export const PERMISSOES = Object.freeze([
  * `invoke` resolve por ele, entao renomear pasta e mudanca combinada com este
  * arquivo, no mesmo commit.
  *
- * `desconectar-conta` ainda nao tem pasta — ver a nota no README desta pasta.
+ * As tres existem. Nenhuma tem atalho pelo front: gravar ou apagar segredo no
+ * Vault e operacao de `service_role`, e o token nunca chega ao navegador.
  */
 export const FUNCOES = Object.freeze({
   concluirConexao: 'conectar-conta',

@@ -203,10 +203,10 @@ pacote pelo npm, e as funções não passam pelo bundler do Vite.
   `ok | falha | token_expirado | rate_limit`, mas `montarHistorico` traduz
   `token_expirado`, `limite_de_taxa` e `falha_de_rede`. O schema adotou o
   vocabulário do motor (nome de domínio em português) e fechou com `check`.
-- **`desconectar-conta` não tem pasta.** `src/lib/conexaoMeta.js` invoca
-  `conectar-conta`, `desconectar-conta` e `excluir-dados`; as duas pontas existem
-  aqui, a do meio não foi atribuída a ninguém. Enquanto ela não existir,
-  `desconectarConta` falha na chamada. Desconectar é diferente de excluir:
-  apaga o token e para a coleta, mas **preserva o histórico já coletado**.
+- **`desconectar-conta` passou a existir.** As três pastas que
+  `src/lib/conexaoMeta.js` invoca estão escritas. Desconectar é diferente de
+  excluir: apaga o token e para a coleta, mas **preserva o histórico já
+  coletado** — e é essa diferença que dá ao cliente uma saída que não custa
+  meses de dado.
 - **Teste de isolamento entre tenants com banco real** continua no backlog, como
   descrito acima.

@@ -160,35 +160,55 @@ venda (ADR-007).
 
 ---
 
-## 7. Desconexão — o fluxo que ainda não existe
+## 7. Desconexão — parar a coleta sem apagar nada
+
+A saída reversível. Existe porque oferecer só a exclusão obrigava quem queria
+apenas parar de coletar a apagar meses de histórico para conseguir.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Tela
+    actor Cliente
+    participant Tela as /dados
     participant Servicos as src/lib/conexaoMeta
     participant Funcao as Edge desconectar-conta
+    participant PG as Postgres
 
+    Cliente->>Tela: Desconectar
+    Tela->>Cliente: confirmacao dizendo que o historico fica
+    Cliente->>Tela: Confirmar desconexao
     Tela->>Servicos: desconectarConta(contaId)
     Servicos->>Funcao: invoke('desconectar-conta')
-    Note over Funcao: A PASTA NAO EXISTE em supabase/functions/
-    Funcao-->>Servicos: falha
-    Servicos-->>Tela: envelope de erro
+    Funcao->>PG: usuario pertence ao tenant dono da conta?
+    Funcao->>PG: ig_contas.status = 'desconectada'
+    Funcao->>PG: apagar_token(conta.token_ref)
+    Funcao-->>Tela: { id, status, jaEstava }
 ```
 
-`FUNCOES.desconectarConta` aponta para a pasta `desconectar-conta`, que não foi
-escrita. Enquanto ela não existir, **o botão de desconectar não pode ser
-oferecido na tela como se funcionasse**.
-
-O que a função precisa fazer quando nascer, e que nenhum atalho pelo front
-resolve (apagar segredo do Vault é operação de `service_role`):
+A ordem dos dois últimos passos é regra, não gosto:
 
 ```
 1. conferir que o usuario pertence ao tenant dono da conta
-2. apagar_token(conta.token_ref)
-3. ig_contas.status = 'desconectada', token_ref esvaziado
+2. ig_contas.status = 'desconectada'   -- e ISTO que para a coleta
+3. apagar_token(conta.token_ref)
 4. NAO apagar snapshots, diagnosticos nem eventos
 ```
+
+**Status antes do cofre.** A coleta só varre `status = 'ativa'`, então o passo 2
+é o que de fato para a coleta. Apagar o token primeiro e falhar no passo
+seguinte deixaria a conta na fila da madrugada seguinte sem token nenhum: ela
+falharia com "token expirado", e a tela pediria **reconexão** a um cliente que
+acabou de pedir desconexão.
+
+**`token_ref` continua apontando para o segredo apagado**, e não é lixo
+esquecido: a coluna é `not null` no schema, a coleta não varre conta
+desconectada, e reconectar reescreve a referência (`conectar-conta` atualiza a
+linha existente). O que importa é o segredo ter saído do cofre — a referência
+sozinha não abre nada.
+
+**Desconectar duas vezes devolve sucesso**, não erro: quem clicou de novo, ou
+recarregou a página, quer o mesmo estado final. A resposta traz `jaEstava: true`
+para quem precisar diferenciar.
 
 ---
 
