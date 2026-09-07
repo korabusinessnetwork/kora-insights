@@ -23,6 +23,8 @@
 | 2026-09-06 | Normalizar a linha do gráfico pelo próprio mínimo e máximo transforma 4% de oscilação em escalada de altura total — o desenho contradizendo a frase logo abaixo dele | Faixa da linha ganhou amplitude mínima relativa à média da série |
 | 2026-09-06 | Tabela de contraste escrita à mão envelhece na primeira troca de paleta: a nossa afirmava 4,6:1 para um par que media 4,27:1 | `src/styles/contraste.test.js` lê a paleta do CSS e reprova a suite. Números do `TOKENS.md` saem dele |
 | 2026-09-06 | `calendario.js` — a fronteira de semana do produto inteiro — nasceu dentro de `src/fixtures/`. Motor, serviços e demonstração importavam de um diretório de dado de exemplo | Movido para `src/calendario/`, com teste próprio |
+| 2026-09-07 | As migrations dependiam, sem dizer, dos grants padrão que o Supabase dá ao `service_role`: elas só concedem para `authenticated` e revogam de `anon`. A dependência só apareceu ao rodar num Postgres puro, com "permission denied for table tenants" | Reproduzida e documentada em `supabase/testes/00-ambiente-supabase.sql`. Dependência implícita de plataforma é dívida até estar escrita |
+| 2026-09-07 | Ler o SQL como texto pega tabela sem política, mas não pega política **errada**: `using (true)` passa em qualquer verificação textual e vaza tudo | Teste de isolamento com Postgres de verdade, no CI. Verificado nos dois sentidos — sabotado, ele reprova |
 | 2026-09-06 | Máscara de segredo aplicada **depois** do `JSON.stringify` não casa: em JSON o nome do campo vem entre aspas, e o padrão esperava `token:`. `client_secret` saía inteiro no log | Máscara passou a percorrer as chaves antes de serializar |
 
 ## Produto

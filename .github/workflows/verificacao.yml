@@ -52,3 +52,17 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  isolamento:
+    name: Isolamento entre tenants
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # O runner ja traz PostgreSQL instalado. O script sobe um cluster efemero
+      # proprio em vez de usar um `services:` container: assim ele roda igual na
+      # maquina de quem desenvolve, sem Docker e sem Supabase CLI.
+      - name: Teste de vazamento entre tenants
+        run: ./scripts/testar-isolamento.sh

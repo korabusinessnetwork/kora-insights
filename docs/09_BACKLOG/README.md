@@ -37,9 +37,13 @@
 - [x] Projeto Vite + Supabase, schema inicial aplicado
 - [x] RLS em toda tabela **com politica** (o esqueleto tinha RLS ligada e zero
       politica, o que nega tudo em silencio)
-- [ ] Teste de isolamento entre tenants **com banco de verdade**. O que existe
-      hoje (`supabase/politicas.test.js`) le o SQL como texto e cobre o que da
-      para cobrir sem subir Postgres; nao substitui o teste de vazamento
+- [x] Teste de isolamento entre tenants **com banco de verdade**
+      (`./scripts/testar-isolamento.sh`, tambem no CI). Sobe um Postgres
+      efemero, aplica as migrations reais sobre um stub minimo do Supabase e
+      faz 22 asserções contando linha com o papel `authenticated` e a
+      identidade trocada pelo mesmo `request.jwt.claims` que o Supabase usa.
+      Verificado nos dois sentidos: com uma politica sabotada para
+      `using (true)`, ele reprova com "esperado 1, obtido 2"
 - [x] Auth por link magico e onboarding de tenant
 
 ### Integracao Meta
