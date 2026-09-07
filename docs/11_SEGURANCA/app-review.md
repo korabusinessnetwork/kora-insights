@@ -13,8 +13,8 @@
 | Exigência | Estado hoje | Onde resolver |
 |---|---|---|
 | **Verificação de negócio** no Meta Business Manager, com documento (CNPJ) | não iniciada | processo administrativo, fora do código |
-| **Política de privacidade publicada**, em URL pública e estável | rota `/privacidade` prevista, texto **não escrito** | `contratos.md`, seção 6 |
-| **Instruções de exclusão de dados**, em URL pública | rota `/dados` prevista, texto **não escrito** | idem |
+| **Política de privacidade publicada**, em URL pública e estável | **texto escrito** em `/privacidade`, rota pública, fora da área autenticada. Falta **publicar** (depende da hospedagem) e preencher três pendências que só o dono tem | `docs/12`, seção 2.2 |
+| **Instruções de exclusão de dados**, em URL pública | **texto escrito** em `/dados`, com as duas saídas (desconectar e excluir) e o protocolo. Falta publicar | idem |
 | **Screencast por permissão**, mostrando cada uma sendo usada em tela | não gravado | seção 3 |
 | **Descrição do caso de uso** de cada permissão | esboçada em `docs/07_APIS/graph-api.md`, seção 1 | idem |
 | **App funcional** para o revisor testar | depende das telas do produto | `docs/09_BACKLOG` |
@@ -104,10 +104,35 @@ ADR-005 — decisão não se apaga, se emenda.
 
 ---
 
-## 4. Política de privacidade — o que precisa estar escrito
+## 4. Política de privacidade — escrita, não publicada
 
-Nada disso existe ainda. O conteúdo mínimo, derivado de
-`docs/03_REGRAS_DE_NEGOCIO/conformidade.md`:
+**Atualizado em 2026-09-07.** Esta seção dizia "nada disso existe ainda". Existe:
+`/privacidade` está escrita e é rota pública. O que segue é a lista mínima com o
+estado real de cada item, e o que ainda falta.
+
+| Item | Estado |
+|---|---|
+| Quem trata os dados | escrito, **pendente**: razão social, CNPJ, endereço e e-mail do encarregado |
+| Que dados coletamos | escrito, com a lista real — identificadores da conta profissional e métricas agregadas |
+| O que **não** coletamos | escrito: nenhum dado demográfico, nenhum identificador de seguidor |
+| Para que usamos | escrito |
+| Base legal | escrito, **pendente**: confirmação com assessoria jurídica |
+| Como o token é guardado | escrito |
+| Com quem compartilhamos | escrito: ninguém |
+| Por quanto tempo | escrito, **pendente**: prazo de retenção |
+| Seus direitos e como pedir exclusão | escrito, apontando para `/dados` |
+
+As três pendências aparecem **marcadas na própria página**, e não preenchidas com
+texto plausível — o que está certo, e é o que `docs/03_REGRAS_DE_NEGOCIO` manda.
+Mas duas delas travam a submissão: a Meta exige um controlador identificável, e
+sem CNPJ e e-mail do encarregado a política não sustenta a verificação de
+negócio.
+
+Sobre a exportação do histórico: a política **não a promete**. `/dados` declara
+que a exportação automática não existe e manda pedir ao suporte. Promessa sem
+implementação teria sido o defeito; declarar a lacuna resolve.
+
+O conteúdo mínimo, derivado de `docs/03_REGRAS_DE_NEGOCIO/conformidade.md`:
 
 - **Que dado é coletado**, com a lista real da seção 1 daquele documento — e não
   uma lista genérica. Hoje: identificadores da conta profissional e métricas
@@ -129,9 +154,15 @@ consultam o banco, e por isso `anon` não tem `select` em tabela nenhuma
 
 ## 5. Exclusão de dados — o que já funciona
 
-A função `excluir-dados` já implementa o fluxo completo, com protocolo
-(`docs/07_APIS/edge-functions.md`, seção 6). O que falta é o texto público de
-`/dados` explicando como pedir.
+A função `excluir-dados` implementa o fluxo completo, com protocolo
+(`docs/07_APIS/edge-functions.md`, seção 6), e `/dados` explica publicamente como
+pedir. **Atualizado em 2026-09-07:** esta seção dizia que faltava o texto — ele
+existe, e a página agora oferece **duas** saídas.
+
+Isso importa para o review mais do que parece: o revisor da Meta procura um
+caminho de exclusão, e encontra também um de desconexão. São direitos diferentes
+— parar de coletar e apagar o que já foi coletado — e oferecer os dois demonstra
+controle real do titular sobre o dado, que é exatamente o que a exigência busca.
 
 **Não decidido:** se a Meta será atendida por *Data Deletion Instructions URL*
 (uma página com instruções) ou por *callback* de exclusão (um endpoint que a Meta
@@ -142,22 +173,58 @@ função para a segunda; falta escolher e configurar no painel do app.
 
 ## 6. Checklist de submissão
 
-**Antes de submeter**
-- [ ] Verificação de negócio concluída (exige CNPJ)
-- [ ] `/privacidade` publicada, com prazo de retenção declarado
-- [ ] `/dados` publicada, com instruções de exclusão
-- [ ] Escolha entre instruções e callback de exclusão, configurada no painel
+Separado por **quem destrava cada item**, porque misturar as três colunas faz o
+checklist parecer intransponível quando na verdade metade dele já está feita.
+
+### Pronto no código
+
+- [x] `/privacidade` escrita, rota pública fora da área autenticada
+- [x] `/dados` escrita, com instruções de exclusão e a saída de desconexão
+- [x] Fluxo de exclusão funcionando, com protocolo (`excluir-dados`)
+- [x] Fluxo de desconexão funcionando (`desconectar-conta`)
+- [x] Nenhuma permissão a mais no `scope` — as quatro estão congeladas em
+      `PERMISSOES` e comparadas caractere a caractere em teste
+- [x] Tela de conexão explicando o requisito da Página **antes** do clique
+
+### Depende do dono (nenhum destes é código)
+
+- [ ] **CNPJ, razão social, endereço e e-mail do encarregado** — três pendências
+      marcadas na política, e a Meta exige controlador identificável
+- [ ] **Verificação de negócio** no Meta Business Manager (exige o CNPJ acima)
+- [ ] **Prazo de retenção** depois do cancelamento ou da desconexão
+- [ ] **Base legal**, confirmada com assessoria jurídica
+- [ ] **Hospedagem escolhida** — sem URL pública, "política publicada" não existe
+      (`docs/12`, seção 2.2: comparativo e recomendação prontos)
+- [ ] **Criar o app no painel Meta** e converter a conta de teste para profissional
 - [ ] Conta de tester real conectada e coletando
+
+### Depende de uma decisão registrada
+
+- [ ] **Screencast: demonstração ou cliente real?** Dois documentos discordam;
+      a leitura desta equipe está na seção 3 e vira emenda ao ADR-007
+- [ ] **Instruções de exclusão × callback** — o produto tem a rota para a
+      primeira e a função para a segunda; falta escolher e configurar no painel
+- [ ] **`pages_read_engagement`: justificada ou removida.** A verificação é
+      barata e ninguém fez: uma conexão de teste **sem** a permissão responde se
+      a descoberta da Página falha. Se não falhar, a permissão sai do pedido — e
+      permissão sem tela é causa clássica de reprovação
+- [ ] Retenção do histórico após desconexão conferida contra os Platform Terms
+
+### Só depois de tudo acima
+
 - [ ] Screencast gravado, uma permissão por trecho
 - [ ] Descrição do caso de uso escrita para cada uma das quatro permissões
-- [ ] `pages_read_engagement`: justificada ou removida do pedido
-- [ ] Nenhuma permissão a mais no `scope` (teste de `conexaoMeta` garante)
-- [ ] Retenção do histórico após desconexão conferida contra os Platform Terms
 
 **Depois de submeter**
 - [ ] Contar 4 a 8 semanas, não 2
 - [ ] Tratar pedido de correção como reinício de fila
 - [ ] Não abrir a venda pública antes da aprovação
+
+### O caminho crítico, em uma linha
+
+Hospedagem → URLs publicadas → CNPJ → verificação de negócio → screencast →
+submissão. **O primeiro elo é o único que está esperando só uma escolha**, e os
+outros quatro não começam sem ele.
 
 ---
 

@@ -115,6 +115,12 @@
 - [x] Endpoint e fluxo de exclusao de dados (`/dados` + Edge Function
       `excluir-dados`, com protocolo em `exclusoes_de_dados`)
 - [ ] Publicar as duas URLs de verdade — depende da decisao de hospedagem
+- [ ] Preencher CNPJ, razao social, endereco e e-mail do encarregado na politica.
+      Sao tres pendencias marcadas na propria pagina, e a Meta exige controlador
+      identificavel: sem elas a verificacao de negocio nao se sustenta
+- [ ] Conferir se `pages_read_engagement` e mesmo necessaria. A verificacao e
+      barata e ninguem fez: uma conexao de teste SEM a permissao responde se a
+      descoberta da Pagina falha. Permissao sem tela e causa classica de reprovacao
 - [ ] Screencast por permissao, gravado com cliente-teste real
 - [ ] Verificacao de negocio no Meta Business Manager (exige CNPJ)
 
