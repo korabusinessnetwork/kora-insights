@@ -87,6 +87,13 @@
   margin-top: var(--e-4);
 }
 
+/* Paragrafo depois de lista nascia colado: `p + p` nao alcanca `ul + p`, e a
+   frase que explica a lista parecia mais um item dela. */
+.ka-pagina__secao ul + p,
+.ka-pagina__secao ol + p {
+  margin-top: var(--e-4);
+}
+
 .ka-pagina__secao a {
   color: var(--cor-tinta);
   text-decoration: underline;
@@ -176,6 +183,11 @@
   align-items: center;
   gap: var(--e-4);
   flex-wrap: wrap;
+  /* Nome longo empurra as acoes para a linha de baixo, e la elas encostariam na
+     esquerda enquanto as outras contas mantem as suas a direita — tres linhas da
+     mesma lista com tres alinhamentos. `auto` manda para a direita nos dois
+     casos. */
+  margin-left: auto;
 }
 
 .ka-pagina__conta-status {

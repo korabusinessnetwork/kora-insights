@@ -1,5 +1,6 @@
 /**
- * Quando esta leitura foi feita — e o que dizer quando ela parou de ser feita.
+ * Quando este diagnostico foi gerado — e o que dizer quando ele parou de ser
+ * refeito.
  *
  * O relatorio carimba a data e o historico data cada linha; a tela de
  * diagnostico, que e a que o cliente le em voz alta numa reuniao, nao dizia
@@ -38,7 +39,7 @@ const MS_POR_DIA = 24 * 60 * 60 * 1000
  * @typedef {object} Frescor
  * @property {number} diasDesde dias inteiros desde a geracao
  * @property {boolean} envelhecido a rotina diaria deixou de rodar
- * @property {string} rotulo a data da leitura, sempre visivel
+ * @property {string} rotulo a data da geracao, sempre visivel
  * @property {string|null} aviso o que a idade significa, quando significa algo
  */
 
@@ -65,15 +66,21 @@ export function frescorDoDiagnostico(diagnostico, agora) {
   return {
     diasDesde,
     envelhecido,
-    rotulo: `Leitura de ${formatarDataCurta(geradoEm)}`,
+    // "Gerado em", a mesma palavra da folha do relatorio. Nao e detalhe de
+    // estilo: a tela ja anuncia "8 semanas ate 30 de agosto", que e o periodo
+    // dos DADOS, e um segundo rotulo de data ao lado dele precisa dizer sozinho
+    // que fala de outra coisa. "Leitura de 5 de setembro" convidava a ler como
+    // "os dados vao ate 5 de setembro" — a terceira janela do mesmo diagnostico,
+    // que este produto ja teve uma vez (memory/learnings.md, 2026-09-06).
+    rotulo: `Gerado em ${formatarDataCurta(geradoEm)}`,
     // A frase diz o que sabemos e para no que nao sabemos. O veredito continua
     // valendo para a janela que ele comparou — o que falta e o que aconteceu
     // desde entao. Afirmar que a leitura "esta errada" seria inventar.
     aviso: envelhecido
-      ? `Esta leitura foi feita há ${diasDesde} dias e não foi atualizada desde ` +
-        'então. O que está na tela continua valendo para o período que ele ' +
-        'compara, mas não inclui o que aconteceu depois. Normalmente ela é ' +
-        'refeita todo dia: se parou, o problema é do nosso lado, não do seu.'
+      ? `Este diagnóstico foi gerado há ${diasDesde} dias e não foi refeito ` +
+        'desde então. O que está na tela continua valendo para o período que ' +
+        'ele compara, mas não inclui o que aconteceu depois. Normalmente ele é ' +
+        'refeito todo dia: se parou, o problema é do nosso lado, não do seu.'
       : null,
   }
 }

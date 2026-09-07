@@ -225,17 +225,17 @@ describe('Diagnostico — os estados que não são a tela', () => {
     expect(screen.queryByRole('alert')).toBeNull()
   })
 
-  it('diz quando a leitura foi feita — a data que só o relatório carregava', async () => {
+  it('diz quando o diagnóstico foi gerado — a data que só o relatório carregava', async () => {
     render(<Diagnostico contaId={CASA_OLIVEIRA} />)
     await screen.findByRole('heading', { name: FRASE_DO_VEREDITO })
 
     // A fixture congela `AGORA` em 05/09/2026, e o relógio do produto acompanha
     // em modo de demonstração — senão a leitura de exemplo envelheceria sozinha.
-    expect(screen.getByText('Leitura de 5 de setembro de 2026')).toBeInTheDocument()
-    expect(screen.queryByText(/não foi atualizada desde então/)).not.toBeInTheDocument()
+    expect(screen.getByText('Gerado em 5 de setembro de 2026')).toBeInTheDocument()
+    expect(screen.queryByText(/não foi refeito desde então/)).not.toBeInTheDocument()
   })
 
-  it('leitura velha se declara velha, em vez de passar por atual', async () => {
+  it('diagnóstico velho se declara velho, em vez de passar por atual', async () => {
     // `gerar-diagnostico` falhando por conta só vai para o log, e de propósito:
     // marcá-la como evento de coleta pintaria uma lacuna que não existe. O preço
     // era a tela mostrar o veredito antigo como se fosse a leitura de hoje.

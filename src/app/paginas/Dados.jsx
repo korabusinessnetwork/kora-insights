@@ -293,8 +293,12 @@ export default function Dados() {
                           Desconectar
                         </Botao>
                       )}
+                      {/* A destrutiva vem depois, nunca disfarçada. `texto` a
+                          deixava sublinhada como link — e link é navegação, não
+                          a ação mais irreversível do produto. Vinha ainda mais
+                          apagada que "Cancelar", que usa a mesma variante. */}
                       <Botao
-                        variante="texto"
+                        variante="secundario"
                         aoClicar={() => setConfirmando({ contaId: conta.id, acao: 'excluir' })}
                       >
                         Pedir exclusão dos dados

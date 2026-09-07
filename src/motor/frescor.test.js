@@ -13,10 +13,13 @@ function feitoHa(dias) {
 }
 
 describe('frescorDoDiagnostico', () => {
-  it('diz a data da leitura, sempre — e essa e a parte que faltava na tela', () => {
+  it('diz a data da geracao, sempre — e essa e a parte que faltava na tela', () => {
     const frescor = frescorDoDiagnostico({ geradoEm: '2026-09-05T04:40:00.000Z' }, AGORA)
 
-    expect(frescor.rotulo).toBe('Leitura de 5 de setembro de 2026')
+    // A mesma palavra da folha do relatorio. A tela ja anuncia o periodo dos
+    // DADOS ("8 semanas ate 30 de agosto"); um segundo rotulo de data ao lado
+    // dele precisa dizer sozinho que fala de outra coisa.
+    expect(frescor.rotulo).toBe('Gerado em 5 de setembro de 2026')
   })
 
   it('leitura do dia nao rende aviso nenhum', () => {
