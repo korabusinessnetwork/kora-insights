@@ -37,6 +37,12 @@
 - [x] Projeto Vite + Supabase, schema inicial aplicado
 - [x] RLS em toda tabela **com politica** (o esqueleto tinha RLS ligada e zero
       politica, o que nega tudo em silencio)
+- [x] Teste das funcoes do cofre (`guardar_token`, `ler_token`, `apagar_token`)
+      no mesmo Postgres efemero. Elas nunca tinham rodado em teste nenhum, e a
+      renovacao do token (ADR-009) depende de `guardar_token` devolver a MESMA
+      referencia para o mesmo nome — se criasse uma nova, `token_ref` apontaria
+      para o segredo velho a cada renovacao e a coleta leria um token vencido
+      achando que leu o novo. Sabotado, o teste reprova com codigo 3
 - [x] Teste de isolamento entre tenants **com banco de verdade**
       (`./scripts/testar-isolamento.sh`, tambem no CI). Sobe um Postgres
       efemero, aplica as migrations reais sobre um stub minimo do Supabase e

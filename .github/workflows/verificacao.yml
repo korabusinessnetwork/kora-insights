@@ -64,5 +64,9 @@ jobs:
       # O runner ja traz PostgreSQL instalado. O script sobe um cluster efemero
       # proprio em vez de usar um `services:` container: assim ele roda igual na
       # maquina de quem desenvolve, sem Docker e sem Supabase CLI.
-      - name: Teste de vazamento entre tenants
+      # Duas suites no mesmo cluster efemero: vazamento entre tenants e as funcoes
+      # do cofre do token. O NOME DO JOB continua "Isolamento entre tenants" de
+      # proposito — ele e o nome do check que aparece no PR, e renomear um check
+      # quebra protecao de branch que exija o nome antigo.
+      - name: Vazamento entre tenants e cofre do token
         run: ./scripts/testar-isolamento.sh

@@ -77,3 +77,47 @@ create table if not exists vault.secrets (
 
 create or replace view vault.decrypted_secrets as
   select id, name, secret as decrypted_secret from vault.secrets;
+
+-- As duas funcoes que `guardar_token` chama. As assinaturas sao as documentadas
+-- pelo Supabase — `create_secret(secret, name, description)` devolvendo o id, e
+-- `update_secret(id, secret, name, description)` devolvendo void — e essa
+-- fidelidade e o ponto: e ela que faz o teste dizer alguma coisa sobre o codigo
+-- de producao em vez de sobre o stub.
+--
+-- O que o stub NAO reproduz e a criptografia. Ele guarda o segredo em texto,
+-- porque o que esta sob prova aqui e a logica de `guardar_token` (achar pelo
+-- nome, criar ou atualizar, devolver a MESMA referencia) e quem alcanca o que.
+-- Cifrar em teste provaria que o Postgres sabe cifrar, que ninguem duvida.
+create or replace function vault.create_secret(
+  new_secret text,
+  new_name text default null,
+  new_description text default ''
+)
+returns uuid
+language plpgsql
+as $$
+declare
+  v_id uuid;
+begin
+  insert into vault.secrets (name, secret) values (new_name, new_secret)
+  returning id into v_id;
+  return v_id;
+end
+$$;
+
+create or replace function vault.update_secret(
+  secret_id uuid,
+  new_secret text default null,
+  new_name text default null,
+  new_description text default null
+)
+returns void
+language plpgsql
+as $$
+begin
+  update vault.secrets
+     set secret = coalesce(new_secret, secret),
+         name = coalesce(new_name, name)
+   where id = secret_id;
+end
+$$;

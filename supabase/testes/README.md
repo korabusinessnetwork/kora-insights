@@ -1,10 +1,13 @@
 # Testes de banco
 
-## Isolamento entre tenants
-
 ```bash
 ./scripts/testar-isolamento.sh
 ```
+
+Um comando, um PostgreSQL efêmero, duas suítes: **isolamento entre tenants** e
+**cofre do token**.
+
+## Isolamento entre tenants
 
 Sobe um PostgreSQL efêmero, aplica as **migrations reais** de produção sobre um
 stub mínimo do Supabase, semeia duas agências que não se conhecem e faz 22
@@ -19,7 +22,8 @@ sem custo.
 |---|---|
 | `00-ambiente-supabase.sql` | O contorno exato do Supabase que as migrations tocam: schema `auth` com `users` e `uid()`, `vault`, `extensions`, os três papéis e os grants padrão do `service_role` |
 | `10-semear.sql` | Estúdio Vergara e Agência Rival, com a **mesma métrica no mesmo dia** e valores diferentes |
-| `20-isolamento.sql` | As asserções |
+| `20-isolamento.sql` | As asserções de isolamento |
+| `30-cofre.sql` | As asserções do cofre do token |
 
 O dado das duas agências colide de propósito. Vazamento de multi-tenant não
 aparece como erro na tela: aparece como um número maior do que deveria, e passa
@@ -37,6 +41,32 @@ das asserções compara **o valor somado**, e não só a contagem de linhas.
   duas travas diferentes, e o teste cobra as duas separadamente.
 - Cliente não insere snapshot nem reescreve diagnóstico.
 
+## Cofre do token
+
+`guardar_token`, `ler_token` e `apagar_token` sustentam duas coisas que o produto
+já faz e que, se falharem, falham **em silêncio**:
+
+1. **A renovação do token (ADR-009)** grava o token novo com o mesmo nome e conta
+   receber a mesma referência de volta. Se `guardar_token` criasse um segredo
+   novo a cada chamada, `ig_contas.token_ref` passaria a apontar para o segredo
+   velho a cada renovação, e a coleta leria um token vencido achando que leu o
+   novo — pior que não renovar, porque parece que renovou.
+2. **A desconexão** apaga o segredo e mantém a linha. Se `apagar_token` não
+   apagasse, ficaria uma autorização viva para uma conta que o cliente pediu para
+   soltar.
+
+Ler o SQL como texto não pega nenhuma das duas: as duas funções *parecem* certas
+na leitura, e é o comportamento que importa. O teste cobre ainda que nome
+diferente é segredo diferente (sem isso, uma renovação sobrescreveria o token de
+outra conta), que referência inexistente devolve nulo em vez de explodir — a
+coleta trata nulo como conexão quebrada, e uma exceção mataria a varredura do dia
+para todas as contas seguintes — e que `authenticated` e `anon` não executam
+nenhuma das três, enquanto `service_role` executa as três.
+
+`SECURITY DEFINER` sem revogar EXECUTE seria pior que não ter cofre: qualquer
+membro de qualquer tenant pediria o token de qualquer conta pelo PostgREST, e a
+RLS não teria como impedir — a função roda como dono.
+
 ## Ele sabe falhar
 
 Verificado nos dois sentidos: com a política de `snapshots_conta` sabotada para
@@ -46,7 +76,17 @@ Verificado nos dois sentidos: com a política de `snapshots_conta` sabotada para
 FALHOU: ana enxerga so o proprio snapshot — esperado 1, obtido 2
 ```
 
-e sai com código diferente de zero. Um teste que não sabe falhar não é teste.
+e sai com código diferente de zero.
+
+O do cofre também: com `guardar_token` sabotada para ignorar o nome e criar um
+segredo a cada chamada — exatamente o bug que arruinaria a renovação —, ele
+reprova com
+
+```
+FALHOU: renovar devolve a MESMA referencia
+```
+
+e sai com código 3. Um teste que não sabe falhar não é teste.
 
 ## Duas dependências que ele expôs
 
@@ -63,5 +103,10 @@ e sai com código diferente de zero. Um teste que não sabe falhar não é teste
 - `pg_cron` e `pg_net`: a migration de agendamento é pulada, e a decisão está
   impressa na saída do script. `supabase/politicas.test.js` continua conferindo
   o conteúdo dela como texto.
-- Criptografia real do Vault. O teste valida quem alcança o quê, não como o
-  segredo é guardado.
+- Criptografia real do Vault. O stub guarda o segredo em texto: o que está sob
+  prova é a lógica das **nossas** funções e quem alcança o quê, não a cifra do
+  Supabase. As assinaturas de `vault.create_secret` e `vault.update_secret` no
+  stub são as documentadas — é essa fidelidade que faz o teste dizer algo sobre o
+  código de produção em vez de sobre o stub.
+- As Edge Functions. Elas orquestram estas funções, e não há Deno no CI: o que
+  está coberto é o que o banco garante a elas.
