@@ -44,6 +44,15 @@
   font-size: var(--texto-apoio);
 }
 
+/* Conta desconectada nao e alarme: o cliente sabe, foi ele que desconectou. A
+   moldura e a mesma para a leitura caber junto, o acento e neutro. */
+.tela-diagnostico__frescor[data-estado='congelado'] {
+  padding: var(--e-4);
+  border-left: var(--borda-acento) solid var(--cor-linha-forte);
+  border-radius: var(--raio-2);
+  background-color: var(--cor-superficie);
+}
+
 .tela-diagnostico__frescor[data-estado='envelhecido'] {
   padding: var(--e-4);
   border-left: var(--borda-acento) solid var(--cor-atencao);

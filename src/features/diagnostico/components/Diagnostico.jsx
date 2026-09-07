@@ -120,7 +120,9 @@ function AindaSemVeredito({ titulo, descricao, achado, lacunas, limites, frescor
  * pintaria uma lacuna que nao existe — e o veredito antigo seguia na tela sem
  * sinal de que envelheceu.
  *
- * O estado entra por `data-estado`, nunca por classe de cor.
+ * O estado entra por `data-estado`, nunca por classe de cor. Sao tres:
+ * `recente`, `envelhecido` (a rotina parou do nosso lado) e `congelado` (a
+ * conta esta desconectada, e quem parou foi o cliente).
  *
  * @param {object} props
  * @param {import('../../../motor/frescor.js').Frescor|null} props.frescor
@@ -130,7 +132,7 @@ function FrescorDaLeitura({ frescor }) {
   if (!frescor) return null
 
   return (
-    <p className="tela-diagnostico__frescor" data-estado={frescor.envelhecido ? 'envelhecido' : 'recente'}>
+    <p className="tela-diagnostico__frescor" data-estado={frescor.estado}>
       <span className="tela-diagnostico__frescor-data">{frescor.rotulo}</span>
       {frescor.aviso ? (
         <span className="tela-diagnostico__frescor-aviso">{frescor.aviso}</span>
@@ -147,11 +149,16 @@ function FrescorDaLeitura({ frescor }) {
  * coluna estreita. Nenhuma media, nenhuma variacao e nenhuma frase de veredito
  * nascem aqui — tudo vem do motor de regras versionado (ADR-005).
  *
+ * A conta chega por prop, e nao de contexto: feature nao le contexto de
+ * aplicacao (memory/patterns.md). Quem costura rota, contexto e feature e
+ * `src/app/telas.jsx`, que existe exatamente para isso.
+ *
  * @param {object} props
  * @param {string|null} [props.contaId] sem conta, a tela mostra o vazio da identidade
+ * @param {{ status?: string }|null} [props.conta] a conta em foco, quando conhecida
  * @returns {JSX.Element}
  */
-export default function Diagnostico({ contaId }) {
+export default function Diagnostico({ contaId, conta = null }) {
   const { estado, diagnostico, erro, recarregar } = useDiagnostico(contaId)
 
   if (estado === ESTADOS.SEM_CONTA) return <SemContaConectada />
@@ -166,8 +173,10 @@ export default function Diagnostico({ contaId }) {
   const limites = diagnostico?.limites ?? []
   // O relogio vem da camada de servicos: em demonstracao ele e o instante
   // congelado da fixture, senao a leitura de exemplo envelheceria sozinha com a
-  // passagem do calendario.
-  const frescor = frescorDoDiagnostico(diagnostico, agoraDoProduto())
+  // passagem do calendario. A conta entra junto porque a mesma idade significa
+  // coisas opostas conforme o estado dela: conta desconectada parou por decisao
+  // do cliente, e culpar a nossa rotina por isso seria mentira.
+  const frescor = frescorDoDiagnostico(diagnostico, conta, agoraDoProduto())
   // Os achados chegam ordenados por peso decrescente (contratos.md, secao 3):
   // o veredito da tela e o primeiro da lista, e ordenar de novo aqui seria a
   // tela decidindo o que o motor ja decidiu.

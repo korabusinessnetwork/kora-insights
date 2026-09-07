@@ -28,7 +28,11 @@ import { Relatorio } from '../features/relatorio/index.js'
  */
 function DiagnosticoDaRota() {
   const { contaId } = useParams()
-  return <Diagnostico contaId={contaId} />
+  const { contas } = useTenant()
+  // A conta vem daqui, e nao de dentro da feature: a tela precisa do estado
+  // dela para nao culpar a nossa rotina por um diagnostico que parou porque o
+  // cliente desconectou a conta. Feature nao le contexto de aplicacao.
+  return <Diagnostico contaId={contaId} conta={contas?.find((c) => c.id === contaId) ?? null} />
 }
 
 /**

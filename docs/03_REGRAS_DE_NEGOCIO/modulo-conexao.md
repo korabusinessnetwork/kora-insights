@@ -71,7 +71,7 @@ stateDiagram-v2
 | `ativa` | sim | sim | sim | diagnóstico normal |
 | `pausada` | **não** | sim | sim | histórico + lacuna crescente |
 | `token_expirado` | **não** | sim | referência existe, segredo pode não | pedido de reconexão + lacuna nomeada |
-| `desconectada` | não | sim | não | histórico congelado, sem coleta nova |
+| `desconectada` | não | **não** | não | histórico congelado, com a data do último diagnóstico e o convite a reconectar |
 | linha apagada | — | — | não | a conta some; sobra o protocolo em `exclusoes_de_dados` |
 
 Regra que amarra a tabela inteira:
@@ -87,6 +87,19 @@ contas = SELECT ... FROM ig_contas WHERE status IN ('ativa','pausada','token_exp
 **Conta com token vencido continua sendo diagnosticada de propósito.** O
 histórico dela não some porque a coleta parou; o que precisa aparecer é a
 lacuna, não uma tela vazia (ADR-004).
+
+**Conta desconectada não é, e isso também é de propósito.** O histórico dela está
+congelado, então refazer o diagnóstico faria uma de duas coisas, as duas ruins:
+reescreveria o mesmo veredito com a data de hoje — e uma conta parada apareceria
+como recém-lida —, ou, quando a janela rolasse, trocaria o último veredito válido
+por "ainda não dá para saber". O último diagnóstico real fica de pé, com a data em
+que foi gerado.
+
+Isso obriga a tela a distinguir dois silêncios que se parecem: o diagnóstico que
+parou de ser refeito **por falha nossa** e o que parou **porque o cliente
+desconectou a conta**. A frase é diferente em cada caso, e assumir a culpa no
+segundo mandaria o cliente procurar defeito onde não há
+(`modulo-diagnostico.md`, 6.6).
 
 ---
 

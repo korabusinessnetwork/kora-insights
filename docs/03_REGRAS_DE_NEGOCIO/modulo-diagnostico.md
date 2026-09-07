@@ -253,8 +253,16 @@ A tela diz sempre a data de `gerado_em`, e diz mais quando essa data envelheceu:
 
 ```
 diasDesde   = piso((agora - gerado_em) / 1 dia)     -- negativo vira zero
-envelhecido = diasDesde > DIAS_ATE_ENVELHECER       -- 2, em src/motor/frescor.js
+congelado   = conta.status = 'desconectada'
+envelhecido = NAO congelado E diasDesde > DIAS_ATE_ENVELHECER   -- 2
 ```
+
+São **três** estados, e o terceiro existe para não acusar falha própria onde não
+houve nenhuma: `gerar-diagnostico` não varre conta desconectada
+(`modulo-conexao.md`, seção 2), então `gerado_em` para de avançar por decisão do
+cliente. Dizer ali "o problema é do nosso lado" mandaria ele procurar defeito
+onde não há. A frase do estado `congelado` diz que a conta está desconectada e
+oferece reconectar; a do `envelhecido` assume a falha.
 
 O limiar sai do agendamento, não do gosto: `gerar-diagnostico` roda todo dia e o
 `id` é determinístico, então rodar de novo no mesmo período cai na mesma linha e

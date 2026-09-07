@@ -256,6 +256,27 @@ describe('Diagnostico — os estados que não são a tela', () => {
     expect(frescor).toHaveTextContent('do nosso lado')
   })
 
+  it('conta desconectada não vira alarme: quem parou foi o cliente', async () => {
+    // `gerar-diagnostico` não varre conta desconectada, então `gerado_em` para
+    // de avançar. Sem saber o estado da conta, a tela diria "o problema é do
+    // nosso lado" para um silêncio que o próprio cliente pediu.
+    const original = await obterDiagnosticoMaisRecente(CASA_OLIVEIRA)
+    obterDiagnosticoMaisRecente.mockResolvedValueOnce({
+      ...original,
+      data: { ...original.data, geradoEm: '2026-07-20T04:40:00.000Z' },
+    })
+
+    const { container } = render(
+      <Diagnostico contaId={CASA_OLIVEIRA} conta={{ id: CASA_OLIVEIRA, status: 'desconectada' }} />,
+    )
+    await screen.findByRole('heading', { name: FRASE_DO_VEREDITO })
+
+    const frescor = container.querySelector('.tela-diagnostico__frescor')
+    expect(frescor).toHaveAttribute('data-estado', 'congelado')
+    expect(frescor).toHaveTextContent('Reconecte')
+    expect(frescor).not.toHaveTextContent('do nosso lado')
+  })
+
   it('descarta a resposta da conta anterior quando a tela troca de conta', async () => {
     let concluirPrimeira
     obterDiagnosticoMaisRecente.mockImplementationOnce(
