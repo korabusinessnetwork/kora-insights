@@ -234,6 +234,6 @@ A defesa é arquitetural e já existe:
 |---|---|
 | Justificar `pages_read_engagement` com tela, ou removê-la do pedido | `docs/11_SEGURANCA/app-review.md` |
 | Escolha de conta quando o usuário administra várias Páginas com IG vinculado | tela nova de seleção + ADR |
-| Renovação do token de ~60 dias antes do vencimento | ADR novo (`modulo-conexao.md`, seção 4) |
+| Renovação do token de ~60 dias antes do vencimento | **Decidido: ADR-009** — `fb_exchange_token` a 15 dias do prazo, dentro da coleta diária |
 | `business_discovery` da Fase 2, com os limites que ele impõe | ADR-006, quando a fase abrir |
 | Divergência do formato aceito de `code`: o front aceita `[A-Za-z0-9._~-]{8,2048}` e a função aceita `[A-Za-z0-9._\-#]{20,512}` | um dos dois está errado; conferir contra um `code` real e unificar |

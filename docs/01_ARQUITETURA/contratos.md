@@ -235,6 +235,7 @@ achado `indeterminado` que diz isso na cara — nunca um veredito inventado.
 | Modulo | Funcoes |
 |---|---|
 | `supabase.js` | `obterCliente()`, `estaEmModoDemonstracao()` |
+| `relogio.js` | `agoraDoProduto()` — o instante que vale para o dado em tela |
 | `envelope.js` | `ok(data, meta?)`, `falha(codigo, mensagem, detalhe?)` |
 | `erros.js` | `CODIGOS`, `mensagemDoErro(erroDoSupabase)` |
 | `autenticacao.js` | `sessaoAtual()`, `entrarComEmail(email)`, `sair()`, `aoMudarSessao(cb)` |

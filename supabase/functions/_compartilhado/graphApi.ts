@@ -255,6 +255,39 @@ export async function trocarCodigoPorTokenLongo(
 }
 
 /**
+ * Troca um token de longa duracao ainda valido por outro, com o prazo cheio.
+ *
+ * E a mesma chamada `fb_exchange_token` do segundo passo da conexao — a Meta
+ * aceita como entrada tanto o token curto quanto um longo dentro da validade.
+ * Por isso renovar nao precisa do cliente: nao ha dialogo de consentimento no
+ * caminho, e a conta segue coletando sem que ninguem seja interrompido.
+ *
+ * O prazo novo conta a partir de agora, entao renovar cedo nao desperdica dia
+ * nenhum: nao ha soma de saldo, ha substituicao.
+ *
+ * @param tokenAtual token de longa duracao ainda dentro da validade
+ * @returns token novo e quando ele vence
+ * @throws {ErroDaGraph} se a Meta recusar a troca (token ja vencido, permissao
+ *   revogada pelo usuario, app secret errado)
+ */
+export async function renovarTokenLongo(
+  tokenAtual: string,
+): Promise<{ token: string; expiraEm: string | null }> {
+  const appId = Deno.env.get('META_APP_ID') ?? ''
+  const appSecret = Deno.env.get('META_APP_SECRET') ?? ''
+  if (BASE_DA_GRAPH.length === 0 || appId.length === 0 || appSecret.length === 0) {
+    throw new ErroDaGraph(CODIGOS.FALHA_INESPERADA, 'Credenciais da Meta ausentes no ambiente.')
+  }
+
+  return await pedirToken({
+    grant_type: 'fb_exchange_token',
+    client_id: appId,
+    client_secret: appSecret,
+    fb_exchange_token: tokenAtual,
+  })
+}
+
+/**
  * Chama `/oauth/access_token`.
  *
  * @param parametros parametros da troca, incluindo o app secret

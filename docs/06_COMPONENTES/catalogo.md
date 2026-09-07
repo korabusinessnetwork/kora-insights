@@ -58,6 +58,8 @@ nada aqui muda.
 | `aoClicar` | função | — | handler |
 | `carregando` | boolean | `false` | desabilita **de verdade** e anuncia "Carregando" |
 | `desabilitado` | boolean | `false` | desabilita |
+| `como` | ElementType | — | componente de navegação (`Link`); rende `<a>` com a mesma pele |
+| `para` | string | — | destino, quando `como` está presente |
 | `children` | node | — | o rótulo |
 
 **Estados:** repouso, `:hover`, `:focus-visible`, `:disabled`, carregando
@@ -66,8 +68,13 @@ nada aqui muda.
 **Tokens:** `--cor-acao`, `--cor-superficie`, `--cor-linha`, `--raio-2`,
 `--transicao-rapida`.
 
+**Chamada para ação que navega:** `como={Link} para={ROTAS.conectar}` — o papel
+vira `link`, abrir em nova aba funciona e o leitor de tela anuncia "link". Quem
+chama passa o componente de rota, e é por isso que o kit continua sem importar
+router: componente do kit não conhece rota (`memory/patterns.md`).
+
 **Quando NÃO usar:**
-- para navegar. Link é `<a>`; botão que navega quebra abrir em nova aba.
+- para navegar **sem** `como`. Botão que navega quebra abrir em nova aba.
 - mais de um `primario` por tela. A cor de acento aparece no máximo três vezes
   por tela — onde tudo é destaque, nada é.
 - para passar cor: **não existe prop de cor**, e não vai existir.

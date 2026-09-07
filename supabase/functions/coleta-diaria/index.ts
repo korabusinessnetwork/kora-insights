@@ -26,8 +26,10 @@ import {
   buscarMidias,
   ErroDaGraph,
   OrcamentoDeChamadas,
+  renovarTokenLongo,
   tipoCanonicoDaMidia,
 } from '../_compartilhado/graphApi.ts'
+import { precisaRenovar } from '../../../src/token/validade.js'
 import {
   CODIGOS,
   type Codigo,
@@ -39,7 +41,7 @@ import {
 } from '../_compartilhado/respostas.ts'
 
 /** Colunas de `ig_contas` que a coleta usa. Nenhum `select *` (CLAUDE.md). */
-const CAMPOS_DA_CONTA = 'id, tenant_id, ig_user_id, token_ref, status'
+const CAMPOS_DA_CONTA = 'id, tenant_id, ig_user_id, token_ref, status, token_expira_em'
 
 /**
  * Quantos dias para tras a busca de midias olha.
@@ -64,6 +66,7 @@ interface Conta {
   ig_user_id: string
   token_ref: string
   status: string
+  token_expira_em: string | null
 }
 
 interface LinhaDeConta {
@@ -162,12 +165,78 @@ async function gravarSnapshots(
 }
 
 /**
+ * Troca o token da conta por um novo quando o vencimento se aproxima.
+ *
+ * O token de longa duracao da Meta vive ~60 dias. Sem esta troca, toda conta
+ * conectada morre no dia 60 e o cliente so descobre pela coleta falhando —
+ * num produto que exige 16 semanas completas para nomear uma causa, isso apaga
+ * meses de caminho andado. O prazo de decisao mora em `src/token/validade.js`,
+ * lido tambem pela tela que pede reconexao.
+ *
+ * **Nunca lanca.** Falha de renovacao nao e falha de coleta: o token de hoje
+ * continua valido (por isso a renovacao acontece com dias de folga), e derrubar
+ * a coleta do dia por causa dela transformaria um problema futuro em lacuna
+ * imediata. Pelo mesmo motivo a falha nao vira linha em `coleta_eventos`: aquela
+ * tabela alimenta `montarHistorico`, e um evento ali desenharia lacuna na tela
+ * num dia que tem dado.
+ *
+ * @param cliente cliente com service_role
+ * @param conta conta ativa, com `token_expira_em`
+ * @param token token atual, ja lido do cofre
+ * @param agora instante da execucao
+ * @returns o token a usar nesta coleta: o novo, ou o atual se a troca falhou
+ */
+async function renovarSeNecessario(
+  cliente: SupabaseClient,
+  conta: Conta,
+  token: string,
+  agora: Date,
+): Promise<string> {
+  if (!precisaRenovar({ tokenExpiraEm: conta.token_expira_em }, agora)) return token
+
+  try {
+    const renovado = await renovarTokenLongo(token)
+
+    // Cofre antes da linha, como na conexao: o nome do segredo e deterministico,
+    // entao `guardar_token` atualiza o segredo existente e devolve a MESMA
+    // referencia. Se a escrita da linha falhar depois desta, o cofre fica com o
+    // token novo e a linha com o prazo velho — e amanha a renovacao roda de novo
+    // a partir do token novo, que e o certo. O contrario perderia o token.
+    const { data: referencia, error: erroDoCofre } = await cliente.rpc('guardar_token', {
+      p_nome: `ig_conta_${conta.ig_user_id}`,
+      p_token: renovado.token,
+    })
+    if (erroDoCofre || !referencia) throw new Error('cofre')
+
+    const { error } = await cliente
+      .from('ig_contas')
+      .update({ token_ref: String(referencia), token_expira_em: renovado.expiraEm })
+      .eq('id', conta.id)
+    if (error) throw new Error(`ig_contas: ${error.code ?? 'erro'}`)
+
+    // Log sem token e sem referencia do cofre: so o que responde "a renovacao
+    // esta funcionando?" no suporte (docs/11_SEGURANCA).
+    registrar('coleta.token_renovado', { conta: conta.id, expira_em: renovado.expiraEm })
+    return renovado.token
+  } catch (erro) {
+    const causa = erro instanceof ErroDaGraph ? erro.codigo : 'falha'
+    registrar('coleta.token_nao_renovado', {
+      conta: conta.id,
+      causa,
+      expira_em: conta.token_expira_em,
+    })
+    return token
+  }
+}
+
+/**
  * Coleta uma conta e devolve o resumo do que gravou.
  *
  * @param cliente cliente com service_role
  * @param conta conta ativa
  * @param dia dia coletado, `YYYY-MM-DD`
  * @param orcamento orcamento de chamadas desta conta
+ * @param agora instante da execucao, para decidir a renovacao do token
  * @returns contagens do que entrou no banco
  * @throws {ErroDaGraph} quando a Meta recusa; quem chama transforma em evento
  */
@@ -176,15 +245,18 @@ async function coletarConta(
   conta: Conta,
   dia: string,
   orcamento: OrcamentoDeChamadas,
+  agora: Date,
 ): Promise<{ leiturasDeConta: number; midias: number; ignoradas: string[] }> {
-  const { data: token, error: erroDoToken } = await cliente.rpc('ler_token', {
+  const { data: doCofre, error: erroDoToken } = await cliente.rpc('ler_token', {
     p_ref: conta.token_ref,
   })
-  if (erroDoToken || typeof token !== 'string' || token.length === 0) {
+  if (erroDoToken || typeof doCofre !== 'string' || doCofre.length === 0) {
     // Referencia sem segredo no cofre significa conexao quebrada, e o cliente
     // precisa reconectar — mesma acao de token vencido.
     throw new ErroDaGraph(CODIGOS.TOKEN_EXPIRADO, 'Token ausente no cofre para esta conta.')
   }
+
+  const token = await renovarSeNecessario(cliente, conta, doCofre, agora)
 
   const adaptador = adaptadorVigente()
   const versoes = { api_version: adaptador.apiVersion, adapter_version: adaptador.versao }
@@ -292,7 +364,10 @@ Deno.serve(async (requisicao: Request) => {
   const cliente = createClient(url, chave, { auth: { persistSession: false } })
 
   const corpo = await lerCorpo(requisicao)
-  const dia = typeof corpo.dia === 'string' ? corpo.dia : diaFechadoAnterior(new Date())
+  // Um instante para a execucao inteira: o dia coletado e a decisao de renovar
+  // token precisam concordar mesmo que a varredura atravesse a meia-noite.
+  const agora = new Date()
+  const dia = typeof corpo.dia === 'string' ? corpo.dia : diaFechadoAnterior(agora)
 
   const { data: contas, error: erroDasContas } = await cliente
     .from('ig_contas')
@@ -332,7 +407,7 @@ Deno.serve(async (requisicao: Request) => {
     const orcamento = new OrcamentoDeChamadas()
 
     try {
-      const resumo = await coletarConta(cliente, conta, dia, orcamento)
+      const resumo = await coletarConta(cliente, conta, dia, orcamento, agora)
       coletadas += 1
       const nota = resumo.ignoradas.length > 0
         ? ` Métricas ignoradas: ${resumo.ignoradas.slice(0, 5).join('; ')}.`

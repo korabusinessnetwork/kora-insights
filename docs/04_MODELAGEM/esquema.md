@@ -148,7 +148,7 @@ tenants são deste usuário?".
 | `nome` | nome de exibição; sem ele a tela cai no `@` (`src/lib/contas.js`) |
 | `fb_page_id` | a Página do Facebook vinculada, exigida pela variante do ADR-002 |
 | `token_ref` | **referência** ao Supabase Vault, nunca o token. Fora de todo `grant` para `authenticated` |
-| `token_expira_em` | data de vencimento do token longo (~60 dias). Hoje nada lê essa coluna — ver `modulo-conexao.md`, seção 4 |
+| `token_expira_em` | data de vencimento do token longo (~60 dias). A coleta diária renova a 15 dias do prazo e a tela pede reconexão a 7 (ADR-009) |
 | `status` | governa quem coleta e quem diagnostica. A coleta só roda em `ativa` |
 | `tem_trafego_pago` | quando falso, o motor **obriga** a tela a declarar que tudo ali vale para alcance orgânico. Sem esse dado, a tela atribuiria ao conteúdo um alcance que veio de anúncio |
 | `conectada_em` | ordena a listagem e a fila de coleta; é também o marco a partir do qual existe histórico próprio (ADR-004) |

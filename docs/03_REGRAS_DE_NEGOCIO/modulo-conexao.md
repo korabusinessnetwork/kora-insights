@@ -144,27 +144,47 @@ com uma mensagem que diz que nada real acontece ali (ADR-007).
 
 ---
 
-## 4. Token vencendo — o estado que ainda não existe
+## 4. Token vencendo — renovação automática, aviso como último recurso
 
 A Meta entrega token de longa duração de aproximadamente 60 dias, e
-`ig_contas.token_expira_em` guarda a data. Hoje o produto **não faz nada com
-essa coluna**: não avisa o cliente, não renova, e só descobre o vencimento
-quando a coleta falha e vira `token_expirado`.
-
-O plano de segurança já promete o contrário: *"Refresh de token antes do
-vencimento, com aviso ao cliente quando a reconexão for necessária"*
-(`docs/11_SEGURANCA/plano.md`). Entre a promessa e o código há uma lacuna real.
-
-**Não decidido:** com quantos dias de antecedência a tela avisa, se existe
-renovação automática por job, e se "vencendo" vira status no banco ou continua
-sendo derivado de `token_expira_em`. A decisão mora em um ADR novo e em
-`docs/09_BACKLOG`. Até lá, a regra honesta é esta:
+`ig_contas.token_expira_em` guarda a data. **ADR-009** decidiu o que fazer com
+ela, e são dois prazos diferentes de propósito:
 
 ```
--- derivado, nao persistido
-tokenVencendo = conta.token_expira_em <> nulo E conta.token_expira_em < agora + N dias
--- N NAO ESTA DEFINIDO. Nenhuma tela pode inventar um N por conta propria.
+-- src/token/validade.js: as duas pontas leem daqui
+DIAS_PARA_RENOVAR = 15   -- a coleta troca o token sozinha
+DIAS_PARA_AVISAR  =  7   -- a tela pede reconexão
+
+-- derivado, nunca persistido
+diasAteVencer = piso((token_expira_em - agora) / 1 dia)
+vencido   = status = 'token_expirado' OU diasAteVencer < 0
+vencendo  = NAO vencido E diasAteVencer <= DIAS_PARA_AVISAR
 ```
+
+**A renovação.** Todo dia, antes de coletar, `coleta-diaria` verifica o prazo da
+conta. Faltando 15 dias ou menos, ela refaz a troca `fb_exchange_token` — a Meta
+aceita um token longo ainda válido como entrada — grava o token novo no cofre com
+o mesmo nome (o que preserva `token_ref`) e atualiza `token_expira_em`. O cliente
+não é interrompido: não há diálogo de consentimento nesse caminho.
+
+Renovar cedo não desperdiça dia: o prazo novo conta a partir da troca, e não se
+soma ao que sobrava.
+
+**A falha da renovação não é falha de coleta.** O token de hoje continua válido
+— é para isso que serve a folga de 15 dias — então a coleta do dia segue com ele
+e a falha vai só para o log (`coleta.token_nao_renovado`). Ela **não** vira linha
+em `coleta_eventos`: aquela tabela alimenta `montarHistorico`, e um evento ali
+desenharia lacuna na tela num dia que tem dado.
+
+**O aviso.** Sete dias é menos que os quinze da renovação, e essa distância é a
+regra: com a troca automática funcionando, o aviso nunca aparece. Se apareceu, é
+porque a renovação já teve mais de uma semana de tentativas e não deu conta —
+permissão revogada no painel da Meta, senha trocada, app suspenso. A faixa mora
+em `Casca`, vale em toda tela e varre **todas** as contas do tenant: conta perde
+dia de histórico esteja ou não em foco.
+
+Conta `desconectada` não gera aviso — foi o cliente que desligou. Conta `pausada`
+gera, porque a pausa é temporária e o token vencido a torna definitiva.
 
 ---
 
@@ -254,7 +274,7 @@ registra.
 
 | Pergunta em aberto | Onde a decisão vai morar |
 |---|---|
-| Antecedência do aviso de token vencendo e se há renovação automática | ADR novo + `docs/09_BACKLOG` |
+| Renovação do token de ~60 dias e a antecedência do aviso | **Decidido: ADR-009**, seção 4 |
 | Quem escreve `status = 'pausada'` e sob que condição | `modulo-assinatura.md` + ADR de cobrança |
 | Se a tela de conexão oferece escolher o tenant quando o usuário tem vários | `docs/06_COMPONENTES/` e uma tela nova; hoje o servidor recusa |
 | Prazo de retenção do histórico após desconexão | `conformidade.md`, seção de retenção — hoje indefinido |

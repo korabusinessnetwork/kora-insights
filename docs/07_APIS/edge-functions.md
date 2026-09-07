@@ -115,11 +115,27 @@ Falha **de uma conta** não é falha da função: ela vira linha em `coleta_even
 e a execução continua. A resposta 200 com `comFalha > 0` é o resultado esperado
 num dia em que uma conta teve o token vencido.
 
-**Efeitos:** `upsert` em `snapshots_conta` e `snapshots_midia`, `insert` em
-`coleta_eventos` (uma linha por conta, sempre), e `update` de
-`ig_contas.status` para `token_expirado` quando for o caso.
+**Renovação do token (ADR-009).** Antes de coletar, a função verifica
+`token_expira_em`. Faltando 15 dias ou menos, ela troca o token por um novo
+(`fb_exchange_token`), grava no cofre com o mesmo nome — o que preserva
+`token_ref` — e atualiza `token_expira_em`.
 
-**Ambiente:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `META_GRAPH_URL`.
+Falha de renovação **não** derruba a coleta e **não** vira `coleta_eventos`: o
+token de hoje continua válido, e um evento ali desenharia lacuna na tela num dia
+que tem dado. Ela vai para o log, como `coleta.token_nao_renovado`.
+
+**Efeitos:** `upsert` em `snapshots_conta` e `snapshots_midia`, `insert` em
+`coleta_eventos` (uma linha por conta, sempre), `update` de `ig_contas.status`
+para `token_expirado` quando for o caso, e `update` de `token_ref` +
+`token_expira_em` quando renova.
+
+**Ambiente:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `META_GRAPH_URL`,
+`META_APP_ID`, `META_APP_SECRET`.
+
+As duas últimas passaram a ser exigidas por esta função na renovação — antes só
+`conectar-conta` precisava delas. **Sem elas a coleta continua funcionando e a
+renovação falha em silêncio**, até a tela pedir reconexão oito dias depois. É a
+diferença entre um deploy correto e um que só quebra dois meses adiante.
 
 ---
 

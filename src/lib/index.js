@@ -11,6 +11,8 @@
 
 export { estaEmModoDemonstracao, obterCliente } from './supabase.js'
 
+export { agoraDoProduto } from './relogio.js'
+
 export {
   falha,
   falhaDeErro,

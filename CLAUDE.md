@@ -87,6 +87,7 @@ Detalhes em `memory/restrictions.md`.
 | Que cor, fonte e contraste? | `docs/02_DESIGN_SYSTEM/TOKENS.md` e `src/styles/tokens.css` |
 | Como o produto deve parecer? | `docs/02_DESIGN_SYSTEM/identidade/` |
 | Quanto histórico o diagnóstico exige? | `src/rules/requisitos.js` — a tela lê de lá |
+| Quando o token é renovado, e quando a tela avisa? | `src/token/validade.js` (ADR-009) |
 | Quais métricas existem? | `src/metricas/dicionario.js` (nunca o nome da Meta) |
 | Como o banco isola tenants? | `supabase/schema.sql` e `supabase/migrations/` |
 | O que já se aprendeu construindo? | `memory/learnings.md` |

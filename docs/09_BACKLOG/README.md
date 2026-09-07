@@ -47,28 +47,41 @@
 - [x] Auth por link magico e onboarding de tenant
 
 ### Integracao Meta
-- [ ] Fluxo OAuth (Instagram API with Facebook Login)
-- [ ] Tela de conexao explicando o requisito da Pagina do Facebook ANTES do clique
-- [ ] Token no Vault, refresh antes do vencimento, aviso de reconexao
-- [ ] Dicionario de metricas canonicas + primeiro adaptador (ADR-003)
+- [x] Fluxo OAuth (Instagram API with Facebook Login), com estado de uso unico e
+      `redirect_uri` conferida contra lista do ambiente
+- [x] Tela de conexao explicando o requisito da Pagina do Facebook ANTES do clique
+- [x] Token no Vault, **refresh antes do vencimento** e aviso de reconexao. A
+      coleta troca o token a 15 dias do prazo e a tela pede reconexao a 7
+      (ADR-009). O aviso e o ultimo recurso: se ele aparece, a renovacao ja teve
+      mais de uma semana de tentativas
+- [x] Dicionario de metricas canonicas + primeiro adaptador (ADR-003)
+- [ ] **Conta `pausada` nao renova token.** A renovacao vive dentro da coleta, e
+      a coleta so varre `ativa`. Uma pausa de mais de 60 dias mata o token e a
+      pausa vira desconexao de fato. Divida aberta por ADR-009; a saida provavel
+      e varrer tambem `pausada` so para renovar
 
 ### Coleta e historico
-- [ ] Edge Function de snapshot diario (ADR-004)
-- [ ] Registro de falha de coleta e sinalizacao de lacuna na tela
+- [x] Edge Function de snapshot diario (ADR-004)
+- [x] Registro de falha de coleta e sinalizacao de lacuna na tela
+- [ ] Avisar o cliente quando uma falha de coleta ameacar o proximo diagnostico.
+      Hoje a lacuna aparece depois; cinco dias perdidos ja custam a semana inteira
 
 ### Motor de regras
-- [ ] Estrutura do ruleset versionado (ADR-005)
-- [ ] Primeiras regras do metodo Atmosfera Viral, com teste sobre historico real
-- [ ] Persistencia em `diagnosticos` com `ruleset_version`
+- [x] Estrutura do ruleset versionado (ADR-005)
+- [x] Primeiras regras do metodo Atmosfera Viral, com teste sobre historico real
+- [x] Persistencia em `diagnosticos` com `ruleset_version`
 
 ### Produto
-- [ ] Tela de diagnostico (o aha: causa nomeada, nao serie)
-- [ ] Export de relatorio a partir do mesmo diagnostico
+- [x] Tela de diagnostico (o aha: causa nomeada, nao serie)
+- [x] Export de relatorio a partir do mesmo diagnostico
 - [ ] Cobranca e ciclo de assinatura
 
 ### Preparacao do App Review (roda em paralelo, nao no fim)
-- [ ] Politica de privacidade publicada
-- [ ] Endpoint e fluxo de exclusao de dados
+- [x] Politica de privacidade escrita e em rota publica (`/privacidade`), fora da
+      area autenticada — a Meta precisa alcancar a URL sem login
+- [x] Endpoint e fluxo de exclusao de dados (`/dados` + Edge Function
+      `excluir-dados`, com protocolo em `exclusoes_de_dados`)
+- [ ] Publicar as duas URLs de verdade — depende da decisao de hospedagem
 - [ ] Screencast por permissao, gravado com cliente-teste real
 - [ ] Verificacao de negocio no Meta Business Manager (exige CNPJ)
 

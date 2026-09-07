@@ -1,40 +1,39 @@
 # 08 — DECISÕES · Kora Insights
 
-> ADRs (Architecture Decision Records): por que escolhemos X em vez de Y.
+> ADRs: por que escolhemos X em vez de Y, com a alternativa descartada escrita.
+> Decisão sem alternativa registrada é preferência disfarçada de arquitetura.
+> Última revisão: 2026-09-07.
 
-## O que vive aqui
+## As decisões vigentes
 
-- **ADRs**: decisões técnicas formalizadas (status, contexto, alternativas, consequências)
-- **Ciclo de vida**: Proposto → Aceito → Supersedido
-- **Arquivo**: um ADR por arquivo (`adr-NNN-titulo.md`)
-- **Histórico**: decisões antigas/supersedidas ficam, marcadas como "Supersedido por"
-- **Rastreabilidade**: quando foi decidido, quem decidiu, qual código implementa
+| ADR | Decide | Onde o código mora |
+|---|---|---|
+| [001](adr-001-stack.md) | React + Vite + Supabase, JavaScript com JSDoc | o repositório inteiro |
+| [002](adr-002-variante-api-instagram.md) | Instagram API **with Facebook Login**, quatro permissões | `src/lib/conexaoMeta.js` |
+| [003](adr-003-dicionario-de-metricas.md) | Dicionário canônico + adaptadores versionados; nome da Meta nunca é persistido | `src/metricas/` |
+| [004](adr-004-historico-proprio.md) | Snapshot diário próprio; lacuna nunca some da tela | `supabase/functions/coleta-diaria/`, `src/motor/historico.js` |
+| [005](adr-005-motor-de-regras-versionado.md) | Regra versionada e pura, nunca modelo de linguagem, nunca cálculo na tela | `src/rules/`, `src/motor/` |
+| [006](adr-006-escopo-mvp.md) | Comparação com concorrente fica para a Fase 2 | — |
+| [007](adr-007-modo-de-demonstracao.md) | Demonstração atrás do mesmo contrato, com diagnóstico saindo do motor real | `src/lib/demonstracao/`, `src/fixtures/` |
+| [008](adr-008-variacao-sobre-valor-exibido.md) | Variação calculada sobre o valor que a tela mostra | `src/rules/0.3.0/cadencia.js` |
+| [009](adr-009-renovacao-do-token.md) | Renovação do token a 15 dias, aviso de reconexão a 7 | `src/token/validade.js`, `coleta-diaria` |
+
+Nenhum ADR foi supersedido até aqui.
+
+## Como escrever o próximo
+
+1. Copie `adr-000-template.md` para `adr-NNN-titulo.md`, numerando na sequência.
+2. Preencha **Alternativas** com o que foi de fato considerado e por que caiu.
+   Alternativa inventada para preencher seção é ruído.
+3. Status nasce `Proposto`; vira `Aceito` quando o dono aprova.
+4. ADR não se apaga nem se reescreve: decisão que mudou ganha um ADR novo, e os
+   dois se linkam.
+5. **Atualize a tabela acima no mesmo commit.** Índice que não lista o arquivo é
+   igual a arquivo que não existe.
 
 ## O que NÃO vive aqui
 
-- Implementação da decisão → `src/`
-- Especificações de API → `07_APIS/`
-- Regras de negócio → `03_REGRAS_DE_NEGOCIO/`
-- Fluxos → `05_FLUXOS/`
-
-## Arquivos sugeridos
-
-- `adr-000-template.md` — TEMPLATE: copie e preencha para novo ADR
-- `adr-001-escolher-database.md` — por que Supabase vs. Firebase vs. RDS
-- `adr-002-autenticacao.md` — por que Clerk vs. Auth0 vs. custom
-- `adr-003-frontend-framework.md` — por que React vs. Vue vs. Svelte
-- `adr-004-...` — continue numerando sequencialmente
-
-## Como preencher
-
-1. **Copie `adr-000-template.md`**: renomeie para `adr-NNN-titulo.md`
-2. **Preencha todas as seções**: Contexto, Decisão, Alternativas, Consequências
-3. **Status começa "Proposto"**: aprovação → "Aceito", depois → "Supersedido"
-4. **Não delete ADRs antigos**: marque como "Supersedido por adr-NNN", arquivo fica no histórico
-5. **Atualize quando decisão muda**: novo ADR que supersede, link bidirecional
-
-## Ligações
-
-- `adr-000-template.md` — comece aqui, clone para novo ADR
-- `01_ARQUITETURA/` — ADRs justificam as escolhas técnicas
-- `03_REGRAS_DE_NEGOCIO/` — se regra é decisão técnica, document em ADR
+- A implementação → `src/`, `supabase/`
+- Como a regra se comporta no detalhe → `03_REGRAS_DE_NEGOCIO/`
+- Contrato entre camadas → `01_ARQUITETURA/contratos.md`
+- Aprendizado que ainda não virou decisão → `memory/learnings.md`

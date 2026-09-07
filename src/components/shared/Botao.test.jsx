@@ -7,6 +7,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Link, MemoryRouter } from 'react-router-dom'
+
 import Botao from './Botao.jsx'
 
 describe('Botao', () => {
@@ -73,5 +75,23 @@ describe('Botao', () => {
     render(<Botao>Histórico</Botao>)
 
     expect(screen.getByRole('button')).toHaveAttribute('data-variante', 'secundario')
+  })
+
+  it('com `como`, a chamada que navega vira link de verdade', () => {
+    // Botão que navega quebra abrir em nova aba e é anunciado como botão a quem
+    // usa leitor de tela. O papel tem que ser `link`, com a mesma pele.
+    render(
+      <MemoryRouter>
+        <Botao como={Link} para="/conectar" variante="primario">
+          Reconectar
+        </Botao>
+      </MemoryRouter>,
+    )
+
+    const acao = screen.getByRole('link', { name: 'Reconectar' })
+    expect(acao).toHaveAttribute('href', '/conectar')
+    expect(acao).toHaveAttribute('data-variante', 'primario')
+    expect(acao.className).toBe('ki-botao')
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 })

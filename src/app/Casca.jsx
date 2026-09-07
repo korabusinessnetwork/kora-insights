@@ -1,12 +1,23 @@
 import { Link, Outlet } from 'react-router-dom'
 
 import { Aviso, Botao } from '../components/shared/index.js'
-import { estaEmModoDemonstracao } from '../lib/index.js'
+import { agoraDoProduto, estaEmModoDemonstracao } from '../lib/index.js'
 import { ROTAS } from '../constants/rotas.js'
 import { useSessao } from '../context/SessaoContexto.jsx'
 import { useTenant } from '../context/TenantContexto.jsx'
+import { avisosDeReconexao } from '../token/validade.js'
 import Cabecalho from './Cabecalho.jsx'
 import './Casca.css'
+
+/**
+ * Urgencia do aviso, na variante que o kit entende. A tela traduz o estado que
+ * o modulo puro decidiu; ela nao decide urgencia nenhuma.
+ * @type {Readonly<Record<string, 'atencao'|'critico'>>}
+ */
+const VARIANTE_DA_RECONEXAO = Object.freeze({
+  vencido: 'critico',
+  vencendo: 'atencao',
+})
 
 /**
  * A casca das telas autenticadas: barra da identidade, avisos que valem para o
@@ -21,8 +32,15 @@ import './Casca.css'
  */
 export default function Casca() {
   const { encerrarSessao } = useSessao()
-  const { erro, recarregar } = useTenant()
+  const { contas, erro, recarregar } = useTenant()
   const emDemonstracao = estaEmModoDemonstracao()
+
+  // Conexao vencendo e assunto do produto inteiro, nao da tela aberta: a conta
+  // que perde o token perde dias de historico esteja ou nao em foco, e dia sem
+  // coleta nao volta (ADR-004). O prazo vem de `src/token/validade.js`, o mesmo
+  // que a coleta usa para renovar sozinha — se este aviso apareceu, e porque a
+  // renovacao automatica ja teve mais de uma semana de tentativas.
+  const reconexoes = avisosDeReconexao(contas, agoraDoProduto())
 
   return (
     <div className="ka-casca">
@@ -32,7 +50,7 @@ export default function Casca() {
 
       <Cabecalho />
 
-      {emDemonstracao || erro ? (
+      {emDemonstracao || erro || reconexoes.length > 0 ? (
         <div className="ka-casca__avisos">
           {/* Dado de exemplo apresentado como dado do cliente é a desonestidade
               que memory/identity.md proíbe: o aviso é permanente, não some com
@@ -57,6 +75,22 @@ export default function Casca() {
               {erro.mensagem}
             </Aviso>
           ) : null}
+
+          {/* Aviso sem próxima ação é beco: o caminho da reconexão vai junto. */}
+          {reconexoes.map((reconexao) => (
+            <Aviso
+              key={reconexao.contaId}
+              variante={VARIANTE_DA_RECONEXAO[reconexao.estado]}
+              titulo={reconexao.titulo}
+              acao={
+                <Botao variante="secundario" como={Link} para={ROTAS.conectar}>
+                  Reconectar
+                </Botao>
+              }
+            >
+              {reconexao.texto}
+            </Aviso>
+          ))}
         </div>
       ) : null}
 
