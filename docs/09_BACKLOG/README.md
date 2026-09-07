@@ -28,7 +28,13 @@
 
 ### Bloqueantes antes de escrever codigo de feature
 - [ ] Confirmar ADR-006 (comparacao na Fase 2) com o Matheus
-- [ ] Decidir hospedagem: Vercel Pro pago ou alternativa com free tier comercial
+- [ ] **Decidir hospedagem.** Comparativo pesquisado e recomendacao escritos em
+      `docs/12`, secao 2.2. Em uma linha: o Hobby da Vercel veda uso comercial e
+      a definicao dela alcanca ate "anunciar a venda de um produto", entao o
+      gatilho e o lancamento e nao a primeira cobranca. Cloudflare Pages e
+      Netlify permitem uso comercial no gratuito; o build e estatico puro, entao
+      trocar nao custa nada. Recomendacao: Cloudflare Pages. **Falta escolher** —
+      e a escolha destrava publicar as URLs do App Review
 - [ ] Escolher gateway e definir se aceita Pix
 - [ ] Criar app no painel Meta, converter conta de teste para profissional e
       vincular Pagina do Facebook
