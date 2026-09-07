@@ -34,6 +34,7 @@
 
 | Data | Aprendizado | Ação |
 |---|---|---|
+| 2026-09-07 | Decisão correta cobra preço em outro lugar: não marcar falha do motor como evento de coleta evita lacuna inventada — e deixava a tela mostrando veredito antigo como leitura de hoje. O relatório carimbava a data, o histórico datava cada linha, e só a tela principal era calada | A tela declara a data da leitura e avisa depois de dois dias. A frase não desmente o veredito: ele vale para o período que comparou, o que falta é o que veio depois |
 | 2026-09-07 | A tela `/dados` oferecia só a saída irreversível. Quem queria apenas parar a coleta — contrato encerrado, conta em reforma — precisava apagar meses de histórico para conseguir. A função reversível estava prevista em quatro documentos e não existia | `desconectar-conta` escrita, e as duas saídas lado a lado, com a reversível primeiro na leitura e na tabulação |
 | 2026-09-07 | Confirmação que guarda só o id da conta, e não a ação, abre as duas saídas ao mesmo tempo: a pessoa clica em "Confirmar" sem saber qual das duas, e uma delas não tem volta | A confirmação carrega `{ contaId, acao }`, e o teste cobra que abrir uma não abre a outra |
 | 2026-09-06 | A regra de cadência disparava sem conferir que o alcance total caiu. Publicar 33% menos e alcançar o mesmo (posts melhores) virava "causa nomeada" e a ação mandava desfazer a melhora | Três desfechos na regra; sem queda de alcance a severidade é `ok`. O produto perde a chance de acusar um problema inexistente, que é exatamente o que se quer |

@@ -194,8 +194,14 @@ A falha **não** vira evento de coleta, e isso é decisão, não esquecimento:
 coleta do dia pode ter ido bem. Marcar ali pintaria na tela um buraco de dado que
 não existe — e **lacuna inventada é tão desonesta quanto lacuna escondida**.
 
-A consequência é que a falha do motor fica só no log. Ela precisa de
-monitoramento próprio, que ainda não existe (`docs/09_BACKLOG`).
+A consequência é que a falha do motor fica só no log — e, do lado do cliente, a
+tela mostrava o veredito antigo sem dizer que ele envelheceu. Isso foi fechado
+pelo lado dele: a tela declara a data da leitura e avisa depois de dois dias sem
+atualização (`src/motor/frescor.js`).
+
+Do nosso lado, **monitoramento próprio continua não existindo**
+(`docs/09_BACKLOG`). O aviso na tela é sinal indireto: chega pelo cliente, e
+depois de dois dias.
 
 ---
 

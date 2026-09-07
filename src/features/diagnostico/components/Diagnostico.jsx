@@ -1,5 +1,7 @@
 import { AvisoDeLacuna, Botao, Estado, Veredito } from '../../../components/shared/index.js'
+import { agoraDoProduto } from '../../../lib/index.js'
 import { formatarJanelaComparada } from '../../../metricas/index.js'
+import { frescorDoDiagnostico } from '../../../motor/index.js'
 import useDiagnostico, { ESTADOS } from '../hooks/useDiagnostico.js'
 import AcaoRecomendada from './AcaoRecomendada.jsx'
 import LimitesDoDiagnostico from './LimitesDoDiagnostico.jsx'
@@ -83,12 +85,15 @@ function FalhaAoCarregar({ erro, aoTentarDeNovo }) {
  * @param {object} [props.achado] o achado `indeterminado`, quando ele existe
  * @param {{ inicio?: string, fim?: string, motivo?: string }[]} [props.lacunas]
  * @param {{ codigo: string, texto: string }[]} [props.limites]
+ * @param {import('../../../motor/frescor.js').Frescor|null} [props.frescor]
  * @returns {JSX.Element}
  */
-function AindaSemVeredito({ titulo, descricao, achado, lacunas, limites }) {
+function AindaSemVeredito({ titulo, descricao, achado, lacunas, limites, frescor }) {
   return (
     <div className="tela-diagnostico" data-fase="sem-veredito">
       <Estado tipo="vazio" titulo={titulo} descricao={descricao} />
+
+      <FrescorDaLeitura frescor={frescor} />
 
       <AvisoDeLacuna lacunas={lacunas} />
 
@@ -102,6 +107,35 @@ function AindaSemVeredito({ titulo, descricao, achado, lacunas, limites }) {
 
       <LimitesDoDiagnostico limites={limites} />
     </div>
+  )
+}
+
+/**
+ * Quando esta leitura foi feita.
+ *
+ * O relatorio ja carimbava a data e o historico ja datava cada linha; esta
+ * tela, que e a que o cliente le em voz alta, era a unica que nao dizia nada.
+ * A consequencia aparecia quando `gerar-diagnostico` parava por conta: a falha
+ * so vai para o log — de proposito, porque marca-la como evento de coleta
+ * pintaria uma lacuna que nao existe — e o veredito antigo seguia na tela sem
+ * sinal de que envelheceu.
+ *
+ * O estado entra por `data-estado`, nunca por classe de cor.
+ *
+ * @param {object} props
+ * @param {import('../../../motor/frescor.js').Frescor|null} props.frescor
+ * @returns {JSX.Element|null}
+ */
+function FrescorDaLeitura({ frescor }) {
+  if (!frescor) return null
+
+  return (
+    <p className="tela-diagnostico__frescor" data-estado={frescor.envelhecido ? 'envelhecido' : 'recente'}>
+      <span className="tela-diagnostico__frescor-data">{frescor.rotulo}</span>
+      {frescor.aviso ? (
+        <span className="tela-diagnostico__frescor-aviso">{frescor.aviso}</span>
+      ) : null}
+    </p>
   )
 }
 
@@ -130,6 +164,10 @@ export default function Diagnostico({ contaId }) {
 
   const cobertura = diagnostico?.cobertura ?? {}
   const limites = diagnostico?.limites ?? []
+  // O relogio vem da camada de servicos: em demonstracao ele e o instante
+  // congelado da fixture, senao a leitura de exemplo envelheceria sozinha com a
+  // passagem do calendario.
+  const frescor = frescorDoDiagnostico(diagnostico, agoraDoProduto())
   // Os achados chegam ordenados por peso decrescente (contratos.md, secao 3):
   // o veredito da tela e o primeiro da lista, e ordenar de novo aqui seria a
   // tela decidindo o que o motor ja decidiu.
@@ -154,6 +192,7 @@ export default function Diagnostico({ contaId }) {
         achado={principal}
         lacunas={cobertura.lacunas}
         limites={limites}
+        frescor={frescor}
       />
     )
   }
@@ -165,6 +204,8 @@ export default function Diagnostico({ contaId }) {
         rotulo={principal.rotulo}
         frase={principal.frase}
       />
+
+      <FrescorDaLeitura frescor={frescor} />
 
       <div className="tela-diagnostico__colunas">
         <div className="tela-diagnostico__evidencia">

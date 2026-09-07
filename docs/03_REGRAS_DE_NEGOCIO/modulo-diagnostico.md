@@ -247,6 +247,35 @@ Quando `meta.origem = 'demonstracao'`, a tela diz isso de forma permanente e
 visível (ADR-007). Dado de exemplo apresentado como dado do cliente é exatamente
 a desonestidade que `memory/identity.md` proíbe.
 
+### 6.6 Quando a leitura foi feita
+
+A tela diz sempre a data de `gerado_em`, e diz mais quando essa data envelheceu:
+
+```
+diasDesde   = piso((agora - gerado_em) / 1 dia)     -- negativo vira zero
+envelhecido = diasDesde > DIAS_ATE_ENVELHECER       -- 2, em src/motor/frescor.js
+```
+
+O limiar sai do agendamento, não do gosto: `gerar-diagnostico` roda todo dia e o
+`id` é determinístico, então rodar de novo no mesmo período cai na mesma linha e
+refaz `gerado_em`. Com a rotina de pé, `gerado_em` tem menos de um dia; dois
+cobrem atraso de execução e folga de fuso; três significam rodada faltando.
+
+Isto existe porque a falha de `gerar-diagnostico` **não** vira evento de coleta
+(seção 9, e `docs/07_APIS/edge-functions.md`, seção 5) — marcá-la ali pintaria
+uma lacuna que não existe, e lacuna inventada é tão desonesta quanto lacuna
+escondida. O preço dessa decisão correta era a tela seguir mostrando o veredito
+antigo sem sinal nenhum de que ele parou de ser refeito. O relatório já carimbava
+a data e o histórico já datava cada linha; a tela de diagnóstico, que é a que o
+cliente lê em voz alta, era a única calada.
+
+**A frase não desmente o veredito**, e essa fronteira é a regra: o que está na
+tela continua valendo para o período que ele comparou; o que falta é o que
+aconteceu depois. Dizer "este diagnóstico está errado" seria inventar tanto
+quanto omitir a idade dele. A frase também assume o problema — "se parou, o
+problema é do nosso lado, não do seu" — porque o cliente não tem o que fazer a
+respeito e não pode ficar procurando erro próprio.
+
 ---
 
 ## 7. Severidade, tom e o veredito único

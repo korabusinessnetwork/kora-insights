@@ -31,6 +31,31 @@
   gap: var(--e-8);
 }
 
+/* ── frescor da leitura ───────────────────────────────────────────────────
+   Quando esta leitura foi feita. Discreto quando esta em dia, porque a data de
+   uma leitura de ontem nao disputa atencao com o veredito; visivel quando
+   envelheceu, porque ai ela muda o que o cliente pode afirmar na reuniao. */
+
+.tela-diagnostico__frescor {
+  display: grid;
+  gap: var(--e-2);
+  margin: 0;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+}
+
+.tela-diagnostico__frescor[data-estado='envelhecido'] {
+  padding: var(--e-4);
+  border-left: var(--borda-acento) solid var(--cor-atencao);
+  border-radius: var(--raio-2);
+  background-color: var(--cor-superficie);
+  color: var(--cor-tinta);
+}
+
+.tela-diagnostico__frescor-data {
+  font-weight: var(--peso-medio);
+}
+
 /* ── esqueleto ────────────────────────────────────────────────────────────
    Blocos vazios com a forma da tela. Nenhum numero, nenhuma frase: o cliente
    nao pode ler nada aqui que ele leve para a reuniao por engano. */

@@ -69,6 +69,17 @@
 - [ ] Avisar o cliente quando uma falha de coleta ameacar o proximo diagnostico.
       Hoje a lacuna aparece depois; cinco dias perdidos ja custam a semana inteira
 
+### Operacao e confianca no dado
+- [x] A tela declara quando a leitura foi feita, e avisa depois de dois dias sem
+      atualizacao. Falha de `gerar-diagnostico` so vai para o log de proposito —
+      marca-la como evento de coleta pintaria lacuna que nao existe — e o preco
+      era o cliente ler veredito velho como se fosse de hoje
+- [ ] **Monitoramento proprio da coleta e do motor.** O aviso na tela cobre o
+      cliente, nao nos: ele chega por ele, e dois dias depois. Falta saber, do
+      nosso lado, que a rotina parou. Alternativa gratuita provavel: uma consulta
+      de saude no proprio Postgres, lida por quem opera — alerta por servico pago
+      fica adiado por padrao (`memory/restrictions.md`)
+
 ### Motor de regras
 - [x] Estrutura do ruleset versionado (ADR-005)
 - [x] Primeiras regras do metodo Atmosfera Viral, com teste sobre historico real

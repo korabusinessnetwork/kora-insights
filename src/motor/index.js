@@ -1,7 +1,11 @@
 /**
- * Porta unica do motor. As regras e a camada de servicos importam daqui, nunca
+ * Porta unica do motor. As regras, a camada de servicos e — para descrever um
+ * diagnostico ja pronto, nunca para calcular um — a tela importam daqui, nunca
  * dos arquivos internos: assim mover um calculo de `janelas.js` para
  * `estatistica.js` nao quebra ruleset publicado.
+ *
+ * `frescorDoDiagnostico` e o caso da tela: ele nao produz veredito nenhum, so
+ * diz ha quanto tempo o veredito foi produzido.
  */
 
 export {
@@ -16,6 +20,8 @@ export {
   variacao,
   variacaoExibida,
 } from './estatistica.js'
+
+export { DIAS_ATE_ENVELHECER, frescorDoDiagnostico } from './frescor.js'
 
 export { montarHistorico } from './historico.js'
 

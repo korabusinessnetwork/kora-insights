@@ -162,8 +162,14 @@ silêncio, e série truncada produz um diagnóstico plausível e errado.
 
 **A falha de uma conta não vira evento de coleta.** `montarHistorico` traduziria
 isso em lacuna, e a coleta do dia pode ter ido bem: lacuna inventada é tão
-desonesta quanto lacuna escondida. A falha fica no log, e por isso ela precisa de
-monitoramento próprio, que ainda não existe.
+desonesta quanto lacuna escondida. A falha fica no log.
+
+O efeito dessa decisão correta chegava ao cliente: a tela seguia mostrando o
+veredito antigo como se fosse a leitura de hoje. Hoje ela declara a idade da
+leitura e, passados dois dias sem atualização, diz que a rotina parou
+(`src/motor/frescor.js`, `modulo-diagnostico.md` 6.6). Isso cobre o cliente, e
+serve de sinal indireto para nós — **monitoramento próprio continua não
+existindo**, e está em `docs/09_BACKLOG`.
 
 **Ambiente:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
 
