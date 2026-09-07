@@ -28,13 +28,17 @@
 
 ### Bloqueantes antes de escrever codigo de feature
 - [ ] Confirmar ADR-006 (comparacao na Fase 2) com o Matheus
-- [ ] **Decidir hospedagem.** Comparativo pesquisado e recomendacao escritos em
-      `docs/12`, secao 2.2. Em uma linha: o Hobby da Vercel veda uso comercial e
-      a definicao dela alcanca ate "anunciar a venda de um produto", entao o
-      gatilho e o lancamento e nao a primeira cobranca. Cloudflare Pages e
-      Netlify permitem uso comercial no gratuito; o build e estatico puro, entao
-      trocar nao custa nada. Recomendacao: Cloudflare Pages. **Falta escolher** —
-      e a escolha destrava publicar as URLs do App Review
+- [x] **Hospedagem decidida: Cloudflare Pages** (ADR-010). Gratuito com uso
+      comercial permitido, sem teto de banda. Configuracao no repositorio:
+      `public/_headers`, `.node-version` e o passo de CI que cobra o modo SPA
+- [ ] **Content-Security-Policy.** Ficou de fora do `_headers` de proposito: ela
+      precisa do host do Supabase, que muda por ambiente, e uma CSP com host
+      errado bloqueia o login em producao sem erro visivel. Entra gerada no build
+      a partir de `VITE_SUPABASE_URL`, quando houver projeto definitivo
+- [ ] **Conectar o repositorio ao Pages e fazer o primeiro deploy.** Build
+      `npm run build`, saida `dist`. Depois, apontar `VITE_META_REDIRECT_URI`,
+      `KORA_REDIRECIONAMENTOS_PERMITIDOS` e `KORA_ORIGENS_PERMITIDAS` para o
+      dominio novo — as tres falham em uso, nunca no build
 - [ ] Escolher gateway e definir se aceita Pix
 - [ ] Criar app no painel Meta, converter conta de teste para profissional e
       vincular Pagina do Facebook

@@ -54,7 +54,7 @@ critico, nao como etapa final.
 | Item | Custo/mes |
 |---|---|
 | Supabase Free | R$ 0 |
-| Vercel (ver 2.2) | R$ 0 a R$ 110 |
+| Cloudflare Pages (ADR-010) | R$ 0 |
 | Gateway de pagamento | ~4% + R$ 0,40 por cobranca |
 | **Piso** | **~R$ 0 + taxa de gateway** |
 
@@ -116,16 +116,17 @@ primeiro real de receita, para resolver um problema que R$ 0 resolvem igual. A
 regra de custo do projeto (`CLAUDE.md`) manda adiar o pago por padrao, e aqui o
 gratuito nao e um degrau abaixo — e o mesmo servico para um site estatico.
 
-**A decisao e do dono.** Quando escolhida, vira ADR-010 com o `_redirects` (ou
-equivalente) da SPA no mesmo commit.
+**Decidido em 2026-09-07: Cloudflare Pages** (ADR-010). O custo fixo de
+hospedagem da Fase 0 e da Fase 1 cai para R$ 0, e some a linha "Vercel Pro" do
+orcamento pos-review.
 
 ### 2.3 Fase 1 (pos review, 20 a 100 contas)
 
 | Item | USD/mes | ~BRL/mes |
 |---|---|---|
 | Supabase Pro | US$ 25 | ~R$ 138 |
-| Vercel Pro (ou alternativa gratuita) | US$ 20 | ~R$ 110 |
-| **Total fixo** | **US$ 45** | **~R$ 248** |
+| Cloudflare Pages (ADR-010) | US$ 0 | R$ 0 |
+| **Total fixo** | **US$ 25** | **~R$ 138** |
 
 O Supabase Pro e cobrado por organizacao, nao por projeto, e ja inclui US$ 10 de
 credito de computacao que cobre exatamente uma instancia Micro. Projeto adicional
@@ -200,7 +201,7 @@ sera infraestrutura, sera suporte manual. Instrumente o onboarding antes de esca
 
 - Gateway (Stripe, Asaas ou Pagar.me) e se aceita Pix, que derruba a taxa de ~4% para
   centavos por transacao
-- Hospedagem definitiva (secao 2.2 — comparativo e recomendacao prontos, falta escolher)
+- ~~Hospedagem definitiva~~ — **decidido**: Cloudflare Pages (ADR-010)
 - Se agencia com varias marcas paga por marca ou tem preco de pacote. Recomendacao
   inicial: por marca, com desconto progressivo a partir da quinta
 

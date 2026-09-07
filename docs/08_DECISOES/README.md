@@ -17,8 +17,10 @@
 | [007](adr-007-modo-de-demonstracao.md) | Demonstração atrás do mesmo contrato, com diagnóstico saindo do motor real | `src/lib/demonstracao/`, `src/fixtures/` |
 | [008](adr-008-variacao-sobre-valor-exibido.md) | Variação calculada sobre o valor que a tela mostra | `src/rules/0.3.0/cadencia.js` |
 | [009](adr-009-renovacao-do-token.md) | Renovação do token a 15 dias, aviso de reconexão a 7 | `src/token/validade.js`, `coleta-diaria` |
+| [010](adr-010-hospedagem-cloudflare-pages.md) | Hospedagem no Cloudflare Pages, no gratuito que permite uso comercial | `public/_headers`, `.node-version` |
 
-Nenhum ADR foi supersedido até aqui.
+O ADR-010 **supera o ADR-001 no ponto do deploy** — "Vercel" deixou de valer. O
+resto do ADR-001 continua de pé, e nenhum outro ADR foi supersedido.
 
 ## Como escrever o próximo
 

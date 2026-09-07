@@ -301,9 +301,16 @@ função ler uma.
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | front | sem as duas, o produto entra em modo de demonstração |
 | `VITE_META_APP_ID`, `VITE_META_OAUTH_URL`, `VITE_META_REDIRECT_URI` | front | monta o diálogo de consentimento |
 
-**`VITE_META_OAUTH_URL` ainda não está em `.env.example`** e precisa entrar: sem
-ela, `urlDeConsentimento` devolve falha em vez de montar a URL. Ela é variável, e
-não literal, porque a versão da Graph API vive dentro do endereço do diálogo.
+`VITE_META_OAUTH_URL` **entrou em `.env.example` em 2026-09-07**, junto com a
+decisão de hospedagem — sem ela, `urlDeConsentimento` devolve falha em vez de
+montar a URL. Ela é variável, e não literal, porque a versão da Graph API vive
+dentro do endereço do diálogo.
+
+**No deploy, três variáveis passam a apontar para o lugar errado e nenhuma falha
+no build** (ADR-010): `VITE_META_REDIRECT_URI` no Pages, e
+`KORA_REDIRECIONAMENTOS_PERMITIDOS` e `KORA_ORIGENS_PERMITIDAS` no Supabase. A
+última é a pior — sem a origem nova, o CORS não ecoa nada e **toda** chamada do
+navegador às Edge Functions falha, não uma tela.
 
 Dependência externa das funções: `jsr:@supabase/supabase-js@2`, resolvida por URL
 pelo Deno. Ela **não** foi adicionada a `package.json` — o front já usa o mesmo
