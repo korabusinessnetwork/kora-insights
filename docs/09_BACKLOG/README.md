@@ -35,10 +35,16 @@
       precisa do host do Supabase, que muda por ambiente, e uma CSP com host
       errado bloqueia o login em producao sem erro visivel. Entra gerada no build
       a partir de `VITE_SUPABASE_URL`, quando houver projeto definitivo
-- [ ] **Conectar o repositorio ao Pages e fazer o primeiro deploy.** Build
-      `npm run build`, saida `dist`. Depois, apontar `VITE_META_REDIRECT_URI`,
-      `KORA_REDIRECIONAMENTOS_PERMITIDOS` e `KORA_ORIGENS_PERMITIDAS` para o
-      dominio novo — as tres falham em uso, nunca no build
+- [x] **Deploy automatizado**: `.github/workflows/publicar.yml` publica no
+      Cloudflare Pages a cada push na `main`, cria o projeto na primeira
+      execucao e repete a conferencia de modo SPA sobre o artefato que vai ao ar
+- [ ] **Dois segredos no GitHub para o deploy ligar**: `CLOUDFLARE_API_TOKEN`
+      (escopo Account → Cloudflare Pages → Edit) e `CLOUDFLARE_ACCOUNT_ID`. Sem
+      eles o workflow avisa e passa, em vez de reprovar a main
+- [ ] Depois do primeiro deploy, apontar `VITE_META_REDIRECT_URI` (segredo do
+      GitHub), `KORA_REDIRECIONAMENTOS_PERMITIDOS` e `KORA_ORIGENS_PERMITIDAS`
+      (secrets do Supabase) para o dominio novo — as tres falham em uso, nunca
+      no build
 - [ ] Escolher gateway e definir se aceita Pix
 - [ ] Criar app no painel Meta, converter conta de teste para profissional e
       vincular Pagina do Facebook

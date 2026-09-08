@@ -41,13 +41,47 @@ projeto manda adiar o pago por padrao, sendo que aqui o gratuito nao e um degrau
 abaixo, e o mesmo servico para um site estatico. Vercel Pro custaria ~R$ 1.320 em
 doze meses antes do primeiro real de receita.
 
-### Configuracao no painel
+### Como o deploy acontece: GitHub Actions, e nao a integracao Git do painel
 
-| Campo | Valor |
+**Emenda de 2026-09-08.** Este ADR previa conectar o repositorio pela integracao
+Git no painel da Cloudflare. O que foi construido e `.github/workflows/publicar.yml`,
+que faz o build e publica com `wrangler` a cada push na `main`.
+
+As duas formas entregam a mesma coisa — deploy automatico a cada push — e a
+escolha tem uma razao de projeto e uma pratica.
+
+A de projeto: assim a configuracao de deploy e versionada, revisada em PR e
+cobrada pelo mesmo CI que cobra o resto. Quem mudar como o produto vai ao ar
+deixa rastro no repositorio, e nao numa tela que so o dono da conta ve.
+
+A pratica: a integracao Git exige cliques no painel da Cloudflare, e o workflow
+exige apenas dois segredos no GitHub. **O token nunca precisa passar por
+conversa nenhuma** — vai direto para os segredos do repositorio, que o proprio
+GitHub mascara em log.
+
+> **As duas formas se somam, nao se substituem.** Se o repositorio TAMBEM for
+> conectado pela integracao Git no painel, cada push publica duas vezes e as duas
+> competem pelo mesmo endereco. Escolha uma.
+
+| Onde | O que |
 |---|---|
-| Build command | `npm run build` |
-| Build output directory | `dist` |
-| Node version | `.node-version` no repositorio, fixado em 22 — o mesmo do CI |
+| Segredo `CLOUDFLARE_API_TOKEN` | escopo **Account → Cloudflare Pages → Edit**, e nada alem |
+| Segredo `CLOUDFLARE_ACCOUNT_ID` | o id da conta, visivel no painel |
+| Build command | `npm run build` (no workflow) |
+| Build output | `dist` |
+| Node | `.node-version`, fixado em 22 — o Pages e o `setup-node` leem o mesmo arquivo |
+| Nome do projeto | `kora-insights`, criado na primeira execucao |
+
+### As variaveis do front moram no GitHub, nao no painel
+
+Consequencia direta de o build acontecer no Actions: `VITE_*` e lida **no
+build**, porque o Vite a inlineia no bundle. Configurada no painel da Cloudflare
+ela nao teria efeito nenhum, ja que la nao ha build.
+
+Ausentes, `estaEmModoDemonstracao()` devolve `true` e o produto sobe em modo de
+demonstracao, com o aviso permanente (ADR-007). **Isso torna util publicar antes
+de existir projeto Supabase**: `/privacidade` e `/dados` sao estaticas, nao
+consultam banco, e sao exatamente as duas URLs que o App Review exige.
 
 ### O fallback de rota liga sozinho, e o gatilho e uma ausencia
 
@@ -98,7 +132,7 @@ muda, e **nenhuma delas falha no build** — todas falham em uso, depois:
 
 | Variavel | Onde | O que quebra se ficar velha |
 |---|---|---|
-| `VITE_META_REDIRECT_URI` | Pages, build | a Meta recusa o `redirect_uri` e a conexao morre no dialogo |
+| `VITE_META_REDIRECT_URI` | segredo do GitHub, lido no build | a Meta recusa o `redirect_uri` e a conexao morre no dialogo |
 | `KORA_REDIRECIONAMENTOS_PERMITIDOS` | Supabase | `conectar-conta` recusa com `ENTRADA_INVALIDA`, mesmo com a Meta aprovando |
 | `KORA_ORIGENS_PERMITIDAS` | Supabase | o CORS nao ecoa a origem nova e **toda** chamada do navegador as Edge Functions falha |
 
