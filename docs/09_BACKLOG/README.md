@@ -38,9 +38,17 @@
 - [x] **Deploy automatizado**: `.github/workflows/publicar.yml` publica no
       Cloudflare Pages a cada push na `main`, cria o projeto na primeira
       execucao e repete a conferencia de modo SPA sobre o artefato que vai ao ar
-- [ ] **Dois segredos no GitHub para o deploy ligar**: `CLOUDFLARE_API_TOKEN`
-      (escopo Account → Cloudflare Pages → Edit) e `CLOUDFLARE_ACCOUNT_ID`. Sem
-      eles o workflow avisa e passa, em vez de reprovar a main
+- [x] **Dois segredos no GitHub para o deploy ligar**: `CLOUDFLARE_API_TOKEN`
+      (escopo Account → Cloudflare Pages → Edit) e `CLOUDFLARE_ACCOUNT_ID`.
+      Configurados em 2026-09-08; o site subiu em https://kora-insights.pages.dev
+- [ ] **As fontes vem do Google Fonts, e isso e uma requisicao de terceiro.**
+      `index.html` carrega Inter e Newsreader de `fonts.googleapis.com`, entao o
+      navegador de todo visitante entrega o IP dele ao Google antes de qualquer
+      consentimento — inclusive nas duas paginas publicas, que sao justamente as
+      que falam de privacidade. Hospedar as duas familias em `public/` resolve,
+      tira uma dependencia externa do caminho critico de renderizacao e simplifica
+      a CSP logo abaixo. Enquanto nao for feito, a politica precisa declarar o
+      Google como operador
 - [ ] Depois do primeiro deploy, apontar `VITE_META_REDIRECT_URI` (segredo do
       GitHub), `KORA_REDIRECIONAMENTOS_PERMITIDOS` e `KORA_ORIGENS_PERMITIDAS`
       (secrets do Supabase) para o dominio novo — as tres falham em uso, nunca

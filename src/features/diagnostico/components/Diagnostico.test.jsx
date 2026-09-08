@@ -96,8 +96,9 @@ describe('Diagnostico — Casa Oliveira, a causa nomeada', () => {
     render(<Diagnostico contaId={CASA_OLIVEIRA} />)
     await screen.findByRole('heading', { name: FRASE_DO_VEREDITO })
 
-    expect(screen.getByRole('button', { name: 'Marcar teste de 4 semanas' })).toBeDisabled()
-    expect(screen.getByText(/A marcação do teste chega na próxima versão/)).toBeInTheDocument()
+    // O bloco de acao nao oferece controle nenhum: a `confirmacao` diz o que
+    // observar, e o botao desabilitado que ficava aqui so pedia desculpa.
+    expect(screen.queryByRole('button')).toBeNull()
   })
 
   it('lista o que o diagnóstico não sabe, ao lado do veredito', async () => {
@@ -151,7 +152,7 @@ describe('Diagnostico — histórico curto', () => {
     render(<Diagnostico contaId={STUDIO_NOVE} />)
     await screen.findByText(ACAO_DE_ESPERA)
 
-    expect(screen.queryByRole('button', { name: 'Marcar teste de 4 semanas' })).toBeNull()
+    expect(screen.queryByRole('button')).toBeNull()
   })
 
   it('declara os limites mesmo sem veredito', async () => {

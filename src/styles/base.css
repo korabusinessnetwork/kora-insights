@@ -84,7 +84,12 @@ a {
   outline: none;
 }
 
-/* Conteudo so para leitor de tela (rotulo de tabela, contexto de botao). */
+/* Conteudo so para leitor de tela (rotulo de tabela, contexto de botao).
+
+   ATENCAO: aplique num `<div>` que envolva a tabela, nunca na `<table>`. Layout
+   de tabela ignora largura menor que o conteudo minimo, entao `width: 1px` nao
+   a encolhe: ela fica com a largura inteira, fora de fluxo, e mesmo assim soma
+   a rolagem horizontal da pagina. */
 .apenas-leitor {
   position: absolute;
   width: 1px;

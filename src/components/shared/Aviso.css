@@ -18,8 +18,27 @@
   line-height: var(--altura-densa);
 }
 
+/* Informacao nao tem preenchimento, e a diferenca carrega significado: cartao
+   cheio quer dizer "isto pede alguma coisa de voce", e as tres informacoes do
+   produto (demonstracao, conta desconectada, pedido registrado) nao pedem nada
+   — elas relatam. Com a mesma moldura de `critico` elas liam como erro de
+   sistema no topo de toda tela, e um alarme que toca sempre para de ser ouvido.
+
+   O filete a esquerda fica: e ele que faz a faixa continuar sendo uma faixa, e
+   o aviso de demonstracao e permanente por contrato (ADR-007). */
 .ki-aviso[data-variante='informacao'] {
   --cor-aviso: var(--cor-tinta-suave);
+  padding-block: var(--e-2);
+  border-color: transparent;
+  border-left-color: var(--cor-linha-forte);
+  background: transparent;
+}
+
+/* Sem moldura a faixa cabe numa linha so, e a largura de leitura deixa de ser
+   o limite certo: ela quebrava o titulo e o texto em duas linhas empilhadas,
+   que era metade da altura que a faixa tinha. */
+.ki-aviso[data-variante='informacao'] .ki-aviso__texto {
+  max-width: none;
 }
 
 .ki-aviso[data-variante='atencao'] {

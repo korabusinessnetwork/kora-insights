@@ -7,7 +7,11 @@ import './Tabela.css'
  * A celula aceita texto puro ou `{ texto, tom }`. E assim que a variacao ganha
  * cor sem nenhum `if` de estilo: o tom vira `data-tom` e o CSS reage.
  *
- * @typedef {{ chave: string, rotulo: string, numerica?: boolean }} Coluna
+ * A `enfase` da coluna diz qual numero o olho procura primeiro. Sem ela as tres
+ * colunas numericas pesam igual, e o leitor precisa reler o cabecalho a cada
+ * linha para saber qual e o valor de agora e qual e o de antes.
+ *
+ * @typedef {{ chave: string, rotulo: string, numerica?: boolean, enfase?: 'forte'|'fraca' }} Coluna
  * @typedef {string|number|{ texto: string|number, tom?: 'bom'|'ruim'|'neutro' }} Celula
  * @typedef {{ id?: string, celulas: Celula[] }} Linha
  *
@@ -31,6 +35,7 @@ export default function Tabela({ colunas, linhas, legenda }) {
                 key={coluna.chave}
                 scope="col"
                 data-alinhamento={coluna.numerica ? 'direita' : 'esquerda'}
+                data-enfase={coluna.enfase}
               >
                 {coluna.rotulo}
               </th>
@@ -50,6 +55,7 @@ export default function Tabela({ colunas, linhas, legenda }) {
                     key={coluna.chave}
                     scope={posicao === 0 ? 'row' : undefined}
                     data-alinhamento={coluna.numerica ? 'direita' : 'esquerda'}
+                    data-enfase={coluna.enfase}
                     data-tom={tom}
                   >
                     {conteudo}

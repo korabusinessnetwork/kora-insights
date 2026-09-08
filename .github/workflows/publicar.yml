@@ -55,6 +55,31 @@ jobs:
         if: env.TEM_CREDENCIAL == 'true'
         run: npm ci
 
+      # O token e conferido ANTES do build, e nao no momento de publicar. Um
+      # token recusado depois do build gasta a construcao inteira para devolver
+      # um codigo cru da API da Cloudflare, que nao diz a ninguem o que corrigir.
+      #
+      # A sonda e `pages project list`, e nao `whoami`, de proposito: ela exerce
+      # exatamente a permissao que o deploy exige (Account - Cloudflare Pages -
+      # Edit). `whoami` le dados do usuario, que um token corretamente estreito
+      # pode nao ter — ele reprovaria um token bom, que e um jeito pior de falhar
+      # do que o problema que este passo resolve.
+      - name: Conferir se a Cloudflare aceita o token
+        id: token
+        if: env.TEM_CREDENCIAL == 'true'
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project list
+
+      - name: Explicar o token recusado
+        if: env.TEM_CREDENCIAL == 'true' && steps.token.outcome == 'failure'
+        run: |
+          echo "::error title=A Cloudflare recusou o token::O segredo existe, mas nao autentica. Confira, nesta ordem: (1) espaco ou quebra de linha colada junto com o token; (2) permissao exatamente Account - Cloudflare Pages - Edit; (3) Account Resources incluindo a sua conta; (4) os dois segredos trocados entre si. O botao Test na tela de criacao do token responde antes de colar."
+          exit 1
+
       # As variaveis do front sao lidas no BUILD, nao em tempo de execucao: o
       # Vite as inlineia no bundle. Por isso elas moram aqui, e nao no painel da
       # Cloudflare — no painel elas so valeriam se o build acontecesse la.

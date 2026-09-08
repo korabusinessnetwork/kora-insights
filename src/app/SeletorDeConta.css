@@ -35,12 +35,24 @@
 }
 
 /* O quadrado da identidade: marcador de conta, não avatar de rede social. */
+/* O selo carrega a inicial da conta. Cheio de cor e vazio de conteudo ele lia
+   como foto que falhou ao carregar — e aparecia assim em toda tela. */
 .ka-seletor__avatar {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 1.375rem;
   height: 1.375rem;
   border-radius: var(--raio-1);
   background: var(--cor-contorno);
+  color: var(--cor-fundo);
+  font-size: 0.6875rem;
+  font-weight: var(--peso-medio);
+  line-height: 1;
+  /* A inicial e ornamento de reconhecimento, nao texto para selecionar junto
+     com o nome que esta do lado. */
+  user-select: none;
 }
 
 .ka-seletor__identificacao {
@@ -136,4 +148,18 @@
 
 .ka-seletor__item[data-acao='conectar']:hover {
   color: var(--cor-tinta);
+}
+
+/* No celular o gatilho disputa a linha com a marca, e as duas metades da
+   identificacao encolhem juntas: sobrava "Casa ..." ao lado de "@casa...", que
+   e o pior dos dois mundos — nenhuma das duas identifica a conta, e o corte
+   parece defeito.
+
+   Abaixo de 560px o arroba sai do GATILHO, e o nome fica com a linha inteira.
+   Ele continua no menu, onde ha largura para os dois e onde a distincao entre
+   duas contas de nome parecido realmente importa. */
+@media (max-width: 560px) {
+  .ka-seletor__gatilho .ka-seletor__arroba {
+    display: none;
+  }
 }

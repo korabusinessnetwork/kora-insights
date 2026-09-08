@@ -90,6 +90,20 @@
   gap: var(--e-8);
   align-content: start;
 }
+/* `min-width: 0` nao e detalhe de CSS aqui, e o que mantem o conteudo dentro da
+   folha no celular.
+
+   Item de grid nasce com `min-width: auto`, que significa "nunca menor que o
+   proprio conteudo". A trilha `minmax(0, 1fr)` limita a TRILHA, nao o item
+   dentro dela — entao o `min-width: 30rem` do grafico esticava esta coluna para
+   480px numa janela de 390, e a tabela e o desenho eram pintados por cima do
+   fundo escuro, fora do papel. O `overflow-x: auto` do grafico nunca chegava a
+   valer, porque quem estourava era o pai dele. */
+.folha__leitura,
+.folha__prova {
+  min-width: 0;
+}
+
 
 .folha__acao-frase {
   margin-top: var(--e-3);
@@ -108,11 +122,24 @@
   line-height: var(--altura-corpo);
 }
 
-/* Fio acima dos limites: eles fecham a coluna de leitura, e o fio e o que os
-   separa da acao sem os rebaixar a letra miuda. */
+/* Fio acima dos limites: eles fecham a folha inteira, e o fio e o que os separa
+   do corpo sem os rebaixar a letra miuda. Em colunas de leitura pelo mesmo
+   motivo da tela de diagnostico — frase de apoio esticada na largura de uma
+   folha A4 e lida uma vez e abandonada. */
 .folha__limites {
+  margin-top: var(--e-8);
   padding-top: var(--e-6);
   border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+.folha__limites .ki-limites__lista {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--e-5) var(--e-8);
+  align-items: start;
+}
+
+.folha__limites .ki-limites__item {
+  max-width: none;
 }
 
 .folha__rotulo {

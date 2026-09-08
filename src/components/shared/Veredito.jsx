@@ -1,3 +1,4 @@
+import { partirComDestaques } from '../../motor/destaques.js'
 import SeloDeSeveridade from './SeloDeSeveridade.jsx'
 import './Veredito.css'
 
@@ -31,11 +32,22 @@ export const PALAVRA_DE_SEVERIDADE = {
  * @param {'ok'|'atencao'|'critico'|'indeterminado'} props.severidade
  * @param {string} props.rotulo ex: 'Frequência de publicação, causa nomeada'
  * @param {string} props.frase o veredito
+ * @param {string[]} [props.destaques] trechos da frase que a REGRA marcou como
+ *   portadores da afirmacao. Vem do achado; a tela nao escolhe o que realcar
  * @param {string} [props.apoio] paragrafo curto que sustenta a frase
  * @param {import('react').ElementType} [props.como] elemento raiz ('section' por padrao)
  * @returns {JSX.Element}
  */
-export default function Veredito({ severidade, rotulo, frase, apoio, como: Como = 'section' }) {
+export default function Veredito({
+  severidade,
+  rotulo,
+  frase,
+  destaques,
+  apoio,
+  como: Como = 'section',
+}) {
+  const pedacos = partirComDestaques(frase, destaques)
+
   return (
     <Como
       className="ki-veredito"
@@ -50,7 +62,19 @@ export default function Veredito({ severidade, rotulo, frase, apoio, como: Como 
         {rotulo ? <span className="ki-veredito__assunto">{rotulo}</span> : null}
       </p>
       {/* Cabecalho de secao de verdade: quem navega por titulo cai no diagnostico. */}
-      <h2 className="ki-veredito__frase">{frase}</h2>
+      {/* O realce e enfase, nunca o unico portador de significado: o numero
+          continua escrito, e a frase continua inteira se a cor nao chegar. */}
+      <h2 className="ki-veredito__frase">
+        {pedacos.map((pedaco, indice) =>
+          pedaco.realce ? (
+            <mark key={indice} className="ki-veredito__realce">
+              {pedaco.texto}
+            </mark>
+          ) : (
+            <span key={indice}>{pedaco.texto}</span>
+          ),
+        )}
+      </h2>
       {apoio ? <p className="ki-veredito__apoio">{apoio}</p> : null}
     </Como>
   )

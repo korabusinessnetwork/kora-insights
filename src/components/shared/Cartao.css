@@ -3,6 +3,12 @@
 
 .ki-cartao {
   display: block;
+  /* Um cartao nunca alarga o layout que o contem. Como item de grid ele nasce
+     com tamanho minimo automatico igual ao proprio conteudo, e o `min-width` do
+     grafico la dentro esticava o cartao para 514px numa janela de 390 — a tela
+     de diagnostico deslizava de lado no celular. Com o minimo zerado, quem rola
+     e o quadro do grafico, que e onde a rolagem foi projetada para acontecer. */
+  min-width: 0;
   padding: var(--e-5) var(--e-6);
   border: var(--borda-fina) solid var(--cor-linha);
   border-radius: var(--raio-4);

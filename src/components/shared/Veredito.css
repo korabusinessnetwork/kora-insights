@@ -61,3 +61,16 @@
     padding: var(--e-5);
   }
 }
+
+/* O trecho que carrega a afirmacao. Quem escolhe o trecho e a regra
+   (`Achado.destaques`), nunca esta folha de estilo.
+
+   `background: none` desfaz o amarelo que o navegador da a `<mark>` por padrao:
+   ele nao e da paleta, e nao passa em contraste sobre o osso do veredito. A cor
+   vira tinta, e o peso acompanha — realce que depende so de cor desaparece em
+   impressao monocromatica e para quem nao distingue matiz. */
+.ki-veredito__realce {
+  background: none;
+  color: var(--cor-acento);
+  font-weight: var(--peso-medio);
+}

@@ -131,6 +131,8 @@ export default {
       frase:
         `${rotulo.singular} salva ${percentual}% mais por publicação que os outros ` +
         'formatos desta conta.',
+      // O ganho do formato e o motivo de a regra ter disparado.
+      destaques: [`${percentual}%`],
       apoio:
         `Nas últimas ${SEMANAS_DE_JANELA} semanas saíram ${campeao.valores.length} ` +
         `${rotulo.plural}, com média de ${mediaDoCampeaoTexto} salvamentos por ` +

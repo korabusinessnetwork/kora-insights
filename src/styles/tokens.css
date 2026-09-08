@@ -43,6 +43,11 @@
   --kora-osso-600: #94a09b;
   --kora-osso-700: #565249;
   --kora-osso-750: #6a6558;
+  /* Eixo de grafico no papel. Existe porque osso-400 media 1,49:1 sobre a
+     folha: a linha de base estava no DOM e invisivel na tela, e um grafico de
+     colunas sem base flutua. 3,07:1 sobre `osso-200`. */
+  --kora-osso-650: #8d8879;
+
   --kora-osso-800: #3b3a34;
 
   /* Ocre: o acento. Claro no escuro, escuro no claro — mesma familia. */
@@ -154,9 +159,22 @@
   --cor-atencao: var(--tenant-atencao, var(--kora-ocre-300));
   --cor-critico: var(--tenant-critico, var(--kora-tijolo-300));
 
-  --cor-grafico-barra: var(--kora-carvao-300);
+  /* Grafico. As tres cores foram medidas, nao escolhidas a olho:
+     - barra passou de `carvao-300` (3,54:1) para `osso-600` (5,20:1). No piso
+       de 3:1 a coluna existia sem ser lida, que e o oposto de uma evidencia.
+     - eixo era `carvao-500`, a 1,38:1 — invisivel. Agora `carvao-300` (3,54:1).
+     Barra e linha ficam a 2,35:1 uma da outra, e isso e deliberado: as duas
+     series se distinguem por FORMA (retangulo cheio contra traco de 2px) e pela
+     legenda, nao por luminancia. Escurecer a barra para separa-las por cor
+     desfaria justamente a leitura que este ajuste veio dar. */
+  /* Faixa atras da coluna vigente da tabela. Um degrau de superficie, nunca
+     cor: ela separa colunas, e quem carrega significado na tabela e o tom da
+     variacao. */
+  --cor-faixa-de-coluna: var(--kora-carvao-600);
+
+  --cor-grafico-barra: var(--kora-osso-600);
   --cor-grafico-linha: var(--kora-osso-200);
-  --cor-grafico-eixo: var(--kora-carvao-500);
+  --cor-grafico-eixo: var(--kora-carvao-300);
 
   --cor-foco: var(--cor-acento);
   --cor-veredito-fundo: var(--kora-osso-200);
@@ -199,9 +217,15 @@
   --cor-atencao: var(--tenant-papel-atencao, var(--kora-ocre-700));
   --cor-critico: var(--tenant-papel-critico, var(--kora-tijolo-700));
 
+  --cor-faixa-de-coluna: var(--kora-osso-100);
+
   --cor-grafico-barra: var(--kora-osso-700);
-  --cor-grafico-linha: #161a18;
-  --cor-grafico-eixo: var(--kora-osso-400);
+  /* `carvao-800` por nome, e nao `#161a18` escrito a mao: o hex literal era o
+     mesmo valor, mas ficava de fora de qualquer conferencia que leia tokens. */
+  --cor-grafico-linha: var(--kora-carvao-800);
+  /* `osso-400` media 1,49:1 sobre a folha: mesma falha do tema escuro, e mais
+     grave aqui porque a folha e o que o cliente imprime e leva para a reuniao. */
+  --cor-grafico-eixo: var(--kora-osso-650);
 
   --cor-foco: var(--kora-ocre-700);
   --cor-veredito-fundo: transparent;

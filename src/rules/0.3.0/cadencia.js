@@ -231,6 +231,10 @@ export default {
         frase:
           `Seu alcance não caiu. Sua frequência caiu ${percentualDeCadencia}% e o ` +
           'alcance seguiu junto.',
+        // A frase tem dois assuntos e um so carrega a causa. Quem sabe qual e a
+        // regra, e nao a tela: procurar o "numero que parece importante" seria a
+        // tela refazendo a decisao do motor (ADR-005).
+        destaques: [`${percentualDeCadencia}%`],
         apoio:
           `${comparacaoDeCadencia} O alcance por publicação ficou praticamente igual: ` +
           `${porPublicacaoAtualTexto} contra ${porPublicacaoAnteriorTexto}. O total ` +
@@ -249,6 +253,9 @@ export default {
           `Sua frequência caiu ${percentualDeCadencia}% e o alcance por publicação caiu ` +
           `${percentualPorPublicacao}%. Não é só volume: o que você publica também está ` +
           'alcançando menos.',
+        // Duas variaveis se movendo juntas: as duas quedas sustentam a frase, e
+        // realcar so uma delas contaria metade da causa.
+        destaques: [`${percentualDeCadencia}%`, `${percentualPorPublicacao}%`],
         apoio:
           `${comparacaoDeCadencia} O alcance por publicação também recuou: ` +
           `${porPublicacaoAtualTexto} contra ${porPublicacaoAnteriorTexto}. São duas ` +
@@ -275,6 +282,12 @@ export default {
           `${alcanceAnteriorTexto}, e o alcance por publicação foi de ` +
           `${porPublicacaoAnteriorTexto} para ${porPublicacaoAtualTexto}. Menos conteúdo ` +
           'entregando o mesmo resultado é ganho de eficiência, não perda de alcance.',
+        // Aqui o numero que importa e o ganho, nao a queda: a frase existe para
+        // dizer que publicar menos NAO custou alcance.
+        destaques:
+          variacaoPorPublicacao !== null && variacaoPorPublicacao >= LIMIAR_DE_ESTABILIDADE
+            ? [`${percentualPorPublicacao}%`]
+            : [`${percentualDeCadencia}%`],
         acao:
           'Antes de voltar ao volume anterior, descubra o que mudou nas publicações ' +
           'recentes: o ganho por publicação é o ativo aqui, e mais volume pode diluí-lo.',
@@ -296,6 +309,7 @@ export default {
       severidade: texto.severidade,
       rotulo: texto.rotulo,
       frase: texto.frase,
+      destaques: texto.destaques ?? [],
       apoio: texto.apoio,
       acao: texto.acao,
       confirmacao: texto.confirmacao,
@@ -341,6 +355,11 @@ export default {
       serie: {
         rotuloBarra: ROTULO_DE_PUBLICACOES,
         rotuloLinha: ROTULO_DE_ALCANCE,
+        // O tom de cada traco e o MESMO da evidencia que ele desenha: as barras
+        // sao publicacoes, a linha e alcance. Sai daqui, e nao do CSS, pelo
+        // mesmo motivo de sempre — cair nem sempre e ruim, e quem sabe se este
+        // caso e ruim e a regra.
+        tomBarra: desfecho === 'sem-queda' ? 'neutro' : tomDaVariacao(quedaDeCadencia, true),
         pontos: recentes.map((janela) => ({
           rotulo: rotuloDeSemana(janela.inicio),
           barra: janela.valores.publicacoes ?? null,

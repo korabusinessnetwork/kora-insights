@@ -40,8 +40,10 @@ const TITULO_DA_EVIDENCIA = 'Evidência'
  */
 const COLUNAS = Object.freeze([
   { chave: 'indicador', rotulo: 'Indicador' },
-  { chave: 'anterior', rotulo: '8 anteriores', numerica: true },
-  { chave: 'atual', rotulo: 'Últimas 8', numerica: true },
+  // A janela anterior existe para dar escala ao numero de agora, e nao para ser
+  // lida com ele: recuada, o olho pousa no valor vigente sem reler o cabecalho.
+  { chave: 'anterior', rotulo: '8 anteriores', numerica: true, enfase: 'fraca' },
+  { chave: 'atual', rotulo: 'Últimas 8', numerica: true, enfase: 'forte' },
   { chave: 'variacao', rotulo: 'Variação', numerica: true },
 ])
 
@@ -200,7 +202,11 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
 
       <div className="folha__corpo">
         <div className="folha__leitura">
-          <Veredito severidade={achado.severidade} frase={achado.frase} />
+          <Veredito
+            severidade={achado.severidade}
+            frase={achado.frase}
+            destaques={achado.destaques}
+          />
 
           <AvisoDeLacuna lacunas={cobertura.lacunas} />
 
@@ -211,10 +217,6 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
               <p className="folha__acao-confirmacao">{achado.confirmacao}</p>
             ) : null}
           </section>
-
-          <div className="folha__limites">
-            <ListaDeLimites titulo={TITULO_DOS_LIMITES} limites={diagnostico.limites} />
-          </div>
         </div>
 
         {temProva ? (
@@ -234,6 +236,7 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
                 pontos={serie.pontos}
                 rotuloBarra={serie.rotuloBarra}
                 rotuloLinha={serie.rotuloLinha}
+                tomBarra={serie.tomBarra}
                 // O paragrafo de apoio do achado e o que sustenta a frase, e e
                 // ele que vira legenda e `aria-label` do desenho: escrever outra
                 // frase aqui seria a folha opinando sobre o que o grafico mostra.
@@ -242,6 +245,15 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
             ) : null}
           </div>
         ) : null}
+      </div>
+
+      {/* Os limites fecham a folha inteira, e nao a coluna de leitura. Eram tres
+          frases na identidade (pagina 3) e hoje sao ate sete: empilhadas numa
+          coluna, esticavam a leitura muito alem da prova e deixavam um vao
+          branco do lado do grafico. Na largura toda eles cabem em colunas, saem
+          todos, e fecham a folha em vez de desequilibra-la. */}
+      <div className="folha__limites">
+        <ListaDeLimites titulo={TITULO_DOS_LIMITES} limites={diagnostico.limites} />
       </div>
 
       <footer className="folha__rodape">

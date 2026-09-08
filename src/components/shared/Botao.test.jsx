@@ -26,7 +26,7 @@ describe('Botao', () => {
 
   it('chama a ação no clique', async () => {
     const aoClicar = vi.fn()
-    render(<Botao aoClicar={aoClicar}>Marcar teste de 4 semanas</Botao>)
+    render(<Botao aoClicar={aoClicar}>Exportar relatório</Botao>)
 
     await userEvent.click(screen.getByRole('button'))
 

@@ -28,6 +28,11 @@ lock-in a desfazer, e nao havera se um dia for preciso trocar de novo.
 ## Decisao
 **Cloudflare Pages**, no plano gratuito, que permite uso comercial.
 
+> **No ar desde 2026-09-08** em https://kora-insights.pages.dev. A primeira
+> publicacao falhou com `Authentication failed [code: 9106]` — token recusado, e
+> nao configuracao errada. O workflow passou a sondar a credencial antes do build
+> para que a proxima recusa diga o que corrigir.
+
 | Opcao | Custo | Comercial no gratuito | Teto que importa aqui |
 |---|---|---|---|
 | Vercel Pro | US$ 20/mes | — (pago) | nenhum |

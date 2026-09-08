@@ -4,6 +4,14 @@
 
 .ki-grafico {
   margin: 0;
+  /* O desenho tem `min-width: 30rem` para as oito semanas continuarem legiveis,
+     e `.ki-grafico__area` rola quando a tela e menor que isso. Mas onde o pai e
+     um grid — a coluna de prova da folha —, esta `figure` vira ITEM de grid, e
+     item de grid nasce com tamanho minimo automatico igual ao proprio conteudo.
+     A trilha entao nascia com 480px numa janela de 390, e a tabela e o desenho
+     eram pintados fora do papel, sobre o fundo escuro. Zerando o minimo, a rolagem
+     volta a acontecer onde deve: dentro do quadro, nunca na pagina. */
+  min-width: 0;
 }
 
 .ki-grafico__legenda {
@@ -62,6 +70,31 @@
   fill: var(--cor-grafico-barra);
 }
 
+/* A cor do traco vem do tom que a REGRA deu a serie, igual a nota do indicador
+   e a celula de variacao da tabela — a mesma queda pintada da mesma cor nos
+   tres lugares. `--cor-tom` ja e resolvido por `[data-tom]` em tokens.css.
+
+   O tom neutro nao entra aqui de proposito: ele deixa a serie no cinza do
+   grafico, e uma serie sem leitura de estado nao devia ganhar cor. */
+.ki-grafico__barras[data-tom='ruim'] rect,
+.ki-grafico__barras[data-tom='bom'] rect {
+  fill: var(--cor-tom);
+}
+
+.ki-grafico__amostra[data-forma='barra'][data-tom='ruim'],
+.ki-grafico__amostra[data-forma='barra'][data-tom='bom'] {
+  background: var(--cor-tom);
+}
+
+/* A LINHA nao recebe o tom, e a barra sim. Com as duas coloridas o desenho
+   inteiro virou ocre: as series deixaram de se distinguir por cor, e uma tela
+   onde tudo e destaque nao tem destaque nenhum (TOKENS.md).
+
+   A cor fica com a serie que o veredito acusa. "Sua frequencia caiu 40% e o
+   alcance seguiu junto": a frequencia e a causa, e ela sao as barras. A linha e
+   o efeito que se acompanha, e traco de referencia — ela precisa ser vista, nao
+   apontada. */
+
 .ki-grafico__linha polyline {
   fill: none;
   stroke: var(--cor-grafico-linha);
@@ -80,4 +113,39 @@
   color: var(--cor-tinta-suave);
   font-size: var(--texto-apoio);
   line-height: var(--altura-corpo);
+}
+
+/* ── Rotulos dentro do desenho ─────────────────────────────────────────────
+   Tamanho em unidades do viewBox, e nao em rem: o SVG escala por CSS, entao o
+   texto precisa escalar junto com as colunas. Fixar em rem faria o rotulo
+   crescer sozinho no celular, onde o desenho encolhe. */
+
+.ki-grafico__valores text {
+  fill: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+}
+
+.ki-grafico__semanas text {
+  fill: var(--cor-tinta-suave);
+  font-family: var(--fonte-texto);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+  dominant-baseline: hanging;
+}
+
+/* Semana sem coleta: o rotulo recua junto com a coluna que nao existe. */
+.ki-grafico__semanas text[data-lacuna='sim'] {
+  fill: var(--cor-tinta-fraca);
+}
+
+/* O tracinho da lacuna e tracejado de proposito: linha cheia no eixo pareceria
+   uma coluna de valor muito baixo, que e a leitura oposta. */
+.ki-grafico__lacunas line {
+  stroke: var(--cor-tinta-fraca);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
 }
