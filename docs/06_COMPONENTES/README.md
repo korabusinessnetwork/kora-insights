@@ -1,44 +1,68 @@
-# 06 — COMPONENTES · Kora Insights
+# 06 — Componentes
 
-> Catálogo vivo de componentes UI em atomic design. Um lugar, uma versão.
+> O kit visual de `src/components/shared/`: o que existe, o que cada peça recebe
+> e — o mais importante — **quando não usar**. Um catálogo que só lista props
+> vira duplicata do JSDoc; este existe para evitar a segunda implementação da
+> mesma ideia.
+> Última revisão: 2026-09-05.
 
-## O que vive aqui
+## O documento
 
-- **Atoms**: botão, campo de texto, label, checkbox, etc.
-- **Molecules**: form, card, modal, toast, alert
-- **Organisms**: tabela com paginação, navbar, sidebar, pedido-form
-- **Templates**: layout de página, variações por contexto (mobile/desktop)
-- **Estados**: default, loading, error, success, disabled
-- **Acessibilidade**: ARIA labels, keyboard nav, contrast ratios
-- **Testes**: snapshot, interação, a11y
+| Documento | O que traz |
+|---|---|
+| [`catalogo.md`](catalogo.md) | os 14 componentes, com props, estados, tokens que cada um consome e quando **não** usar |
+
+## As cinco regras do kit
+
+1. **Cada componente é um par `Nome.jsx` + `Nome.css`.** Zero estilo no JSX: sem
+   `style={{...}}`, sem cor em prop, sem classe utilitária solta.
+2. **Estado visual entra por atributo de dado** — `data-severidade`, `data-tom`,
+   `data-variante`, `data-tipo`, `data-elevacao` — e o CSS reage. Nenhum `if` de
+   JavaScript escolhe cor.
+3. **Nenhum componente conhece serviço, rota ou regra de negócio.** Ele recebe
+   props e renderiza. Se um componente precisou importar de `src/lib`, a
+   fronteira foi violada (`docs/01_ARQUITETURA/overview.md`).
+4. **Convenção de classe `ki-<bloco>__<elemento>--<modificador>`**, prefixo `ki-`
+   sempre. Sem `!important` fora de `impressao.css`.
+5. **Componente não formata número nem calcula variação.** O valor chega
+   formatado de quem exibe, e a variação é calculada sobre o valor exibido
+   (ADR-008). Kit visual que arredonda por conta própria produz uma tabela que
+   discorda dela mesma.
+
+## Os quatro estados obrigatórios
+
+Toda tela renderiza `carregando`, `vazio`, `erro` e `sucesso` (CLAUDE.md). Os
+três primeiros passam por `Estado`; o sucesso é a própria tela.
+
+**O vazio é conteúdo, não um encolher de ombros.** A tela sem conta conectada
+explica os três passos até o primeiro diagnóstico e diz, com todas as letras,
+que não há gráfico de exemplo ali de propósito
+(`docs/02_DESIGN_SYSTEM/identidade/02-sem-conta-conectada.png`).
+
+## Acessibilidade — o que o kit já garante
+
+- Cor **nunca** é o único portador de significado: severidade vem com a palavra
+  ("Atenção", "Estável"), variação vem com o valor anterior por escrito.
+- `GraficoCadencia` publica uma tabela equivalente para leitor de tela — leitor
+  de tela não lê SVG, lê tabela.
+- `carregando` e `erro` são anunciados por `role` e `aria-live`; `vazio` não é
+  anunciado, porque é conteúdo comum e anunciá-lo seria ruído.
+- Botão em espera é **desabilitado de verdade**, não só rotulado: prevenir o
+  duplo clique vale mais que avisar depois que ele aconteceu.
+- Alvo de contraste: AA (4,5:1) para texto corrido, 3:1 para texto grande e
+  elementos gráficos. `--kora-osso-600` é o limite inferior de tinta.
 
 ## O que NÃO vive aqui
 
-- Código real → `src/components/`
-- Design tokens → `02_DESIGN_SYSTEM/`
-- Regras de quando mostrar → `03_REGRAS_DE_NEGOCIO/`
-- Fluxos de interação → `05_FLUXOS/`
-
-## Arquivos sugeridos
-
-- `atoms.md` — botão, input, label, icon, badge (+ screenshots)
-- `molecules.md` — formgroup, card, modal, toast, badge-group
-- `organisms.md` — tabela, navbar, sidebar, form complexa
-- `templates.md` — página de listagem, página de detalhe, modal workflow
-- `estados.md` — loading, error, success, disabled, focus
-- `ACCESSIBILITY.md` — checklist: keyboard, screenreader, contrast
-
-## Como preencher
-
-1. **Design System primeiro**: componentes nascem em `02_DESIGN_SYSTEM/`
-2. **Atomic design**: breaking up UI into atoms/molecules/organisms
-3. **Código separado de design**: JSX em `src/`, documentação aqui
-4. **Componentes reutilizáveis**: se aparecer 2x, é componente
-5. **Teste = documentação**: teste é prova de que componente funciona
-6. **White-label**: componentes não assumem tenant específico (tokens, sim)
+- Tokens, paleta, tipografia e contraste → `docs/02_DESIGN_SYSTEM/TOKENS.md`
+- Código dos componentes → `src/components/shared/`
+- Quando mostrar cada bloco → `docs/03_REGRAS_DE_NEGOCIO/`
+- A tabela de props como contrato entre camadas → `docs/01_ARQUITETURA/contratos.md`, seção 5
 
 ## Ligações
 
-- `02_DESIGN_SYSTEM/` — tokens, cores, tipografia
-- `src/components/` — código real dos componentes
-- CLAUDE.md — regra: CSS separado do JSX (decisão 018)
+- `docs/02_DESIGN_SYSTEM/TOKENS.md` — as três camadas de token e por que
+  componente nunca usa `--kora-*` direto
+- `docs/02_DESIGN_SYSTEM/identidade/` — as três telas fechadas, fonte de verdade
+  visual: quando o diretório e o código divergirem, o código está errado
+- `src/styles/impressao.css` — o que `data-bloco` e `data-imprimir` fazem no papel

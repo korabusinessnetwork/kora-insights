@@ -1,0 +1,26 @@
+/* Selo: quadrado de 12px com a metade direita vazada. O vazado e transparente
+   de proposito — assim o selo funciona sobre o cartao de osso do veredito e
+   sobre o carvao da tela sem precisar saber em qual dos dois esta. */
+
+.ki-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  color: var(--cor-severidade);
+  font-size: var(--texto-rotulo);
+  line-height: var(--altura-densa);
+  white-space: nowrap;
+}
+
+.ki-selo__marca {
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--cor-severidade);
+  border-radius: var(--raio-1);
+  background: linear-gradient(90deg, var(--cor-severidade) 0 45%, transparent 45%);
+}
+
+.ki-selo__texto {
+  color: inherit;
+}

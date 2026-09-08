@@ -1,44 +1,29 @@
-# 02 — DESIGN SYSTEM · Kora Insights
+# 02 — Design system
 
-> Fonte única de verdade visual: tokens, cores, tipografia, componentes, animações.
+> Índice. Fonte única de verdade visual do produto.
+> Última revisão: 2026-09-06.
 
-## O que vive aqui
+| Arquivo | O que responde |
+|---|---|
+| `TOKENS.md` | Paleta, contraste medido, tipografia, espaçamento, movimento e white-label |
+| `identidade/` | As três telas fechadas entregues pelo dono, e o PDF original |
 
-- **Design tokens**: escala de cores, tipografia, espaçamento, shadows, bordas
-- **Paleta de cores**: cores base, semântica (sucesso/erro/aviso), acessibilidade
-- **Tipografia**: fontes, escalas de tamanho, line-height, weights por contexto
-- **Espacimentos**: grid, padding, margin, gap — a "régua" do layout
-- **Iconografia**: conjunto único de ícones (SVG), convenção de nomes, tamanhos
-- **Componentes**: catálogo de componentes visuais (atoms → molecules → organisms)
-- **Animações**: transições, eases, durations — movimento consistente
+Implementação: `src/styles/tokens.css` (três camadas), `base.css` (reset, foco,
+acessibilidade) e `impressao.css` (a folha A4 do relatório).
 
-## O que NÃO vive aqui
+## Duas regras que valem acima de gosto
 
-- Código dos componentes → `src/components/`
-- Regras de negócio de UI → `03_REGRAS_DE_NEGOCIO/`
-- Fluxos de interação → `05_FLUXOS/`
-- Documentação de APIs → `07_APIS/`
+1. **Componente nunca usa primitiva `--kora-*` direto.** Se precisou, falta uma
+   semântica — e a falta é o defeito, não a exceção.
+2. **A tabela de contraste não é escrita à mão.** `src/styles/contraste.test.js`
+   lê a paleta do CSS e reprova a suíte quando um par cai abaixo de AA.
 
-## Arquivos sugeridos
+Quando `identidade/` e o código divergirem, o código está errado — com uma
+exceção registrada em `TOKENS.md`: onde a identidade fica abaixo do mínimo de
+contraste, a acessibilidade vence e a divergência fica anotada.
 
-- `TOKENS.md` — tabela estruturada: categoria, token name, valor, escopo
-- `CORES.md` — paleta com hex/RGB, uso recomendado, contrast ratios
-- `TIPOGRAFIA.md` — fontes, escalas (mobile/desktop), line-heights
-- `ESPACAMENTOS.md` — grid, unidade base, escalas de spacing
-- `ICONOGRAFIA.md` — conjunto de ícones SVG, nomeação, tamanhos
-- `COMPONENTES.md` — atomic design: atoms, molecules, organisms
-- `ANIMACOES.md` — transições, eases, durations, movimentos padrão
+## Fora daqui
 
-## Como preencher
-
-1. **Crie uma paleta de cores primeiro**: escolha 3–5 cores base + variações (light/dark)
-2. **Defina 1 única fonte para textos, 1 para display**: consistência visual
-3. **Tokens devem ser parametrizáveis**: {{NOME_TENANT}} muda cor/logo, tokens não mudam
-4. **Componentes nascem aqui, código em src/**: design first, depois implementa
-5. **White-label**: nada de marca ou cor hardcodada — tudo token parametrizável por tenant
-
-## Ligações
-
-- `06_COMPONENTES/` — implementação dos componentes em React
-- `memory/brand.md` — identidade visual e restrições de brand
-- CLAUDE.md — regra de separar CSS do JSX (decisão 018)
+- Código dos componentes → `src/components/shared/`
+- Catálogo do kit, com props e quando não usar → `../06_COMPONENTES/catalogo.md`
+- Fluxos de interação → `../05_FLUXOS/`

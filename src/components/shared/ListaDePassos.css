@@ -1,0 +1,49 @@
+/* Passos: numero pequeno numa coluna propria, filete entre os itens.
+   E uma lista de leitura, nao um formulario com etapas — nada de circulo,
+   nada de barra de progresso. */
+
+.ki-passos {
+  list-style: none;
+  counter-reset: ki-passo;
+  border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+.ki-passos__item {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: var(--e-2) var(--e-3);
+  padding: var(--e-5) 0;
+  border-bottom: var(--borda-fina) solid var(--cor-linha);
+  counter-increment: ki-passo;
+}
+
+.ki-passos__item::before {
+  content: counter(ki-passo);
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-micro);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--altura-corpo);
+}
+
+.ki-passos__titulo {
+  grid-column: 2;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-corpo);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-densa);
+}
+
+.ki-passos__descricao {
+  grid-column: 2;
+  max-width: 52ch;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+@media (max-width: 480px) {
+  .ki-passos__item {
+    grid-template-columns: 1.25rem 1fr;
+  }
+}

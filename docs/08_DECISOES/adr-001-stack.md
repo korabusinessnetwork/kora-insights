@@ -1,5 +1,9 @@
 # ADR-001 — Stack: React + Vite + Supabase + Vercel
 
+
+> **Emenda de 2026-09-07:** o ponto "Deploy: Vercel" foi superado pelo
+> **ADR-010** (Cloudflare Pages). O plano Hobby veda uso comercial numa definicao
+> que alcanca ate anunciar a venda do produto. O resto deste ADR continua valendo.
 **Status**: Aceito · **Data**: 2026-09-05 · **Decisores**: Matheus Bonato
 
 ## Contexto

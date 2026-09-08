@@ -1,152 +1,139 @@
 # Padrões Consolidados — Kora Insights
 
-## Objetivo
-- Registrar padrões validados em produção (não especulação)
-- Evitar variação e inconsistência no código
-- Acelerar onboarding com guias de implementação
+> Padrão só entra aqui depois de valer em código de verdade. Cada um traz o
+> arquivo onde vive, um exemplo real e o contraexemplo que ele existe para
+> impedir. Padrão sem exemplo é opinião.
+> Última revisão: 2026-09-06.
 
-## Contexto
-- Stack: React + Vite + Supabase (Auth, RLS, Edge Functions) + Vercel (ex: React + Supabase + Vercel)
-- Padrões evoluem com a base de código; deprecados ganham tag [DEPRECADO]
+## Regras deste documento
 
-## Regras Gerais
-- Padrão só entra após validado em produção ou revisão de código (≥ 2 devs)
-- Padrão obsoleto = tag [DEPRECADO] + data + sucessor
-- Padrão quebrado em issue = escalação ao tech lead
-
-## Validações
-- Padrão tem exemplos de código real (não pseudocódigo)?
-- Contraexemplo está marcado como anti-padrão?
-
-## Permissões
-- Tech lead: aprova/depreca padrões
-- Dev: propõe padrões após revisar com time
-
-## Exceções
-- Padrão de segurança/compliance: entra imediatamente (sem esperar 2 devs)
-
-## Auditoria
-- Code review checa conformidade com padrões
-- Linter configurable para policing automático
-
-## Eventos
-- `pattern.validated`, `pattern.deprecated`, `pattern.superseded`
-
-## Casos de Uso
-- Revisar código de feature nova
-- Decidir como estruturar novo módulo
-- Treinar dev novo
-
-## Critérios de Aceite
-- [ ] Padrão tem mínimo 1 exemplo de uso real
-- [ ] Contraexemplos claros (anti-padrão)
-- [ ] Exceções documentadas
+- Padrão nasce de código que rodou, não de preferência.
+- Padrão obsoleto ganha `[DEPRECADO]`, data e sucessor. Não se apaga.
+- Padrão de segurança entra na hora, sem esperar segunda opinião.
 
 ---
 
-## Padrões de Código
+## Nomenclatura
 
-### Nomenclatura
-- **Domínio (português)**: `abrirCaixa`, `fecharComanda`, `calcularTroco`
-- **Técnico (inglês)**: `useEffect`, `handleSubmit`, `fetchData`
-- **Constantes**: `TAXA_PADRAO_CAIXA`, `MAX_ITENS_COMANDA`
-- **Booleans**: `isDone`, `canEdit`, `hasError`
+Domínio em português, técnico em inglês. A regra existe porque o domínio deste
+produto **é** português: `alcance`, `cadência`, `veredito`. Traduzir isso para
+inglês obriga a traduzir de volta em toda conversa com o dono do produto.
 
-✅ `const abrirCaixa = async () => { ... }` (ação em português)
-❌ `const handleOpenCashierRegister = () => { ... }` (jargão técnico misturado)
+✅ `montarHistorico()`, `listarContasConectadas()`, `gerarDiagnostico()`
+✅ `handleSubmit`, `useEffect`, `aoClicar`
+❌ `buildHistory()`, `getConnectedAccounts()` — jargão onde o domínio é pt-BR
 
-### Estrutura de Arquivos (por-feature)
+Constantes em maiúsculas com o mesmo critério: `SEMANAS_POR_JANELA`,
+`LIMIAR_DE_ESTABILIDADE`, `CODIGOS`.
+
+## Estrutura por feature
+
 ```
-src/features/
-├── {{FEATURE}}/
-│   ├── components/
-│   │   ├── {{Feature}}.jsx
-│   │   └── {{Feature}}.test.jsx
-│   ├── hooks/
-│   │   └── use{{Feature}}.js
-│   ├── types.js (ou .ts)
-│   ├── constants.js
-│   └── index.js (barrel export)
+src/features/<feature>/
+├── components/<Nome>.jsx + <Nome>.css + <Nome>.test.jsx
+├── hooks/use<Feature>.js
+└── index.js        barril: é por onde as rotas importam
 ```
 
-✅ `src/features/caixa/components/Caixa.jsx`
-❌ `src/components/caixa/Caixa.jsx` + `src/hooks/caixa.js` espalhados
+✅ `src/features/diagnostico/components/Diagnostico.jsx`
+❌ `src/components/diagnostico/` + `src/hooks/diagnostico.js` espalhados
 
-### Gerenciamento de Estado
-- **Local**: useState (componente é dono dos dados)
-- **Contexto**: {{CONTEXTO_GLOBAL}} (ex: autenticação, tema)
-- **Supabase Realtime**: subscriptions em useEffect (cleanup ao desmontar)
+O barril não é cerimônia: `src/app/telas.jsx` importa só dele, então mover um
+bloco entre componentes nunca quebra uma rota.
 
-✅ Estado crítico + compartilhado = Supabase + Context
-❌ Redux; ❌ useState em component pai para passpropping profundo
+## Camadas, e o que cada uma não pode
 
-## Padrões de API / Backend
+| Camada | Onde | Não pode |
+|---|---|---|
+| Telas | `src/features/` | calcular diagnóstico, falar com Supabase |
+| Kit visual | `src/components/shared/` | conhecer regra de negócio ou rota |
+| Serviços | `src/lib/` | conter regra de diagnóstico |
+| Métricas, regras, motor | `src/metricas`, `src/rules`, `src/motor` | tocar rede ou DOM |
 
-### Envelope de Resposta
-```json
-{
-  "data": {{DADOS_RETORNADOS}},
-  "meta": { "timestamp": "2024-01-15T10:30:00Z", "version": "1" },
-  "error": null
-}
+`src/metricas`, `src/rules` e `src/motor` são **puros**, com relógio injetado.
+É o que permite rodá-los iguais no navegador e no Deno da Edge Function, e
+testá-los contra histórico real sem subir nada.
+
+## Envelope em toda chamada de serviço
+
+```js
+{ data, error: { codigo, mensagem } | null, meta: { carimbo, versao, origem } }
 ```
 
-**Em caso de erro:**
-```json
-{
-  "data": null,
-  "error": { "code": "VALIDATION_ERROR", "message": "CPF inválido" },
-  "meta": { "timestamp": "..." }
-}
+✅ Envelope sempre, inclusive em sucesso — quem consome tem um caminho só.
+❌ Devolver array nu em sucesso e objeto de erro em falha: dois formatos, dois
+   caminhos de leitura, e um deles sempre esquecido.
+
+`error.codigo` é estável entre versões (`src/lib/erros.js`); `error.mensagem` é
+pt-BR e vai para a tela. Mensagem crua do banco nunca sobe: vaza schema.
+
+## Estilo entra por atributo de dado, nunca por `if` de JavaScript
+
+```jsx
+<li data-severidade={achado.severidade}>   ✅ o dado escolhe, o CSS reage
+<li className={grave ? 'vermelho' : ''}>   ❌ regra de cor espalhada no JSX
 ```
 
-✅ Sempre envelope, mesmo em sucesso
-❌ Array nu ou objeto nu sem metadata
+Zero `style={{...}}`, zero hex fora de `src/styles`, zero cor em prop. É o que
+faz o white-label ser uma troca de token em vez de uma varredura de componentes
+(`src/tema/identidadeVisual.js`).
 
-### Validação
-- Input validation na {{CAMADA_VALIDACAO}} (ex: Zod schema antes de Supabase)
-- Mensagens de erro em português, código em enum (pt-BR como fallback)
+## Um número, uma fonte
 
-### Tratamento de Erros
-- Código de erro estável (não muda entre versões)
-- Retry automático em 5xx (com backoff exponencial)
-- Log estruturado sem dados sensíveis (senhas, tokens)
+Quando o mesmo número aparece em dois lugares, ele vem de um módulo só.
+Aprendido caro: o prazo até o primeiro diagnóstico era literal na tela e
+constante no ruleset, e o produto passou a prometer 8 semanas entregando 16.
 
-## Padrões de UI/UX
+✅ `src/rules/requisitos.js` — a tela e o motor leem o mesmo valor
+✅ `formatarJanelaComparada()` — cabeçalho, tela e relatório dizem a mesma janela
+❌ o mesmo prazo escrito à mão em dois arquivos
 
-### Feedback Temporal
-- **Sucesso**: toast confirmação, <2s
-- **Erro**: banner vermelho + botão retry, permanece até ação
-- **Carregando**: skeleton ou spinner, ≤ 100ms de latência antes de aparecer
+## O que a ferramenta não sabe também é entrega
 
-✅ Fechar caixa: spinner, sucesso com toast "Caixa fechada em X min"
-❌ Pop-up de erro que some em 3s
+Toda regra devolve `limites`, e o motor acrescenta os que valem sempre. A tela é
+obrigada a mostrá-los. Serve para a lacuna de coleta, para o limite de
+agregação da Meta e para o que a API simplesmente não entrega.
 
-### Estados Obrigatórios
-Toda tela tem renderização para:
-- `loading`: buscando dados
-- `empty`: nenhum resultado
-- `error`: algo quebrou
-- `success`: renderização normal
+❌ Omitir a limitação porque "atrapalha a venda". Quem diz o próprio limite
+   ganha credibilidade no resto (`docs/13_VENDA`, seção 8).
 
-## Padrões de Processo
+## Estados obrigatórios
 
-### Fluxo de PR
-1. Branch `feature/xxx` ou `fix/xxx` de `main`
-2. Commit `message em inglês, corpo em pt-BR opcionalmente`
-3. PR com checklist (testes passam, design review, casos edge)
-4. ≥ 1 aprovação + CI green = merge
-5. Delete branch remota
+Toda tela renderiza `carregando`, `vazio`, `erro` e `sucesso`. O vazio é
+conteúdo, não encolher de ombros: a tela sem conta conectada explica os três
+passos até o primeiro diagnóstico.
 
-### Code Review
-- Verificar se novo padrão? Documentar em `memory/patterns.md`
-- Quebra padrão existente? Tag `[DEPRECADO]` o padrão velho
-- Segurança? Escalar ao tech lead imediatamente
+A decisão de qual estado mostrar mora numa função pura separada do efeito
+(`situacaoDaTela()` em `useHistorico.js`, `useRelatorio.js`): dá para ler a
+tabela de estados de uma vez em vez de reconstruí-la a partir de booleanos
+espalhados pelo JSX.
 
-### Documentação
-- Código novo + comentário `// {{O_QUE}} ({{POR_QUE}})`
-- Função > 3 linhas = JSDoc (tipos, exemplos)
-- Feature = issue linked, ADR se relevante
+## Botão que não funciona é declarado, não escondido
+
+"Marcar teste de 4 semanas" e "Enviar por e-mail" ainda não existem. Os dois
+aparecem desabilitados **com o motivo escrito ao lado**.
+
+❌ Botão que finge funcionar. ❌ Botão removido em silêncio, que some do radar
+de quem vai construir a funcionalidade.
+
+## Teste que prova o que importa
+
+- Função pura nasce com teste.
+- Teste de peça não pega defeito de junção: `src/app/telas.test.jsx` existe
+  porque três features testadas ficaram fora do bundle.
+- Número de documento que pode envelhecer vira teste:
+  `src/styles/contraste.test.js` lê a paleta do CSS e reprova a suite quando um
+  par cai abaixo de AA — a tabela do `TOKENS.md` sai dele.
+- Fixture é determinística: sem `Math.random`, sem relógio. Fixture que muda
+  sozinha não serve de base para teste.
+
+## Comentário explica POR QUE
+
+✅ `// Soma de subconjunto não é total de janela: uma semana completa sem a`
+   `// métrica puxaria o bloco para baixo e fabricaria uma queda que não houve.`
+❌ `// soma os valores`
+
+Função com mais de 3 linhas ganha JSDoc com tipos.
 
 ---
 
@@ -154,12 +141,13 @@ Toda tela tem renderização para:
 
 | Padrão | Razão | Data | Sucessor |
 |---|---|---|---|
-| {{PADRAO_VELHO}} | {{RAZAO}} | 2026-09-05 | {{NOVO_PADRAO}} |
-| Redux (exemplo) | Context API + Supabase bastam, Redux é overhead | 2024-02-01 | Context API + Hooks |
+| `src/components/` + `src/hooks/` planos | Espalhava a feature por três diretórios; achar o que muda junto virava caça | 2026-09-06 | estrutura por feature |
+| `--cor-linha-forte` como borda de controle | Compartilhava token com a linha decorativa e media 1,50:1 | 2026-09-06 | `--cor-contorno`, com mínimo de 3:1 |
+| `telaAusente()` / `ROTAS_SEM_TELA` | Virou código morto quando a última rota ganhou tela | 2026-09-06 | `telas.test.jsx` cobre o mesmo |
 
-## Checklist de Novo Padrão
+## Checklist de padrão novo
 
-- [ ] Testado em 2+ contextos reais
-- [ ] Documentado aqui com exemplo ✅ e contraexemplo ❌
-- [ ] Code review aprovada
-- [ ] Linter/automação em lugar? (opcional)
+- [ ] Vale em pelo menos dois lugares do código de verdade
+- [ ] Tem exemplo ✅ e contraexemplo ❌, os dois reais
+- [ ] Diz onde mora o código que o implementa
+- [ ] Se dá para transformar em teste, virou teste

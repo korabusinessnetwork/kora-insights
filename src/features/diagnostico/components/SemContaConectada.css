@@ -1,0 +1,76 @@
+/* Sem conta conectada: duas colunas — a esquerda diz por que a tela esta vazia,
+   a direita mostra os tres passos ate ela deixar de estar (identidade, pagina 2).
+   O rodape de privacidade fecha a tela, longe das acoes. */
+
+.sem-conta {
+  display: grid;
+  gap: var(--e-16);
+  padding-block: var(--e-12);
+}
+
+.sem-conta__colunas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--e-12) var(--e-16);
+  align-items: start;
+}
+
+.sem-conta__acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--e-4) var(--e-6);
+}
+
+/* Ancora com peso de botao primario. E link, e nao `Botao`, porque navega — e
+   botao que navega quebra abrir em nova aba (catalogo do kit). A pele vem dos
+   mesmos tokens semanticos, entao o white-label troca as duas juntas. */
+.sem-conta__conectar {
+  display: inline-block;
+  padding: var(--e-3) var(--e-5);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio-2);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+  font-size: var(--texto-corpo);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+  text-decoration: none;
+  transition: background var(--duracao-rapida) var(--ease-padrao);
+}
+
+.sem-conta__conectar:hover {
+  background: var(--cor-tinta-suave);
+}
+
+.sem-conta__requisitos {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sem-conta__requisitos:hover {
+  color: var(--cor-tinta);
+}
+
+.sem-conta__rodape {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+/* Empilhado, a explicacao vem antes dos passos: primeiro por que a tela esta
+   vazia, depois como sair dela. */
+@media (max-width: 900px) {
+  .sem-conta {
+    gap: var(--e-10);
+    padding-block: var(--e-8);
+  }
+
+  .sem-conta__colunas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-10);
+  }
+}

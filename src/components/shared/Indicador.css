@@ -1,0 +1,38 @@
+/* Indicador: o numero e o maior elemento do bloco, a nota e o que o explica.
+   Sem transicao de entrada — numero que aparece animado mente sobre quando
+   chegou (TOKENS.md, movimento). */
+
+.ki-indicador {
+  min-width: 0;
+}
+
+.ki-indicador__rotulo {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+  line-height: var(--altura-densa);
+}
+
+.ki-indicador__dado {
+  display: block;
+  margin: 0;
+}
+
+.ki-indicador__valor {
+  display: block;
+  margin-top: var(--e-2);
+  color: var(--cor-tinta);
+  font-size: var(--texto-numero);
+  font-weight: var(--peso-medio);
+  line-height: 1.1;
+  letter-spacing: var(--tracking-numero);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A nota carrega o tom: e a unica cor do bloco, e ela vem do dado. */
+.ki-indicador__nota {
+  display: block;
+  margin-top: var(--e-2);
+  color: var(--cor-tom);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}

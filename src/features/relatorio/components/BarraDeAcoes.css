@@ -1,0 +1,42 @@
+/* As acoes da folha, na superficie escura do app: elas emolduram o relatorio,
+   nao fazem parte dele. Por isso ficam acima da folha e fora da impressao.
+
+   Nenhuma cor aqui: os botoes vem do kit visual e leem os tokens semanticos do
+   contexto em que estao (src/components/shared/Botao.css). */
+
+.barra-de-acoes {
+  display: grid;
+  gap: var(--e-4);
+}
+
+.barra-de-acoes__botoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+/* As notas explicam o que cada botao faz — e, nos dois que nao fazem tudo, o
+   que ele nao faz. Ficam em coluna para nenhuma delas virar rodape da outra. */
+.barra-de-acoes__notas {
+  display: grid;
+  gap: var(--e-1);
+  max-width: var(--largura-leitura);
+}
+
+.barra-de-acoes__nota {
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+/* Nota vazia nao ocupa linha: a regiao viva existe no DOM o tempo todo, mas so
+   empurra a barra quando tem o que dizer. */
+.barra-de-acoes__nota:empty {
+  display: none;
+}
+
+/* A confirmacao da copia ganha o tom decidido no JSX, nunca uma cor escrita. */
+.barra-de-acoes__nota[data-tom] {
+  color: var(--cor-tom);
+}

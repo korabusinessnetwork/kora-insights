@@ -1,0 +1,21 @@
+/* Assinatura do produto: serifa, sem caixa alta, sem simbolo. */
+
+.ki-marca {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.ki-marca__nome {
+  color: var(--cor-tinta);
+}
+
+/* A segunda palavra recua um passo de tinta: e o que faz a primeira ser o nome. */
+.ki-marca__sufixo {
+  color: var(--cor-tinta-suave);
+}

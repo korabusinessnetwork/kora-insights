@@ -1,0 +1,108 @@
+/* Volta do OAuth. Tres desfechos, um layout: coluna estreita, uma frase grande
+   e, embaixo, o que fazer a seguir. O caso de recusa reaproveita o `Estado` do
+   kit — quem recusa nao ganha tela propria, ganha o proximo passo. */
+
+.retorno {
+  display: grid;
+  gap: var(--e-6);
+  padding-block: var(--e-12);
+  max-width: 52rem;
+}
+
+.retorno__titulo {
+  font-family: var(--fonte-display);
+  font-size: var(--texto-veredito);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-veredito);
+  letter-spacing: var(--tracking-veredito);
+  color: var(--cor-tinta);
+}
+
+.retorno__apoio {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+}
+
+.retorno__saida {
+  display: grid;
+  gap: var(--e-3);
+  margin-top: var(--e-2);
+}
+
+.retorno__subtitulo {
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-tinta-suave);
+}
+
+.retorno__passos {
+  display: grid;
+  gap: var(--e-2);
+  counter-reset: passo;
+  list-style: none;
+}
+
+.retorno__passo {
+  position: relative;
+  padding-left: var(--e-6);
+  max-width: var(--largura-leitura);
+  counter-increment: passo;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+.retorno__passo::before {
+  position: absolute;
+  left: 0;
+  content: counter(passo) '.';
+  color: var(--cor-acento);
+  font-variant-numeric: tabular-nums;
+}
+
+.retorno__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-4) var(--e-6);
+  margin-top: var(--e-2);
+}
+
+.retorno__link {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.retorno__link:hover {
+  color: var(--cor-tinta);
+}
+
+/* Ancora com peso de botao primario: ela navega, e botao que navega quebra
+   abrir em nova aba (catalogo do kit). A pele sai dos mesmos tokens. */
+.retorno__link[data-papel='principal'] {
+  padding: var(--e-3) var(--e-5);
+  border-radius: var(--raio-2);
+  background: var(--cor-tinta);
+  color: var(--cor-fundo);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+  text-decoration: none;
+  transition: background var(--duracao-rapida) var(--ease-padrao);
+}
+
+.retorno__link[data-papel='principal']:hover {
+  background: var(--cor-tinta-suave);
+  color: var(--cor-fundo);
+}
+
+@media (max-width: 900px) {
+  .retorno {
+    padding-block: var(--e-8);
+  }
+}

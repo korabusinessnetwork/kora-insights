@@ -1,0 +1,33 @@
+/* Acao recomendada: a segunda frase mais importante da tela, e por isso a
+   unica alem do veredito que sai em serifa (identidade, pagina 1). */
+
+.acao-recomendada__frase {
+  margin-top: var(--e-4);
+  max-width: 34ch;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  line-height: var(--altura-densa);
+}
+
+.acao-recomendada__confirmacao {
+  margin-top: var(--e-4);
+  max-width: 46ch;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+.acao-recomendada__teste {
+  margin-top: var(--e-6);
+}
+
+/* O aviso fica colado no botao desabilitado, e nao em rodape de cartao: quem
+   tenta clicar precisa ler a explicacao no mesmo olhar. */
+.acao-recomendada__indisponivel {
+  margin-top: var(--e-3);
+  max-width: 44ch;
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-micro);
+  line-height: var(--altura-corpo);
+}

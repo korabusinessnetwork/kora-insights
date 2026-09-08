@@ -1,0 +1,150 @@
+/* Requisitos da conexao: uma coluna de leitura, porque isto e para ser LIDO
+   antes de clicar. Nada de cartao dentro de cartao e nada de acordeao — passo
+   escondido atras de um clique e passo que ninguem le. */
+
+.requisitos {
+  display: grid;
+  gap: var(--e-10);
+}
+
+.requisitos__secao {
+  display: grid;
+  gap: var(--e-4);
+}
+
+.requisitos__colunas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--e-8);
+  align-items: start;
+}
+
+/* Numero desenhado por contador: reordenar a lista nao pode exigir renumerar
+   a mao, e o leitor de tela ja anuncia a posicao do item. */
+.requisitos__lista {
+  display: grid;
+  gap: var(--e-6);
+  counter-reset: requisito;
+  list-style: none;
+}
+
+.requisitos__item {
+  position: relative;
+  display: grid;
+  gap: var(--e-2);
+  counter-increment: requisito;
+  padding-left: var(--e-10);
+}
+
+.requisitos__item::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  content: counter(requisito);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  line-height: var(--altura-densa);
+  color: var(--cor-acento);
+  font-variant-numeric: tabular-nums;
+}
+
+.requisitos__titulo {
+  max-width: var(--largura-leitura);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-densa);
+  color: var(--cor-tinta);
+}
+
+.requisitos__linha {
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+}
+
+/* O "porque" e apoio: ele explica que o requisito e da plataforma, nao nosso —
+   mas quem esta com o celular na mao precisa achar a checagem primeiro. */
+.requisitos__linha[data-papel='porque'] {
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-apoio);
+}
+
+.requisitos__marcador {
+  color: var(--cor-tinta);
+  font-weight: var(--peso-medio);
+}
+
+.requisitos__marcada {
+  display: grid;
+  gap: var(--e-2);
+  list-style: none;
+}
+
+.requisitos__marcado {
+  position: relative;
+  padding-left: var(--e-5);
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+.requisitos__marcado::before {
+  position: absolute;
+  left: 0;
+  content: '+';
+  color: var(--cor-positivo);
+}
+
+/* A negativa e a metade que constroi confianca: ela merece o mesmo peso visual
+   da lista do que lemos, com o sinal trocado. */
+.requisitos__marcada[data-tom='negativa'] .requisitos__marcado::before {
+  content: '–';
+  color: var(--cor-tinta-fraca);
+}
+
+.requisitos__permissoes {
+  display: grid;
+  gap: var(--e-3);
+  list-style: none;
+}
+
+.requisitos__permissao {
+  display: grid;
+  gap: var(--e-1);
+  padding: var(--e-3) var(--e-4);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-2);
+  background: var(--cor-superficie);
+}
+
+.requisitos__uso {
+  color: var(--cor-tinta);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+/* O nome tecnico fica visivel de proposito: e exatamente o que vai no pedido a
+   Meta, e o cliente pode conferir na tela de autorizacao dela. */
+.requisitos__escopo {
+  color: var(--cor-tinta-fraca);
+  font-family: ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  font-size: var(--texto-micro);
+}
+
+@media (max-width: 900px) {
+  .requisitos {
+    gap: var(--e-8);
+  }
+
+  .requisitos__colunas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-8);
+  }
+
+  .requisitos__item {
+    padding-left: var(--e-8);
+  }
+}

@@ -10,6 +10,8 @@ Indice de ADRs. Toda decisao de arquitetura relevante vira ADR em `docs/08_DECIS
 | 004 | Snapshot diario e historico proprio desde o dia 1 | Aceito |
 | 005 | Motor de regras versionado (o metodo como codigo) | Aceito |
 | 006 | Comparacao com concorrentes fica para a Fase 2 | Proposto |
+| 007 | Modo de demonstracao com fixture deterministica | Aceito |
+| 008 | Variacao calculada sobre o valor exibido | Aceito |
 
 ## Decisoes pendentes (viram ADR quando resolvidas)
 - Hospedagem definitiva: Vercel Pro pago ou alternativa com free tier comercial

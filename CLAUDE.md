@@ -1,12 +1,11 @@
 # Diretrizes de Desenvolvimento — Kora Insights
 
-> Constituição do projeto. Substitua os `{{...}}` pelas respostas do intake
-> (`respostas-intake.md`). Remova as seções que não se aplicam ao seu produto.
+> Constituição do projeto. Vale acima de preferência pessoal e de conveniência
+> técnica. Quando ela e o código discordarem, o código está errado — e quando
+> ela própria estiver errada, corrija-a no mesmo commit em que corrigir o código.
+> Última revisão: 2026-09-06.
 
 ## Princípio nº 1 — INTUITIVIDADE (inegociável)
-
-<!-- Se tem UI, o padrão é INTUITIVIDADE. Se é serviço/lib, pode ser
-     CONFIABILIDADE ou CONTRATO ESTÁVEL. Defina o valor inegociável nº1. -->
 
 O foco principal do sistema é **INTUITIVIDADE: a tela precisa ser compreensível sem treinamento, e todo diagnóstico deve caber numa frase que o cliente repetiria em voz alta**. Em qualquer decisão,
 priorize este princípio acima de conveniência técnica. Regras práticas:
@@ -35,7 +34,6 @@ priorize este princípio acima de conveniência técnica. Regras práticas:
 
 ## Processo de trabalho
 
-<!-- Se usa orquestração multi-modelo, mantenha; senão, descreva seu fluxo. -->
 1. **Planejar TUDO antes de executar** — escopo fechado, sem retrabalho.
 2. Builds multi-parte → fan-out paralelo com **dono exclusivo por arquivo**
    (dois agentes nunca tocam o mesmo arquivo).
@@ -62,9 +60,12 @@ Detalhes em `memory/restrictions.md`.
 
 ## Padrões de código
 
-- Componentes React em arquivos separados, CSS fora do JSX, acesso ao backend somente pela camada de serviços em src/lib <!-- ex: Componentes React em arquivos separados -->
-- Variáveis/funções em português para nomes de domínio (`abrirCaixa`), inglês
-  para padrões técnicos (`handleSubmit`).
+- Componentes React em arquivos separados, CSS fora do JSX (par `Nome.jsx` +
+  `Nome.css`), acesso ao backend somente pela camada de serviços em `src/lib`.
+- Estrutura **por feature** (`src/features/<feature>/`), nunca `components/` e
+  `hooks/` planos. Padrões consolidados em `memory/patterns.md`.
+- Variáveis/funções em português para nomes de domínio (`montarHistorico`,
+  `gerarDiagnostico`), inglês para padrões técnicos (`handleSubmit`, `useEffect`).
 - Sempre tratar erros de chamadas ao backend com `try/catch` ou checagem de `.error`.
 - Logs de atividade fire-and-forget — nunca bloquear a operação principal.
 - Rodar `npm test` antes de commitar; funções puras nascem com teste.
@@ -76,11 +77,17 @@ Detalhes em `memory/restrictions.md`.
 - **Backend:** Supabase (Auth, Postgres com RLS, Edge Functions, Cron)
 - **Deploy:** Vercel (decisão pendente sobre plano comercial, ver docs/12)
 - **Integração:** Instagram API with Facebook Login (ADR-002)
-- **Regras:** ruleset versionado em src/rules (ADR-005)
-<!-- ex:
-- React + Vite
-- Supabase (auth, database, realtime)
-- React Router v6
-- Context API (sem Redux)
-- Deploy: Vercel
--->
+- **Regras:** ruleset versionado em `src/rules` (ADR-005)
+
+## Onde está a verdade de cada coisa
+
+| Pergunta | Arquivo |
+|---|---|
+| O que atravessa fronteira de módulo? | `docs/01_ARQUITETURA/contratos.md` |
+| Que cor, fonte e contraste? | `docs/02_DESIGN_SYSTEM/TOKENS.md` e `src/styles/tokens.css` |
+| Como o produto deve parecer? | `docs/02_DESIGN_SYSTEM/identidade/` |
+| Quanto histórico o diagnóstico exige? | `src/rules/requisitos.js` — a tela lê de lá |
+| Quando o token é renovado, e quando a tela avisa? | `src/token/validade.js` (ADR-009) |
+| Quais métricas existem? | `src/metricas/dicionario.js` (nunca o nome da Meta) |
+| Como o banco isola tenants? | `supabase/schema.sql` e `supabase/migrations/` |
+| O que já se aprendeu construindo? | `memory/learnings.md` |

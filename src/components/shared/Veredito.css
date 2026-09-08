@@ -1,0 +1,63 @@
+/* O veredito e a unica coisa grande da tela. Cartao de osso sobre o carvao,
+   barra de acento encostada na esquerda sangrando a altura toda, e a frase em
+   serifa. Nada aqui disputa atencao com ela.
+
+   O JSX marca o cartao com [data-superficie="papel"], entao os tokens aqui
+   dentro ja sao os da folha clara. E o mesmo mecanismo que faz o relatorio
+   claro viver dentro do app escuro (TOKENS.md), e e ele que garante contraste
+   do selo de severidade sobre o osso. No relatorio, onde a folha inteira ja e
+   papel, --cor-superficie coincide com o fundo da pagina e sobra so a barra —
+   igual a identidade, sem uma linha de CSS a mais. */
+
+.ki-veredito {
+  padding: var(--e-6) var(--e-8);
+  border-left: var(--borda-acento) solid var(--cor-veredito-barra);
+  border-radius: 0 var(--raio-2) var(--raio-2) 0;
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+}
+
+.ki-veredito__rotulo {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--e-3);
+  font-size: var(--texto-rotulo);
+  line-height: var(--altura-densa);
+}
+
+/* Separador vertical entre a severidade e o assunto, como na identidade. */
+.ki-veredito__assunto {
+  padding-left: var(--e-3);
+  border-left: var(--borda-fina) solid var(--cor-linha-forte);
+  color: var(--cor-tinta);
+  opacity: 0.72;
+}
+
+.ki-veredito__frase {
+  margin: 0;
+  max-width: var(--largura-veredito);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-veredito);
+  font-weight: var(--peso-normal);
+  line-height: var(--altura-veredito);
+  letter-spacing: var(--tracking-veredito);
+  text-wrap: balance;
+}
+
+.ki-veredito__apoio {
+  margin-top: var(--e-4);
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-corpo);
+  opacity: 0.78;
+}
+
+@media (max-width: 640px) {
+  .ki-veredito {
+    padding: var(--e-5);
+  }
+}

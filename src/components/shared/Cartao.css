@@ -1,0 +1,21 @@
+/* Cartao: a superficie mais comum da tela. Sem sombra: profundidade aqui vem
+   de um degrau de cinza, nao de desfoque (TOKENS.md, "nenhuma sombra decorativa"). */
+
+.ki-cartao {
+  display: block;
+  padding: var(--e-5) var(--e-6);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-superficie);
+  color: var(--cor-tinta);
+}
+
+.ki-cartao[data-elevacao='alta'] {
+  background: var(--cor-superficie-alta);
+}
+
+@media (max-width: 640px) {
+  .ki-cartao {
+    padding: var(--e-4);
+  }
+}

@@ -1,0 +1,64 @@
+/* Tabela do relatorio: linhas horizontais finas, sem zebra e sem borda externa.
+   O que separa as colunas e o alinhamento, nao um traco. */
+
+.ki-tabela {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.ki-tabela__grade {
+  width: 100%;
+  min-width: 26rem;
+  border-collapse: collapse;
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+.ki-tabela__grade th,
+.ki-tabela__grade td {
+  padding: var(--e-3) var(--e-4);
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.ki-tabela__grade thead th {
+  border-bottom: var(--borda-fina) solid var(--cor-linha);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-normal);
+  white-space: nowrap;
+}
+
+.ki-tabela__grade tbody th {
+  color: var(--cor-tinta);
+  font-weight: var(--peso-normal);
+}
+
+.ki-tabela__grade tbody td {
+  color: var(--cor-tinta);
+}
+
+.ki-tabela__grade tbody tr + tr th,
+.ki-tabela__grade tbody tr + tr td {
+  border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+/* Coluna de numero encosta a direita: coluna que nao alinha nao se compara. */
+.ki-tabela__grade [data-alinhamento='direita'] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A cor da celula vem do tom decidido pela regra, nunca do sinal do numero. */
+.ki-tabela__grade [data-tom] {
+  color: var(--cor-tom);
+}
+
+/* A grade encosta nas bordas do bloco: o relatorio e uma folha, nao uma caixa. */
+.ki-tabela__grade tr > *:first-child {
+  padding-left: 0;
+}
+
+.ki-tabela__grade tr > *:last-child {
+  padding-right: 0;
+}

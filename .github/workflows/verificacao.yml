@@ -1,0 +1,88 @@
+# Verificacao de todo push e de todo PR.
+#
+# Custo: repositorio privado no plano Free tem 2.000 minutos de Actions por mes,
+# e esta suite roda em cerca de um minuto. Fica folgado dentro do gratuito, que e
+# a regra de custo do projeto (CLAUDE.md, "priorizar o gratuito").
+#
+# A ordem e proposital: lint e o mais rapido e pega erro bobo antes de gastar
+# tempo em teste; o build vem por ultimo porque um bundle que compila com teste
+# quebrado nao serve de nada.
+
+name: Verificação
+
+# Push so na main, PR em qualquer branch. Disparar nos dois para a mesma branch
+# rodaria a suite duas vezes por commit — e a primeira versao deste arquivo fazia
+# exatamente isso, gastando o dobro de minuto para produzir o mesmo resultado.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Push novo na mesma branch cancela a execucao anterior: ninguem precisa do
+# resultado de um commit que ja foi substituido, e minuto de Actions e finito.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Lint, testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` e nao `npm install`: instala exatamente o que esta no lockfile.
+      # Instalar versao diferente da que o desenvolvedor testou transforma o CI
+      # num ambiente que nao existe em lugar nenhum.
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # O fallback de rota do Cloudflare Pages liga sozinho, e o gatilho e a
+      # AUSENCIA de um `404.html` na raiz do build (ADR-010). Um arquivo desses
+      # aparecendo um dia desliga o modo SPA em silencio: `/contas/<id>` aberto
+      # direto passaria a devolver 404 em producao, com a suite verde.
+      # Regra que depende de um arquivo nao existir precisa de quem cobre.
+      - name: O build continua sendo uma SPA para o Pages
+        run: |
+          if [ -f dist/404.html ]; then
+            echo "dist/404.html existe: o Pages sai do modo SPA e todo link direto quebra."
+            echo "Ver docs/08_DECISOES/adr-010-hospedagem-cloudflare-pages.md"
+            exit 1
+          fi
+          test -f dist/_headers || { echo "dist/_headers sumiu: o deploy iria sem cabecalho de seguranca."; exit 1; }
+          echo "ok: sem 404.html na raiz, e _headers presente"
+
+
+  isolamento:
+    name: Isolamento entre tenants
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # O runner ja traz PostgreSQL instalado. O script sobe um cluster efemero
+      # proprio em vez de usar um `services:` container: assim ele roda igual na
+      # maquina de quem desenvolve, sem Docker e sem Supabase CLI.
+      # Duas suites no mesmo cluster efemero: vazamento entre tenants e as funcoes
+      # do cofre do token. O NOME DO JOB continua "Isolamento entre tenants" de
+      # proposito — ele e o nome do check que aparece no PR, e renomear um check
+      # quebra protecao de branch que exija o nome antigo.
+      - name: Vazamento entre tenants e cofre do token
+        run: ./scripts/testar-isolamento.sh

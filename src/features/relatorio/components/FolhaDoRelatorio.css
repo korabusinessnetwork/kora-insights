@@ -1,0 +1,189 @@
+/* A folha do relatorio (identidade, pagina 3).
+
+   Papel claro dentro do app escuro: a cor nao esta escrita aqui. O JSX marca a
+   folha com [data-superficie="papel"] e os tokens semanticos trocam de pele
+   (src/styles/tokens.css) — e por isso o veredito, a tabela e o grafico saem
+   legiveis sobre osso sem uma unica cor a mais neste arquivo.
+
+   O fundo e --cor-fundo, que sobre papel coincide com --cor-superficie: e o que
+   faz o cartao do veredito desaparecer e sobrar so a barra ocre, como na
+   identidade. */
+
+.folha {
+  padding: var(--e-10);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-fundo);
+  color: var(--cor-tinta);
+}
+
+/* ── cabecalho ──────────────────────────────────────────────────────────── */
+
+.folha__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+  padding-bottom: var(--e-5);
+  border-bottom: var(--borda-fina) solid var(--cor-linha-forte);
+}
+
+/* O nome do cliente e o titulo da pagina, mas nao e o heroi dela: o heroi e o
+   veredito. Por isso h1 discreto, no corpo do texto e em tinta cheia. */
+.folha__cliente {
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-corpo);
+  font-weight: var(--peso-forte);
+  line-height: var(--altura-densa);
+}
+
+.folha__assunto {
+  margin-top: var(--e-2);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+.folha__assinatura {
+  text-align: right;
+}
+
+.folha__rotulo-assinatura {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+.folha__preparador {
+  margin-top: var(--e-1);
+  color: var(--cor-tinta);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-densa);
+}
+
+/* ── corpo ──────────────────────────────────────────────────────────────────
+   Duas colunas: a esquerda le (veredito, acao, limites), a direita prova
+   (tabela e grafico). A da prova e um fio mais larga porque a tabela tem quatro
+   colunas e o grafico tem oito semanas; a da leitura precisa apenas caber uma
+   frase sem virar paragrafo. */
+
+.folha__corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--e-10);
+  align-items: start;
+  margin-top: var(--e-8);
+}
+
+/* Sem evidencia nao ha coluna de prova: uma folha com metade vazia anunciaria
+   que falta alguma coisa ali. Vira coluna unica de leitura. */
+.folha[data-prova='nao'] .folha__corpo {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: var(--largura-leitura);
+}
+
+.folha__leitura,
+.folha__prova {
+  display: grid;
+  gap: var(--e-8);
+  align-content: start;
+}
+
+.folha__acao-frase {
+  margin-top: var(--e-3);
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-display);
+  font-size: var(--texto-display);
+  line-height: var(--altura-densa);
+}
+
+.folha__acao-confirmacao {
+  margin-top: var(--e-4);
+  max-width: var(--largura-leitura);
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-corpo);
+}
+
+/* Fio acima dos limites: eles fecham a coluna de leitura, e o fio e o que os
+   separa da acao sem os rebaixar a letra miuda. */
+.folha__limites {
+  padding-top: var(--e-6);
+  border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+.folha__rotulo {
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-medio);
+  line-height: var(--altura-densa);
+}
+
+/* ── rodape ─────────────────────────────────────────────────────────────── */
+
+.folha__rodape {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  margin-top: var(--e-10);
+  padding-top: var(--e-5);
+  border-top: var(--borda-fina) solid var(--cor-linha-forte);
+}
+
+.folha__origem {
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}
+
+@media (max-width: 64rem) {
+  .folha {
+    padding: var(--e-6);
+  }
+
+  /* Empilhado, a prova vem depois da leitura: o cliente rola atras do numero
+     que sustenta a frase, e nao o contrario. */
+  .folha__corpo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-8);
+  }
+}
+
+@media print {
+  /* O papel e A4 retrato (src/styles/impressao.css, @page). Duas colunas em
+     retrato espremem a tabela abaixo da largura minima dela, e a coluna de
+     variacao sairia cortada — que e justamente o numero que o cliente confere
+     na reuniao. Em uma coluna, cada bloco recebe a largura inteira da pagina. */
+  .folha__corpo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-6);
+    margin-top: var(--e-6);
+  }
+
+  .folha__leitura,
+  .folha__prova {
+    gap: var(--e-6);
+  }
+
+  .folha__rodape {
+    margin-top: var(--e-6);
+  }
+}
+
+/* Carimbo de demonstração: viaja dentro da folha, e por isso sobrevive à
+   impressão. É a única coisa da folha que pode gritar. */
+.folha__carimbo {
+  margin: 0 0 var(--e-6);
+  padding: var(--e-3) var(--e-4);
+  border: var(--borda-fina) dashed var(--cor-acento);
+  border-radius: var(--raio-3);
+  color: var(--cor-acento);
+  font-size: var(--texto-apoio);
+  line-height: var(--altura-densa);
+}

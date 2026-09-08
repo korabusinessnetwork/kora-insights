@@ -1,0 +1,90 @@
+/* Casca: coluna única, cabeçalho fixo no topo, rodapé no fim da página.
+   Largura de conteúdo vem do token — a tela do diagnóstico e a do relatório
+   precisam começar na mesma margem. */
+
+.ka-casca {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--cor-fundo);
+}
+
+.ka-casca__avisos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  width: 100%;
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--e-4) var(--e-6) 0;
+}
+
+.ka-casca__conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--e-6);
+}
+
+/* O alvo do "pular para o conteúdo" recebe foco por programa: sem anel, porque
+   o anel aqui marcaria uma região inteira, e não um controle. */
+.ka-casca__conteudo:focus {
+  outline: none;
+}
+
+.ka-casca__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--e-6);
+  border-top: var(--borda-fina) solid var(--cor-linha);
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-apoio);
+}
+
+.ka-casca__links {
+  display: flex;
+  gap: var(--e-5);
+  flex-wrap: wrap;
+}
+
+.ka-casca__links a {
+  color: var(--cor-tinta-suave);
+  text-decoration: none;
+  text-underline-offset: 0.25em;
+}
+
+.ka-casca__links a:hover {
+  color: var(--cor-tinta);
+  text-decoration: underline;
+}
+
+@media (max-width: 52rem) {
+  .ka-casca__avisos {
+    padding: var(--e-4) var(--e-4) 0;
+  }
+
+  .ka-casca__conteudo,
+  .ka-casca__rodape {
+    padding: var(--e-4);
+  }
+}
+
+/* No papel, a casca some: o relatório impresso é a folha, e só ela. */
+@media print {
+  .ka-casca {
+    min-height: 0;
+    background: transparent;
+  }
+
+  .ka-casca__conteudo {
+    max-width: none;
+    padding: 0;
+  }
+}

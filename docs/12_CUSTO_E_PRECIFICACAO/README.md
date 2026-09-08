@@ -13,7 +13,7 @@
 | Item | Custo | Nota |
 |---|---|---|
 | Supabase Free | R$ 0 | 500 MB de banco, 50 mil MAU. Pausa apos 7 dias ociosa, mas o cron diario de coleta impede a pausa |
-| Vercel Hobby | R$ 0 | **Atencao:** o plano Hobby veda uso comercial. Ver secao 2.2 |
+| Vercel Hobby | R$ 0 | **Nao serve:** veda uso comercial, e a definicao alcanca ate a pagina que anuncia o produto. Ver secao 2.2 |
 | Meta Developer + Graph API | R$ 0 | A Graph API nao cobra por chamada. O custo e tempo de review e limite de taxa |
 | Dominio .com.br | ~R$ 40/ano | |
 | **Total de desembolso ate o primeiro cliente** | **~R$ 40** | |
@@ -54,7 +54,7 @@ critico, nao como etapa final.
 | Item | Custo/mes |
 |---|---|
 | Supabase Free | R$ 0 |
-| Vercel (ver 2.2) | R$ 0 a R$ 110 |
+| Cloudflare Pages (ADR-010) | R$ 0 |
 | Gateway de pagamento | ~4% + R$ 0,40 por cobranca |
 | **Piso** | **~R$ 0 + taxa de gateway** |
 
@@ -63,20 +63,70 @@ mais ~30 snapshots de midia). Com 20 contas, sao ~88 MB por ano, bem dentro dos
 500 MB do plano Free. Armazenamento nao e o gargalo; o gargalo e o limite de
 testers do Development mode.
 
-### 2.2 Alerta: Vercel Hobby e uso comercial
+### 2.2 Hospedagem: o Hobby da Vercel morde antes do primeiro cliente
 
-O plano Hobby da Vercel e para projetos nao comerciais. No momento em que voce
-cobra do primeiro cliente, ou migra para o Vercel Pro (US$ 20/mes) ou hospeda em
-uma alternativa cujo plano gratuito permite uso comercial, como Cloudflare Pages
-ou Netlify. **Decisao pendente, vira ADR antes da primeira cobranca.**
+**Correcao de 2026-09-07.** Este documento dizia que a restricao valia "no momento
+em que voce cobra do primeiro cliente". Nao e isso. A definicao da propria Vercel
+e mais ampla:
+
+> Commercial usage is defined as any Deployment that is used for the purpose of
+> financial gain of **anyone** involved in **any part of the production** of the
+> project, including a paid employee or consultant writing the code. Examples
+> include […] **advertising the sale of a product or service**.
+>
+> — Vercel, *Fair Use Guidelines*, secao "Commercial usage"
+
+Ou seja: uma pagina que anuncia a venda do produto ja e uso comercial, e o
+proprio fato de alguem ser pago para escrever o codigo tambem entra. O gatilho
+nao e a primeira cobranca — e o lancamento. Publicar a politica de privacidade e
+a pagina de exclusao no Hobby, que e o que o App Review exige, ja fica em cima
+dessa linha.
+
+#### O que a troca custa
+
+Quase nada, e vale medir antes de decidir por medo: **o build e estatico puro**
+(`vite build` produz `index.html` + `assets/`). Nao ha funcao serverless no host
+— as Edge Functions rodam no Supabase. O host so precisa servir arquivo e ter
+fallback de SPA. Nao ha lock-in a desfazer.
+
+#### As tres saidas
+
+| Opcao | Custo | Uso comercial no gratuito | Limites que importam aqui |
+|---|---|---|---|
+| **Vercel Pro** | US$ 20/mes (~R$ 110) | — (pago) | Nenhum que este produto alcance |
+| **Cloudflare Pages** | R$ 0 | **Permitido** | Banda ilimitada; 500 builds/mes; 20.000 arquivos |
+| **Netlify Free** | R$ 0 | **Permitido**, exceto revender a hospedagem | 100 GB de banda, 300 min de build por mes |
+
+Revender hospedagem nao e o nosso caso: vendemos diagnostico, e o cliente nunca
+hospeda nada conosco.
+
+#### Recomendacao
+
+**Cloudflare Pages, agora.** Tres razoes, em ordem de peso:
+
+1. E a unica das tres sem teto de banda. As outras duas tem um numero que um dia
+   obriga a decidir de novo; esta nao cria a segunda decisao.
+2. Custa R$ 0 e destrava a cadeia que hoje esta parada: sem URL publica nao ha
+   politica de privacidade publicada, sem ela nao ha submissao ao App Review, e o
+   App Review e o caminho critico (`memory/learnings.md`, 2026-09-05).
+3. A troca e barata **hoje** e continua barata depois. Adiar nao compra nada.
+
+Contra a Vercel Pro agora: US$ 20/mes por 12 meses sao ~R$ 1.320 gastos antes do
+primeiro real de receita, para resolver um problema que R$ 0 resolvem igual. A
+regra de custo do projeto (`CLAUDE.md`) manda adiar o pago por padrao, e aqui o
+gratuito nao e um degrau abaixo — e o mesmo servico para um site estatico.
+
+**Decidido em 2026-09-07: Cloudflare Pages** (ADR-010). O custo fixo de
+hospedagem da Fase 0 e da Fase 1 cai para R$ 0, e some a linha "Vercel Pro" do
+orcamento pos-review.
 
 ### 2.3 Fase 1 (pos review, 20 a 100 contas)
 
 | Item | USD/mes | ~BRL/mes |
 |---|---|---|
 | Supabase Pro | US$ 25 | ~R$ 138 |
-| Vercel Pro (ou alternativa gratuita) | US$ 20 | ~R$ 110 |
-| **Total fixo** | **US$ 45** | **~R$ 248** |
+| Cloudflare Pages (ADR-010) | US$ 0 | R$ 0 |
+| **Total fixo** | **US$ 25** | **~R$ 138** |
 
 O Supabase Pro e cobrado por organizacao, nao por projeto, e ja inclui US$ 10 de
 credito de computacao que cobre exatamente uma instancia Micro. Projeto adicional
@@ -151,7 +201,7 @@ sera infraestrutura, sera suporte manual. Instrumente o onboarding antes de esca
 
 - Gateway (Stripe, Asaas ou Pagar.me) e se aceita Pix, que derruba a taxa de ~4% para
   centavos por transacao
-- Hospedagem definitiva (secao 2.2)
+- ~~Hospedagem definitiva~~ — **decidido**: Cloudflare Pages (ADR-010)
 - Se agencia com varias marcas paga por marca ou tem preco de pacote. Recomendacao
   inicial: por marca, com desconto progressivo a partir da quinta
 
