@@ -13,8 +13,8 @@
 | Exigência | Estado hoje | Onde resolver |
 |---|---|---|
 | **Verificação de negócio** no Meta Business Manager, com documento (CNPJ) | não iniciada | processo administrativo, fora do código |
-| **Política de privacidade publicada**, em URL pública e estável | **texto escrito** em `/privacidade`, rota pública, fora da área autenticada. Falta **publicar** (depende da hospedagem) e preencher três pendências que só o dono tem | `docs/12`, seção 2.2 |
-| **Instruções de exclusão de dados**, em URL pública | **texto escrito** em `/dados`, com as duas saídas (desconectar e excluir) e o protocolo. Falta publicar | idem |
+| **Política de privacidade publicada**, em URL pública e estável | **publicada** em https://kora-insights.pages.dev/privacidade (2026-09-08). Faltam três pendências que só o dono tem | `docs/12`, seção 2.2 |
+| **Instruções de exclusão de dados**, em URL pública | **publicada** em https://kora-insights.pages.dev/dados, com as duas saídas (desconectar e excluir) e o protocolo | idem |
 | **Screencast por permissão**, mostrando cada uma sendo usada em tela | não gravado | seção 3 |
 | **Descrição do caso de uso** de cada permissão | esboçada em `docs/07_APIS/graph-api.md`, seção 1 | idem |
 | **App funcional** para o revisor testar | depende das telas do produto | `docs/09_BACKLOG` |
@@ -193,8 +193,9 @@ checklist parecer intransponível quando na verdade metade dele já está feita.
 - [ ] **Verificação de negócio** no Meta Business Manager (exige o CNPJ acima)
 - [ ] **Prazo de retenção** depois do cancelamento ou da desconexão
 - [ ] **Base legal**, confirmada com assessoria jurídica
-- [ ] **Hospedagem escolhida** — sem URL pública, "política publicada" não existe
-      (`docs/12`, seção 2.2: comparativo e recomendação prontos)
+- [x] **Hospedagem escolhida e publicando** — Cloudflare Pages (ADR-010), no ar
+      desde 2026-09-08 em https://kora-insights.pages.dev. As duas URLs que a
+      Meta exige respondem, e a cada push na `main` o deploy refaz sozinho
 - [ ] **Criar o app no painel Meta** e converter a conta de teste para profissional
 - [ ] Conta de tester real conectada e coletando
 
@@ -222,9 +223,10 @@ checklist parecer intransponível quando na verdade metade dele já está feita.
 
 ### O caminho crítico, em uma linha
 
-Hospedagem → URLs publicadas → CNPJ → verificação de negócio → screencast →
-submissão. **O primeiro elo é o único que está esperando só uma escolha**, e os
-outros quatro não começam sem ele.
+~~Hospedagem → URLs publicadas~~ → **CNPJ** → verificação de negócio →
+screencast → submissão. Os dois primeiros elos caíram em 2026-09-08. **O elo que
+segura a fila agora é o CNPJ**: ele destrava a verificação de negócio, e sem ela
+não há submissão. É pendência do dono, não de código.
 
 ---
 
