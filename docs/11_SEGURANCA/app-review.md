@@ -189,15 +189,20 @@ checklist parecer intransponível quando na verdade metade dele já está feita.
 ### Depende do dono (nenhum destes é código)
 
 - [ ] **CNPJ, razão social, endereço e e-mail do encarregado** — três pendências
-      marcadas na política, e a Meta exige controlador identificável
-- [ ] **Verificação de negócio** no Meta Business Manager (exige o CNPJ acima)
+      marcadas na política, e a Meta exige controlador identificável. Bloqueia o
+      acesso avançado (cliente pagante), **não** o modo de desenvolvimento
+- [ ] **Verificação de negócio** no Meta Business Manager (exige o CNPJ acima).
+      Para empresa brasileira a Meta pede CNPJ ativo, com razão social e endereço
+      batendo exatamente com a Receita Federal
 - [ ] **Prazo de retenção** depois do cancelamento ou da desconexão
 - [ ] **Base legal**, confirmada com assessoria jurídica
 - [x] **Hospedagem escolhida e publicando** — Cloudflare Pages (ADR-010), no ar
       desde 2026-09-08 em https://kora-insights.pages.dev. As duas URLs que a
       Meta exige respondem, e a cada push na `main` o deploy refaz sozinho
-- [ ] **Criar o app no painel Meta** e converter a conta de teste para profissional
-- [ ] Conta de tester real conectada e coletando
+- [ ] **Criar o app no painel Meta** e converter a conta de teste para
+      profissional — **é o próximo passo real**, e não depende de CNPJ nenhum
+- [ ] Conta de tester real conectada e coletando — destrava o screencast e o
+      teste de `pages_read_engagement`
 
 ### Depende de uma decisão registrada
 
@@ -223,10 +228,38 @@ checklist parecer intransponível quando na verdade metade dele já está feita.
 
 ### O caminho crítico, em uma linha
 
-~~Hospedagem → URLs publicadas~~ → **CNPJ** → verificação de negócio →
-screencast → submissão. Os dois primeiros elos caíram em 2026-09-08. **O elo que
-segura a fila agora é o CNPJ**: ele destrava a verificação de negócio, e sem ela
-não há submissão. É pendência do dono, não de código.
+~~Hospedagem → URLs publicadas~~ → **app criado + conta real conectada como
+tester** → screencast → CNPJ → verificação de negócio → submissão.
+
+Os dois primeiros elos caíram em 2026-09-08. **Correção de 2026-09-08:** esta
+linha dizia que o elo seguinte era o CNPJ. Estava errado, e o erro custaria
+semanas de espera pela coisa errada.
+
+A Meta separa dois níveis de acesso, e o CNPJ só aparece no segundo:
+
+| Nível | Quem consegue conectar | Exige |
+|---|---|---|
+| **Desenvolvimento** | só contas com papel no app (*Instagram Tester*) | nada: nem App Review, nem verificação de negócio, nem CNPJ |
+| **Avançado** | qualquer conta, ou seja, cliente pagante | App Review **+ verificação de negócio** → CNPJ |
+
+No modo de desenvolvimento a coleta é **real**: token de verdade, dados de
+verdade, diagnóstico de verdade. O que muda é só quem pode conectar.
+
+Isso importa porque o **screencast que o App Review exige mostra cada permissão
+sendo usada em tela** — e não existe como gravá-lo sem uma conta conectada. O
+caminho de tester não é um atalho nem um desvio: é pré-requisito da submissão.
+Ele também é onde `pages_read_engagement` finalmente pode ser testada.
+
+**O elo que segura a fila é criar o app no painel da Meta e conectar a primeira
+conta como tester.** Custa R$ 0 e não espera terceiros. O CNPJ corre em
+paralelo, e só bloqueia o último elo.
+
+> **MEI não resolve este CNPJ.** Os CNAEs de desenvolvimento e licenciamento de
+> software (6201-5/01, 6202-3/00) estão fora da lista de ocupações do MEI, e a
+> previsão para 2026 é que continuem fora — então o caminho é ME no Simples
+> Nacional, com contador e tributação sobre faturamento, e não os ~R$ 80/mês que
+> se costuma supor. **Confirmar com contador antes de abrir**; este repositório
+> não é fonte de verdade fiscal.
 
 ---
 
