@@ -1,0 +1,106 @@
+name: Publicar
+
+# Deploy no Cloudflare Pages (ADR-010).
+#
+# Existe aqui, e nao na integracao Git do painel da Cloudflare, por uma razao de
+# projeto: assim a configuracao de deploy e versionada, revisada em PR e cobrada
+# pelo mesmo CI que cobra o resto. Quem mudar como o produto vai ao ar deixa
+# rastro no repositorio.
+#
+# ATENCAO: as duas formas se somam em vez de se substituir. Se o repositorio
+# TAMBEM for conectado pela integracao Git no painel, cada push publica DUAS
+# vezes, e as duas competem pelo mesmo endereco. Escolha uma.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  # Deploy nao se cancela no meio: uma publicacao interrompida deixa o site
+  # servindo metade de um build. Push novo espera o anterior terminar.
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: Publicar no Cloudflare Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      # Segredo nao pode ser lido em `if:` de job, mas pode virar env de job.
+      # Sem as credenciais o workflow avisa e passa, em vez de pintar a main de
+      # vermelho por uma configuracao que ainda nao foi feita.
+      TEM_CREDENCIAL: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+      PROJETO: kora-insights
+
+    steps:
+      - name: Conferir credenciais
+        run: |
+          if [ "$TEM_CREDENCIAL" != "true" ]; then
+            echo "::notice title=Publicação não configurada::Faltam os segredos CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID. Ver docs/08_DECISOES/adr-010-hospedagem-cloudflare-pages.md"
+          fi
+
+      - uses: actions/checkout@v4
+        if: env.TEM_CREDENCIAL == 'true'
+
+      - uses: actions/setup-node@v4
+        if: env.TEM_CREDENCIAL == 'true'
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Instalar dependências
+        if: env.TEM_CREDENCIAL == 'true'
+        run: npm ci
+
+      # As variaveis do front sao lidas no BUILD, nao em tempo de execucao: o
+      # Vite as inlineia no bundle. Por isso elas moram aqui, e nao no painel da
+      # Cloudflare — no painel elas so valeriam se o build acontecesse la.
+      #
+      # Ausentes, `estaEmModoDemonstracao()` devolve true e o produto sobe em
+      # modo de demonstracao, com o aviso permanente na tela (ADR-007). Isso e
+      # util de proposito: as rotas publicas `/privacidade` e `/dados`, que o App
+      # Review exige, sao estaticas e ja funcionam sem Supabase nenhum.
+      - name: Build
+        if: env.TEM_CREDENCIAL == 'true'
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_META_APP_ID: ${{ secrets.VITE_META_APP_ID }}
+          VITE_META_OAUTH_URL: ${{ secrets.VITE_META_OAUTH_URL }}
+          VITE_META_REDIRECT_URI: ${{ secrets.VITE_META_REDIRECT_URI }}
+
+      # O mesmo passo que o CI de verificacao roda, repetido aqui de proposito:
+      # o que vai ao ar precisa ser conferido no artefato que vai ao ar, e nao
+      # num build parecido de outro job (ADR-010).
+      - name: O build continua sendo uma SPA para o Pages
+        if: env.TEM_CREDENCIAL == 'true'
+        run: |
+          if [ -f dist/404.html ]; then
+            echo "dist/404.html existe: o Pages sai do modo SPA e todo link direto quebra."
+            exit 1
+          fi
+          test -f dist/_headers || { echo "dist/_headers sumiu: o deploy iria sem cabecalho de seguranca."; exit 1; }
+
+      # Falha quando o projeto ja existe, que e o caso normal a partir da segunda
+      # execucao. `continue-on-error` cobre exatamente isso e nada mais: o passo
+      # seguinte falha de verdade se o projeto nao existir.
+      - name: Criar o projeto no Pages, se ainda não existir
+        if: env.TEM_CREDENCIAL == 'true'
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create ${{ env.PROJETO }} --production-branch=main
+
+      - name: Publicar
+        if: env.TEM_CREDENCIAL == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ env.PROJETO }} --branch=main
