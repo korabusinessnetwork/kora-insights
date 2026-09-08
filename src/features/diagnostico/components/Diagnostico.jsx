@@ -226,9 +226,20 @@ export default function Diagnostico({ contaId, conta = null }) {
 
         <div className="tela-diagnostico__lateral">
           <AcaoRecomendada acao={principal.acao} confirmacao={principal.confirmacao} />
-          <LimitesDoDiagnostico limites={limites} />
         </div>
       </div>
+
+      {/* Os limites atravessam a largura toda, e nao a coluna estreita ao lado
+          da acao. Na identidade (pagina 1) eram tres frases curtas e as duas
+          colunas terminavam juntas; o motor hoje declara ate sete, e empilhadas
+          em ~30ch elas esticavam a coluna direita muito alem da esquerda —
+          sobrava um vao vazio embaixo da evidencia, do tamanho da diferenca.
+
+          A saida NAO e recolher os limites atras de um "ver mais": lacuna que
+          some da tela e exatamente o que este produto existe para nao fazer
+          (CLAUDE.md, principio n1). Em faixa larga eles cabem em colunas de
+          leitura, aparecem todos, e o vao deixa de existir. */}
+      <LimitesDoDiagnostico limites={limites} />
     </div>
   )
 }

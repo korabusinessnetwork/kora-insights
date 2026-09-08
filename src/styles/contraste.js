@@ -62,11 +62,6 @@ export function contraste(frente, fundo) {
 /**
  * Extrai as primitivas `--kora-*` de uma folha de tokens.
  *
- * Le so as primitivas de proposito: as semanticas sao `var(--tenant-*, ...)` e
- * resolve-las exigiria um motor de CSS. O contrato do design system e que
- * componente nunca usa primitiva direto, entao mapear semantica → primitiva e
- * uma tabela curta e explicita (ver `contraste.test.js`).
- *
  * @param {string} css conteudo de tokens.css
  * @returns {Record<string, string>} nome do token sem `--` para hex
  */
@@ -77,4 +72,38 @@ export function lerPrimitivas(css) {
     primitivas[nome] = valor
   }
   return primitivas
+}
+
+/**
+ * Resolve as semanticas `--cor-*` de um bloco de tema para o nome da primitiva
+ * que as pinta por padrao.
+ *
+ * Existe porque a tabela semantica → primitiva vivia escrita a mao no teste, e
+ * `--cor-grafico-eixo` simplesmente nao estava nela: o eixo do grafico ficou a
+ * 1,38:1 no escuro e 1,49:1 no papel, no DOM e invisivel na tela, com a suite
+ * inteira verde. Tabela escrita a mao so cobra o que alguem lembrou de listar.
+ *
+ * Nao e um motor de CSS: le `var(--tenant-x, var(--kora-y))` e `var(--kora-y)`,
+ * que sao as duas unicas formas que `tokens.css` usa. Valor literal (o preto do
+ * traco no papel, por exemplo) fica de fora, porque nao ha primitiva a nomear.
+ *
+ * @param {string} css conteudo de tokens.css
+ * @param {'escuro'|'papel'} tema qual bloco ler
+ * @returns {Record<string, string>} nome da semantica sem `--` para nome da primitiva
+ */
+export function lerSemanticas(css, tema) {
+  const abertura = tema === 'escuro' ? "[data-superficie='carvao']" : "[data-superficie='papel']"
+  const inicio = css.indexOf(abertura)
+  if (inicio === -1) throw new Error(`bloco de tema ${tema} nao encontrado em tokens.css`)
+  const bloco = css.slice(inicio, css.indexOf('\n}', inicio))
+
+  /** @type {Record<string, string>} */
+  const semanticas = {}
+  for (const [, nome, valor] of bloco.matchAll(/--(cor-[a-z0-9-]+):\s*([^;]+);/gi)) {
+    // A ultima mencao e o fallback: em `var(--tenant-x, var(--kora-y))` quem
+    // pinta sem tenant configurado e `--kora-y`.
+    const primitivas = [...valor.matchAll(/--(kora-[a-z0-9-]+)/gi)].map((m) => m[1])
+    if (primitivas.length > 0) semanticas[nome] = primitivas[primitivas.length - 1]
+  }
+  return semanticas
 }

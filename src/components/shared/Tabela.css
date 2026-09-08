@@ -62,3 +62,31 @@
 .ki-tabela__grade tr > *:last-child {
   padding-right: 0;
 }
+
+/* ── Enfase de coluna ──────────────────────────────────────────────────────
+   Tres colunas numericas com o mesmo peso obrigam a reler o cabecalho a cada
+   linha para saber qual numero e o de agora. A hierarquia resolve isso sem
+   nenhuma cor nova: o valor vigente ganha tinta cheia, a janela anterior recua
+   para tinta suave, e a variacao mantem a cor que a REGRA decidiu — o CSS aqui
+   so lhe da peso, nunca significado. */
+
+.ki-tabela__grade [data-enfase='forte'] {
+  color: var(--cor-tinta);
+  font-weight: var(--peso-medio);
+}
+
+.ki-tabela__grade [data-enfase='fraca'] {
+  color: var(--cor-tinta-suave);
+}
+
+/* A variacao e o que a linha existe para dizer. Peso, e nao cor: a cor ja vem
+   do tom, e um segundo canal de cor competiria com ela. */
+.ki-tabela__grade tbody [data-tom] {
+  font-weight: var(--peso-medio);
+}
+
+/* O cabecalho da coluna vigente acompanha a enfase da coluna, senao a tinta
+   cheia embaixo parece um acidente de uma linha so. */
+.ki-tabela__grade thead th[data-enfase='forte'] {
+  color: var(--cor-tinta);
+}

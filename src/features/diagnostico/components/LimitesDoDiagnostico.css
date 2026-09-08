@@ -1,15 +1,21 @@
-/* O bloco de limites vive na coluna estreita, ao lado da acao recomendada
-   (identidade, pagina 1). Nada de cor nem de tipografia proprias: o kit ja
-   resolveu isso. Aqui so se ajusta o que muda por causa da coluna estreita. */
+/* Os limites ocupam a largura toda, abaixo das duas colunas (a identidade os
+   punha na coluna estreita, quando eram tres frases curtas — hoje o motor
+   declara ate sete, e a coluna nao comporta mais).
 
-/* Em ~30ch de largura, os limites encostam um no outro e viram um paragrafo so.
-   Mais respiro entre eles mantem cada limite como uma frase inteira. */
+   Nada de cor nem de tipografia proprias: o kit ja resolveu isso. Aqui so se
+   resolve a largura. */
+
+/* Colunas de leitura, e nao uma linha de 100% de largura: frase de apoio com
+   130 caracteres de comprimento e lida uma vez e abandonada. ~34ch mantem cada
+   limite no formato em que ele foi escrito, uma frase inteira. */
 .ki-cartao[data-bloco='limites'] .ki-limites__lista {
-  gap: var(--e-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--e-5) var(--e-8);
+  align-items: start;
 }
 
-/* A largura de leitura do kit (68ch) e maior que a coluna: quem limita a linha
-   aqui e a propria coluna, e o texto pode usa-la inteira. */
+/* Quem limita a linha aqui e a coluna do grid, nao a largura de leitura do kit
+   (68ch), que e maior que a coluna e portanto nunca chegaria a valer. */
 .ki-cartao[data-bloco='limites'] .ki-limites__item {
   max-width: none;
 }

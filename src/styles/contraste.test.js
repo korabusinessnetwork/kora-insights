@@ -4,13 +4,14 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { contraste, lerHex, lerPrimitivas, luminancia } from './contraste.js'
+import { contraste, lerHex, lerPrimitivas, lerSemanticas, luminancia } from './contraste.js'
 
 // Le o CSS de verdade: uma segunda copia dos hex aqui sairia de sincronia na
 // primeira troca de paleta, que e exatamente o que aconteceu com a tabela do
 // TOKENS.md escrita a mao.
 const TOKENS_CSS = join(dirname(fileURLToPath(import.meta.url)), 'tokens.css')
-const PRIMITIVAS = lerPrimitivas(readFileSync(TOKENS_CSS, 'utf8'))
+const CSS = readFileSync(TOKENS_CSS, 'utf8')
+const PRIMITIVAS = lerPrimitivas(CSS)
 
 /** @param {string} nome @returns {string} hex */
 function token(nome) {
@@ -97,4 +98,39 @@ describe('superficie de papel', () => {
       expect(contraste(token(nome), papel)).toBeGreaterThanOrEqual(TEXTO)
     }
   })
+})
+
+/*
+ * O grafico e cobrado a partir do CSS, e nao de uma lista escrita aqui.
+ *
+ * A lista a mao ja falhou uma vez: `--cor-grafico-eixo` nunca entrou nela, e o
+ * eixo ficou a 1,38:1 no escuro e 1,49:1 no papel — presente no DOM, invisivel
+ * na tela, com a suite verde. Lendo as semanticas do proprio `tokens.css`, um
+ * token de grafico novo entra coberto no dia em que nasce, sem depender de
+ * alguem lembrar de vir ate aqui.
+ */
+describe('todo elemento de grafico e visivel na superficie onde e desenhado', () => {
+  const SUPERFICIES = {
+    escuro: { cartao: 'kora-carvao-700', 'cartao elevado': 'kora-carvao-600' },
+    papel: { folha: 'kora-osso-200', 'folha elevada': 'kora-osso-100' },
+  }
+
+  for (const tema of /** @type {const} */ (['escuro', 'papel'])) {
+    const semanticas = lerSemanticas(CSS, tema)
+    const doGrafico = Object.keys(semanticas).filter((nome) => nome.startsWith('cor-grafico-'))
+
+    it(`o tema ${tema} declara os elementos de grafico`, () => {
+      // Zero token encontrado passaria o laco abaixo por vacuidade, que e como
+      // um teste deste formato deixa de cobrar sem nunca ficar vermelho.
+      expect(doGrafico.length).toBeGreaterThanOrEqual(3)
+    })
+
+    for (const nome of doGrafico) {
+      for (const [ondeNome, onde] of Object.entries(SUPERFICIES[tema])) {
+        it(`${tema}: --${nome} sobre ${ondeNome}`, () => {
+          expect(contraste(token(semanticas[nome]), token(onde))).toBeGreaterThanOrEqual(GRAFICO)
+        })
+      }
+    }
+  }
 })

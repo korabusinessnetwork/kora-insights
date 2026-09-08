@@ -15,6 +15,30 @@ import './SeletorDeConta.css'
  */
 
 /**
+ * A inicial que ocupa o selo da conta.
+ *
+ * O selo era um quadrado de cor sólida, sem conteúdo — a identidade o desenhou
+ * como lugar da foto de perfil, e a foto nunca existiu porque não guardamos
+ * imagem de perfil. Quadrado cinza vazio não lê como "espaço reservado": lê
+ * como imagem que falhou ao carregar, em toda tela do produto.
+ *
+ * A inicial resolve sem depender de rede, de armazenamento ou de permissão nova
+ * da Meta, e ainda distingue duas contas na hora de trocar. Vem do nome, e não
+ * do arroba, porque é o nome que o cliente reconhece.
+ *
+ * `Array.from` e não `[0]`: nome começado por emoji ou por letra acentuada fora
+ * do BMP quebraria no meio do caractere e renderizaria lixo.
+ *
+ * @param {string} [nome]
+ * @returns {string} uma letra maiúscula, ou vazio quando não há nome
+ */
+export function inicialDaConta(nome) {
+  const limpo = (nome ?? '').trim()
+  if (limpo === '') return ''
+  return Array.from(limpo)[0].toLocaleUpperCase('pt-BR')
+}
+
+/**
  * O que dizer de uma conta que não está coletando. Vocabulário do produto, não
  * regra de cliente: o status vem do banco (`ig_contas.status`).
  * @type {Readonly<Record<string, string>>}
@@ -140,7 +164,9 @@ export default function SeletorDeConta({ contas = [], selecionada = null }) {
         }}
         onKeyDown={aoTeclarNoGatilho}
       >
-        <span className="ka-seletor__avatar" aria-hidden="true" />
+        <span className="ka-seletor__avatar" aria-hidden="true">
+          {inicialDaConta(selecionada.nome)}
+        </span>
         <span className="ka-seletor__identificacao">
           <span className="ka-seletor__nome">
             {selecionada ? selecionada.nome : 'Escolher conta'}
@@ -179,7 +205,9 @@ export default function SeletorDeConta({ contas = [], selecionada = null }) {
                 data-selecionada={ehSelecionada ? 'sim' : undefined}
                 onClick={() => fechar(true)}
               >
-                <span className="ka-seletor__avatar" aria-hidden="true" />
+                <span className="ka-seletor__avatar" aria-hidden="true">
+                  {inicialDaConta(conta.nome)}
+                </span>
                 <span className="ka-seletor__identificacao">
                   <span className="ka-seletor__nome">{conta.nome}</span>
                   <span className="ka-seletor__arroba">@{conta.username}</span>

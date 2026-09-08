@@ -108,11 +108,24 @@
   line-height: var(--altura-corpo);
 }
 
-/* Fio acima dos limites: eles fecham a coluna de leitura, e o fio e o que os
-   separa da acao sem os rebaixar a letra miuda. */
+/* Fio acima dos limites: eles fecham a folha inteira, e o fio e o que os separa
+   do corpo sem os rebaixar a letra miuda. Em colunas de leitura pelo mesmo
+   motivo da tela de diagnostico — frase de apoio esticada na largura de uma
+   folha A4 e lida uma vez e abandonada. */
 .folha__limites {
+  margin-top: var(--e-8);
   padding-top: var(--e-6);
   border-top: var(--borda-fina) solid var(--cor-linha);
+}
+
+.folha__limites .ki-limites__lista {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--e-5) var(--e-8);
+  align-items: start;
+}
+
+.folha__limites .ki-limites__item {
+  max-width: none;
 }
 
 .folha__rotulo {
