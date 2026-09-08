@@ -200,7 +200,11 @@ checklist parecer intransponível quando na verdade metade dele já está feita.
       desde 2026-09-08 em https://kora-insights.pages.dev. As duas URLs que a
       Meta exige respondem, e a cada push na `main` o deploy refaz sozinho
 - [ ] **Criar o app no painel Meta** e converter a conta de teste para
-      profissional — **é o próximo passo real**, e não depende de CNPJ nenhum
+      profissional — **é o próximo passo real**, e não depende de CNPJ nenhum.
+      Passo a passo em `docs/07_APIS/criar-o-app-na-meta.md`, com o destino de
+      cada valor que o painel gera. Depende do projeto Supabase existir para ser
+      exercido: sem ele o produto está em demonstração, e `iniciarConexao`
+      recusa por contrato
 - [ ] Conta de tester real conectada e coletando — destrava o screencast e o
       teste de `pages_read_engagement`
 
