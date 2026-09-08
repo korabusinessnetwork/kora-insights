@@ -59,6 +59,7 @@ export default function PainelDeEvidencia({ achado, periodo }) {
             pontos={serie.pontos}
             rotuloBarra={serie.rotuloBarra}
             rotuloLinha={serie.rotuloLinha}
+            tomBarra={serie.tomBarra}
             // O paragrafo de apoio do achado e o texto que sustenta a frase, e e
             // ele que vira legenda e `aria-label` do desenho: escrever outra
             // frase aqui seria a tela opinando sobre o que o grafico mostra.

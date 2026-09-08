@@ -167,6 +167,11 @@
      series se distinguem por FORMA (retangulo cheio contra traco de 2px) e pela
      legenda, nao por luminancia. Escurecer a barra para separa-las por cor
      desfaria justamente a leitura que este ajuste veio dar. */
+  /* Faixa atras da coluna vigente da tabela. Um degrau de superficie, nunca
+     cor: ela separa colunas, e quem carrega significado na tabela e o tom da
+     variacao. */
+  --cor-faixa-de-coluna: var(--kora-carvao-600);
+
   --cor-grafico-barra: var(--kora-osso-600);
   --cor-grafico-linha: var(--kora-osso-200);
   --cor-grafico-eixo: var(--kora-carvao-300);
@@ -211,6 +216,8 @@
   --cor-positivo: var(--tenant-papel-positivo, var(--kora-sage-700));
   --cor-atencao: var(--tenant-papel-atencao, var(--kora-ocre-700));
   --cor-critico: var(--tenant-papel-critico, var(--kora-tijolo-700));
+
+  --cor-faixa-de-coluna: var(--kora-osso-100);
 
   --cor-grafico-barra: var(--kora-osso-700);
   /* `carvao-800` por nome, e nao `#161a18` escrito a mao: o hex literal era o

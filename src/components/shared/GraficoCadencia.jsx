@@ -134,10 +134,18 @@ export function rotuloDoValor(valor) {
  * @param {{ rotulo: string, barra: number|null, linha: number|null }[]} props.pontos
  * @param {string} props.rotuloBarra ex: 'Publicações na semana'
  * @param {string} props.rotuloLinha ex: 'Contas alcançadas'
+ * @param {'bom'|'ruim'|'neutro'} [props.tomBarra] tom que a REGRA deu as barras.
+ *   A linha nao recebe tom: ver a nota em GraficoCadencia.css
  * @param {string} props.descricao a historia do grafico em uma frase, para ler e ouvir
  * @returns {JSX.Element}
  */
-export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, descricao }) {
+export default function GraficoCadencia({
+  pontos,
+  rotuloBarra,
+  rotuloLinha,
+  tomBarra,
+  descricao,
+}) {
   const serie = Array.isArray(pontos) ? pontos : []
   const fatia = serie.length > 0 ? (LARGURA - 2 * MARGEM_X) / serie.length : 0
   const larguraDaBarra = Math.min(fatia * 0.34, 34)
@@ -176,11 +184,20 @@ export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, desc
     <figure className="ki-grafico" data-bloco="grafico">
       <p className="ki-grafico__legenda">
         <span className="ki-grafico__chave">
-          <span className="ki-grafico__amostra" data-forma="barra" aria-hidden="true" />
+          <span
+            className="ki-grafico__amostra"
+            data-forma="barra"
+            data-tom={tomBarra}
+            aria-hidden="true"
+          />
           {rotuloBarra}
         </span>
         <span className="ki-grafico__chave">
-          <span className="ki-grafico__amostra" data-forma="linha" aria-hidden="true" />
+          <span
+            className="ki-grafico__amostra"
+            data-forma="linha"
+            aria-hidden="true"
+          />
           {rotuloLinha}
         </span>
       </p>
@@ -199,7 +216,7 @@ export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, desc
             x2={LARGURA - MARGEM_X}
             y2={BASE}
           />
-          <g className="ki-grafico__barras">
+          <g className="ki-grafico__barras" data-tom={tomBarra}>
             {serie.map((ponto, indice) =>
               typeof ponto?.barra === 'number' && ponto.barra > 0 ? (
                 <rect

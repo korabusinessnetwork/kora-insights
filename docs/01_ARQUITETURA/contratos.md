@@ -153,6 +153,8 @@ export default {
  * @property {'ok'|'atencao'|'critico'|'indeterminado'} severidade
  * @property {string} rotulo           ex: 'Frequencia de publicacao, causa nomeada'
  * @property {string} frase            O VEREDITO. Uma frase, dita em voz alta.
+ * @property {string[]} destaques      trechos EXATOS de `frase` que carregam a
+ *                                     afirmacao. Ex: ['40%']
  * @property {string} apoio            paragrafo curto que sustenta a frase
  * @property {string} acao             uma acao imperativa e concreta
  * @property {string} confirmacao      como saber, depois, se a causa estava certa
@@ -178,11 +180,25 @@ export default {
  * @typedef {object} Serie
  * @property {string} rotuloBarra
  * @property {string} rotuloLinha
+ * @property {'bom'|'ruim'|'neutro'} [tomBarra] tom da serie desenhada em barras.
+ *                                     A linha nao tem tom de proposito: com as duas
+ *                                     coloridas elas param de se distinguir por cor
  * @property {{ rotulo: string, barra: number|null, linha: number|null }[]} pontos
  */
 ```
 
-`tom` e decisao da regra, nunca do CSS: cair nem sempre e ruim.
+`tom` e decisao da regra, nunca do CSS: cair nem sempre e ruim. Vale igual para
+`tomBarra` e `tomLinha`: a mesma queda sai da mesma cor na nota do indicador, na
+celula de variacao e no traco do grafico, porque as tres leem o mesmo campo.
+
+**`destaques` existe pela mesma razao.** "Sua frequencia caiu 40% e o alcance
+seguiu junto" tem dois assuntos e um so carrega a causa; a tela procurando
+sozinha o "numero que parece importante" — o maior, o primeiro percentual —
+seria ela refazendo a decisao que o motor ja tomou. A regra entrega os trechos
+literais, e `src/motor/destaques.js` so acha onde eles caem. Realce e enfase,
+nunca o unico portador de significado: o numero continua escrito, e a frase
+continua inteira quando a cor nao chega (impressao monocromatica, alto
+contraste, quem nao distingue matiz).
 
 **A variacao e calculada sobre os valores como sao exibidos**, nao sobre os
 valores crus. Publicacoes por semana caiu de 3,0 para 1,8: quem conferir a

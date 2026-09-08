@@ -93,3 +93,24 @@
 .ki-tabela__grade thead th[data-enfase='forte'] {
   color: var(--cor-tinta);
 }
+
+/* A coluna vigente ganha faixa de fundo. Peso de tinta separa os numeros, mas
+   nao desenha a COLUNA: o olho corre a linha e perde a vertical. A faixa e o
+   que faz "8 anteriores" e "Últimas 8" se lerem como dois blocos, e nao como
+   seis numeros soltos.
+
+   Fundo, e nao cor de tinta: a tinta ja carrega o tom da variacao ao lado, e
+   dois canais de cor competindo na mesma linha cancelam os dois. */
+.ki-tabela__grade [data-enfase='forte'] {
+  background: var(--cor-faixa-de-coluna);
+}
+
+.ki-tabela__grade thead th[data-enfase='forte'] {
+  border-top-left-radius: var(--raio-1);
+  border-top-right-radius: var(--raio-1);
+}
+
+.ki-tabela__grade tbody tr:last-child [data-enfase='forte'] {
+  border-bottom-left-radius: var(--raio-1);
+  border-bottom-right-radius: var(--raio-1);
+}

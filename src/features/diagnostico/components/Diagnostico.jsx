@@ -211,6 +211,7 @@ export default function Diagnostico({ contaId, conta = null }) {
         severidade={principal.severidade}
         rotulo={principal.rotulo}
         frase={principal.frase}
+        destaques={principal.destaques}
       />
 
       <FrescorDaLeitura frescor={frescor} />

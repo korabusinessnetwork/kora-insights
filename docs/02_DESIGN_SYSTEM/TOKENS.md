@@ -10,9 +10,39 @@ A tela e escura, densa e quieta para que **uma frase** possa gritar. Todo o
 resto do sistema existe para nao competir com o veredito: cinza esverdeado,
 pouca cor, nenhuma sombra decorativa, nenhum arredondamento simpatico.
 
-A cor de acento aparece tres vezes por tela, no maximo: a barra do veredito, o
-rotulo de severidade e a variacao que sustenta a causa. Onde tudo e destaque,
-nada e.
+**Revisto em 2026-09-08, por decisao do dono.** A regra anterior dizia: "a cor
+de acento aparece tres vezes por tela, no maximo — a barra do veredito, o rotulo
+de severidade e a variacao que sustenta a causa". Na pratica ela produziu uma
+tela cinza em que as colunas do relatorio nao se liam como colunas e o numero
+que carrega o veredito nao se destacava da frase que o carrega.
+
+A regra passa a ser sobre **o que** o acento marca, e nao **quantas vezes** ele
+aparece: o acento marca a CAUSA, e nada alem dela. Hoje isso e:
+
+| Onde | O que marca |
+|---|---|
+| Barra do veredito e rotulo de severidade | que ha uma causa nomeada |
+| O trecho realcado na frase | o numero que carrega a afirmacao (`Achado.destaques`) |
+| Nota do indicador e celula de variacao | a variacao que sustenta a causa |
+| Barras do grafico | a serie que o veredito acusa (`Serie.tomBarra`) |
+
+O contador saiu, mas o principio nao: **onde tudo e destaque, nada e.** Duas
+travas o mantem de pe.
+
+A primeira: **quem decide se ha acento e a regra, nunca o CSS.** Todos os quatro
+casos leem `tom` ou `destaques` do achado. Tom neutro nao pinta nada — e por isso
+que o desfecho "sem-queda" sai com o grafico cinza, e nao em ocre anunciando um
+problema que a propria frase nega.
+
+A segunda: **a linha do grafico nao recebe tom, de proposito.** Colorir as duas
+series deixou o desenho inteiro ocre, e elas pararam de se distinguir por cor —
+foi tentado e revertido no mesmo dia. A cor fica com a causa; o efeito que se
+acompanha e traco de referencia.
+
+Acento nunca e o unico portador de significado: o realce vem com peso de fonte,
+a severidade vem com palavra escrita (`Atencao`, `Estavel`), e a variacao traz o
+valor anterior por extenso. Em impressao monocromatica ou para quem nao
+distingue matiz, a tela continua inteira.
 
 ## Tres camadas
 

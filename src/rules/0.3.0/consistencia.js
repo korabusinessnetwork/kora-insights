@@ -78,6 +78,9 @@ export default {
           'da conta depende de acertar o post, não de um método.'
         : `Suas publicações alcançam a mesma faixa: ${percentual}% de variação entre ` +
           'elas. O resultado vem do método, não de sorte de post.',
+      // A dispersao e a frase inteira: nos dois desfechos e ela que decide se o
+      // resultado vem de metodo ou de sorte.
+      destaques: [`${percentual}%`],
       apoio:
         `Nas últimas ${SEMANAS_DE_JANELA} semanas saíram ${alcances.length} publicações, ` +
         `com alcance médio de ${medioTexto} contas. A variação entre elas foi de ` +

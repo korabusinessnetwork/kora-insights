@@ -202,7 +202,11 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
 
       <div className="folha__corpo">
         <div className="folha__leitura">
-          <Veredito severidade={achado.severidade} frase={achado.frase} />
+          <Veredito
+            severidade={achado.severidade}
+            frase={achado.frase}
+            destaques={achado.destaques}
+          />
 
           <AvisoDeLacuna lacunas={cobertura.lacunas} />
 
@@ -232,6 +236,7 @@ export default function FolhaDoRelatorio({ diagnostico, conta, preparadoPor, ori
                 pontos={serie.pontos}
                 rotuloBarra={serie.rotuloBarra}
                 rotuloLinha={serie.rotuloLinha}
+                tomBarra={serie.tomBarra}
                 // O paragrafo de apoio do achado e o que sustenta a frase, e e
                 // ele que vira legenda e `aria-label` do desenho: escrever outra
                 // frase aqui seria a folha opinando sobre o que o grafico mostra.
