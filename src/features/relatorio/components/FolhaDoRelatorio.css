@@ -90,6 +90,20 @@
   gap: var(--e-8);
   align-content: start;
 }
+/* `min-width: 0` nao e detalhe de CSS aqui, e o que mantem o conteudo dentro da
+   folha no celular.
+
+   Item de grid nasce com `min-width: auto`, que significa "nunca menor que o
+   proprio conteudo". A trilha `minmax(0, 1fr)` limita a TRILHA, nao o item
+   dentro dela — entao o `min-width: 30rem` do grafico esticava esta coluna para
+   480px numa janela de 390, e a tabela e o desenho eram pintados por cima do
+   fundo escuro, fora do papel. O `overflow-x: auto` do grafico nunca chegava a
+   valer, porque quem estourava era o pai dele. */
+.folha__leitura,
+.folha__prova {
+  min-width: 0;
+}
+
 
 .folha__acao-frase {
   margin-top: var(--e-3);

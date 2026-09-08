@@ -14,7 +14,12 @@
   display: grid;
   grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
   gap: var(--e-6);
-  align-items: start;
+  /* `stretch`, e nao `start`: a acao e uma frase curta ao lado de um cartao de
+     evidencia que carrega tres numeros, um grafico e um paragrafo. Alinhados
+     pelo topo, sobravam ~300px de fundo vazio embaixo da acao — o mesmo vao que
+     os limites deixavam antes de virarem faixa. Esticado, o cartao vira painel
+     e o vazio vira respiro dentro dele. */
+  align-items: stretch;
 }
 
 .tela-diagnostico__evidencia,
@@ -22,6 +27,19 @@
   display: grid;
   gap: var(--e-6);
   align-content: start;
+  /* Ver a nota em FolhaDoRelatorio.css: sem isto o `min-width` do grafico
+     estica a coluna para fora do cartao no celular, e o proprio `overflow-x`
+     do grafico deixa de valer. */
+  min-width: 0;
+}
+
+/* A acao ocupa a altura da coluna. Ela e uma frase curta ao lado de um cartao
+   que carrega tres numeros, um grafico e um paragrafo: alinhada pelo topo,
+   deixava ~300px de fundo aberto embaixo — o mesmo tipo de vao que os limites
+   abriam antes de virarem faixa. Esticada, ela e um painel; o espaco vira
+   respiro dentro do cartao em vez de buraco na pagina. */
+.tela-diagnostico__lateral {
+  align-content: stretch;
 }
 
 /* Sem veredito a tela vira uma coluna de leitura: a admissao de ignorancia nao

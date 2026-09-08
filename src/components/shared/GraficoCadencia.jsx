@@ -3,10 +3,22 @@ import './GraficoCadencia.css'
 /* Espaco de coordenadas fixo: o SVG escala por CSS, entao a geometria pode ser
    escrita uma vez em numeros redondos e nunca depender do tamanho da tela. */
 const LARGURA = 720
-const ALTURA = 210
-const TOPO = 8
-const BASE = 196
+/* A altura cresceu de 210 para 216 e a base subiu de 196 para 186: a faixa
+   abaixo do eixo passou a receber a semana de cada coluna, e a de cima o valor
+   da barra. Antes disso o desenho tinha oito colunas sem nome e sem numero —
+   quem olhasse nao sabia que semana era qual nem quanto cada uma valia, e essas
+   duas leituras existiam SO na tabela de leitor de tela. Quem enxerga recebia
+   menos dado que quem nao enxerga, o que e um jeito estranho de acessibilidade. */
+const ALTURA = 216
+const TOPO = 20
+const BASE = 186
 const MARGEM_X = 8
+
+/** Distancia do valor ao topo da barra, e da semana ao eixo. */
+const RESPIRO_DO_ROTULO = 7
+
+/** Altura do tracinho que marca a semana sem coleta. */
+const MARCA_DE_LACUNA = 12
 
 /** A barra mais alta ocupa 78% da area — sobra ar para a linha cruzar por cima. */
 const TETO_DA_BARRA = 0.78
@@ -76,6 +88,24 @@ function menorValor(valores) {
   return finitos.length > 0 ? Math.min(...finitos) : 0
 }
 
+const FORMATO_DO_VALOR = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 })
+
+/**
+ * O numero que vai em cima da barra.
+ *
+ * Devolve nulo — e nao '0' nem '—' — quando nao houve coleta, porque quem
+ * decide como desenhar a ausencia e o SVG, e nao o formatador. Zero devolve
+ * '0', e essa e a distincao que este grafico precisava passar a fazer: semana
+ * sem coleta e semana sem publicacao desenhavam as duas a mesma coisa (nada).
+ *
+ * @param {number|null|undefined} valor
+ * @returns {string|null} nulo quando nao ha leitura
+ */
+export function rotuloDoValor(valor) {
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) return null
+  return FORMATO_DO_VALOR.format(valor)
+}
+
 /**
  * Grafico de cadencia: barras discretas para o volume, linha fina para o alcance.
  *
@@ -83,13 +113,20 @@ function menorValor(valores) {
  * custaria peso de pagina e uma superficie de atualizacao sem contrapartida
  * (memory/restrictions.md, fase bootstrap).
  *
- * Nao ha tooltip nem grade: o numero exato mora nos indicadores e na tabela do
- * relatorio. Aqui interessa a forma das duas series juntas, que e o que a frase
- * do veredito afirma.
+ * Nao ha tooltip nem grade. Cada barra leva o proprio valor escrito em cima, que
+ * e mais direto que uma grade e nao cobra do leitor a conta de interpolar altura
+ * contra eixo. Aqui interessa a forma das duas series juntas, que e o que a
+ * frase do veredito afirma.
  *
- * As barras partem do zero, porque comparar volume com base cortada engana. A
- * linha nao tem eixo numerico e ocupa uma faixa propria: ela mostra o desenho da
- * tendencia, e o valor dela e dito por escrito na descricao e nos indicadores.
+ * As barras partem do zero, porque comparar volume com base cortada engana — e e
+ * por partirem do zero que rotula-las e honesto.
+ *
+ * **A linha continua sem eixo numerico, e isso e deliberado.** Ela ocupa uma
+ * faixa propria com amplitude minima (ver `AMPLITUDE_MINIMA_DA_LINHA`), para que
+ * serie estavel apareca estavel; qualquer numero lido dessa faixa estaria
+ * errado. Ela mostra o desenho da tendencia, e o valor dela e dito por escrito
+ * na descricao e nos indicadores. Um eixo Y unico para as duas series seria pior
+ * que nenhum: ele daria ao leitor uma escala que so vale para metade do desenho.
  * A faixa da linha tem amplitude minima (ver `AMPLITUDE_MINIMA_DA_LINHA`), para
  * que uma serie estavel apareca estavel.
  *
@@ -176,6 +213,58 @@ export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, desc
               ) : null,
             )}
           </g>
+
+          {/* Semana sem coleta ganha um tracinho no eixo.
+              Sem ele a lacuna era desenhada exatamente como um zero — barra de
+              altura nenhuma nos dois casos — e "a conta nao publicou nesta
+              semana" e "nao sabemos o que houve nesta semana" viravam a mesma
+              imagem. Lacuna nunca some da tela (CLAUDE.md, principio n1). */}
+          <g className="ki-grafico__lacunas">
+            {serie.map((ponto, indice) =>
+              typeof ponto?.barra === 'number' && Number.isFinite(ponto.barra) ? null : (
+                <line
+                  key={`lacuna-${indice}`}
+                  x1={centroDe(indice)}
+                  y1={BASE}
+                  x2={centroDe(indice)}
+                  y2={BASE - MARCA_DE_LACUNA}
+                />
+              ),
+            )}
+          </g>
+
+          {/* O valor de cada barra, escrito. `aria-hidden` porque a tabela
+              abaixo ja diz o mesmo a quem usa leitor de tela, e repetir faria o
+              desenho ser lido duas vezes. */}
+          <g className="ki-grafico__valores" aria-hidden="true">
+            {serie.map((ponto, indice) => {
+              const rotulo = rotuloDoValor(ponto?.barra)
+              if (rotulo === null) return null
+              return (
+                <text
+                  key={`valor-${indice}`}
+                  x={centroDe(indice)}
+                  y={BASE - alturaDe(ponto.barra) - RESPIRO_DO_ROTULO}
+                >
+                  {rotulo}
+                </text>
+              )
+            })}
+          </g>
+
+          {/* A semana de cada coluna. Mesma razao do `aria-hidden` acima. */}
+          <g className="ki-grafico__semanas" aria-hidden="true">
+            {serie.map((ponto, indice) => (
+              <text
+                key={`semana-${indice}`}
+                x={centroDe(indice)}
+                y={BASE + RESPIRO_DO_ROTULO}
+                data-lacuna={rotuloDoValor(ponto?.barra) === null ? 'sim' : undefined}
+              >
+                {ponto?.rotulo ?? ''}
+              </text>
+            ))}
+          </g>
           <g className="ki-grafico__linha">
             {segmentos.map((segmento, indice) =>
               segmento.length > 1 ? (
@@ -199,26 +288,36 @@ export default function GraficoCadencia({ pontos, rotuloBarra, rotuloLinha, desc
         </svg>
       </div>
 
-      {/* Equivalente textual: leitor de tela nao le SVG, le tabela. */}
-      <table className="apenas-leitor">
-        <caption>{`Semana a semana: ${rotuloBarra} e ${rotuloLinha}`}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Semana</th>
-            <th scope="col">{rotuloBarra}</th>
-            <th scope="col">{rotuloLinha}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {serie.map((ponto, indice) => (
-            <tr key={`linha-${indice}`}>
-              <th scope="row">{ponto?.rotulo ?? ''}</th>
-              <td>{typeof ponto?.barra === 'number' ? String(ponto.barra) : SEM_COLETA}</td>
-              <td>{typeof ponto?.linha === 'number' ? String(ponto.linha) : SEM_COLETA}</td>
+      {/* Equivalente textual: leitor de tela nao le SVG, le tabela.
+
+          A classe fica no DIV, e nao na `<table>`: `width: 1px` nao encolhe uma
+          tabela, porque layout de tabela ignora largura menor que o conteudo
+          minimo. Com a classe direto nela, a tabela ficava com ~397px, fora de
+          fluxo mas ainda somando a rolagem da pagina — o relatorio deslizava de
+          lado no celular por causa de um elemento que ninguem enxerga.
+          Trocar o `display` da tabela resolveria a largura e custaria a
+          semantica que este bloco existe para dar. */}
+      <div className="apenas-leitor">
+        <table>
+          <caption>{`Semana a semana: ${rotuloBarra} e ${rotuloLinha}`}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Semana</th>
+              <th scope="col">{rotuloBarra}</th>
+              <th scope="col">{rotuloLinha}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {serie.map((ponto, indice) => (
+              <tr key={`linha-${indice}`}>
+                <th scope="row">{ponto?.rotulo ?? ''}</th>
+                <td>{typeof ponto?.barra === 'number' ? String(ponto.barra) : SEM_COLETA}</td>
+                <td>{typeof ponto?.linha === 'number' ? String(ponto.linha) : SEM_COLETA}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <figcaption className="ki-grafico__nota">{descricao}</figcaption>
     </figure>

@@ -4,6 +4,14 @@
 
 .ki-grafico {
   margin: 0;
+  /* O desenho tem `min-width: 30rem` para as oito semanas continuarem legiveis,
+     e `.ki-grafico__area` rola quando a tela e menor que isso. Mas onde o pai e
+     um grid — a coluna de prova da folha —, esta `figure` vira ITEM de grid, e
+     item de grid nasce com tamanho minimo automatico igual ao proprio conteudo.
+     A trilha entao nascia com 480px numa janela de 390, e a tabela e o desenho
+     eram pintados fora do papel, sobre o fundo escuro. Zerando o minimo, a rolagem
+     volta a acontecer onde deve: dentro do quadro, nunca na pagina. */
+  min-width: 0;
 }
 
 .ki-grafico__legenda {
@@ -80,4 +88,39 @@
   color: var(--cor-tinta-suave);
   font-size: var(--texto-apoio);
   line-height: var(--altura-corpo);
+}
+
+/* ── Rotulos dentro do desenho ─────────────────────────────────────────────
+   Tamanho em unidades do viewBox, e nao em rem: o SVG escala por CSS, entao o
+   texto precisa escalar junto com as colunas. Fixar em rem faria o rotulo
+   crescer sozinho no celular, onde o desenho encolhe. */
+
+.ki-grafico__valores text {
+  fill: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+}
+
+.ki-grafico__semanas text {
+  fill: var(--cor-tinta-suave);
+  font-family: var(--fonte-texto);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+  dominant-baseline: hanging;
+}
+
+/* Semana sem coleta: o rotulo recua junto com a coluna que nao existe. */
+.ki-grafico__semanas text[data-lacuna='sim'] {
+  fill: var(--cor-tinta-fraca);
+}
+
+/* O tracinho da lacuna e tracejado de proposito: linha cheia no eixo pareceria
+   uma coluna de valor muito baixo, que e a leitura oposta. */
+.ki-grafico__lacunas line {
+  stroke: var(--cor-tinta-fraca);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
 }

@@ -101,7 +101,6 @@ function AindaSemVeredito({ titulo, descricao, achado, lacunas, limites, frescor
         <AcaoRecomendada
           acao={achado.acao}
           confirmacao={achado.confirmacao}
-          ofereceTeste={false}
         />
       ) : null}
 

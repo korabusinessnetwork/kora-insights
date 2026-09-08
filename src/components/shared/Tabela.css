@@ -4,6 +4,9 @@
 .ki-tabela {
   overflow-x: auto;
   overscroll-behavior-x: contain;
+  /* Mesma razao do `min-width: 0` em GraficoCadencia.css: como item de grid, o
+     `min-width: 26rem` da grade esticaria a coluna inteira em vez de rolar. */
+  min-width: 0;
 }
 
 .ki-tabela__grade {
