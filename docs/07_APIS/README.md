@@ -11,6 +11,7 @@
 |---|---|
 | [`graph-api.md`](graph-api.md) | as chamadas que realmente fazemos, as permissões do ADR-002 e a tela que justifica cada uma, limite de taxa e classificação de erro |
 | [`criar-o-app-na-meta.md`](criar-o-app-na-meta.md) | o cadastro no painel da Meta, passo a passo, e para onde vai cada valor que ele gera — o App Secret nunca é um deles no repositório |
+| [`quanto-historico-a-meta-devolve.md`](quanto-historico-a-meta-devolve.md) | quanto dá para retroagir na conexão, e por que metade do diagnóstico é retroagível e a outra metade não — a investigação que a decisão de 16 semanas esperava |
 | [`edge-functions.md`](edge-functions.md) | contrato de cada função: quem chama, o que aceita, o que devolve, que variável de ambiente exige |
 
 ## Onde mora o resto do contrato
