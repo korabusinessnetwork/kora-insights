@@ -7,7 +7,17 @@
   z-index: var(--z-cabecalho);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* Empacotado à esquerda, com as ações empurradas por `margin-left: auto`.
+
+     Era `space-between`, e o efeito colateral só apareceu com o produto no
+     navegador: quando as ações quebram para a segunda linha, a linha de cima
+     sobra com dois itens e o espaço de trabalho ia parar colado na borda
+     direita — em 900px, mas não em 1440px, e não em 390px. Um menu suspenso
+     ancorado num elemento que muda de lado conforme a largura vaza da tela
+     numa faixa ou na outra, e não há regra de CSS que acerte as duas.
+     Com a barra empacotada à esquerda, o nome do espaço fica sempre logo
+     depois da conta, e o menu abre sempre para dentro da tela. */
+  justify-content: flex-start;
   gap: var(--e-4);
   flex-wrap: wrap;
   padding: var(--e-3) var(--e-6);
@@ -109,14 +119,4 @@
     margin-right: 0;
     white-space: normal;
   }
-}
-
-/* Nome do espaço de trabalho: presente, nunca em disputa com a marca nem com o
-   período. Numa agência com quinze marcas, é o que responde "de quem é esta
-   tela". */
-.ka-cabecalho__tenant {
-  margin: 0;
-  color: var(--cor-tinta-suave);
-  font-size: var(--texto-rotulo);
-  white-space: nowrap;
 }

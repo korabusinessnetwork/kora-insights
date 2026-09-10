@@ -1,0 +1,130 @@
+/* Seletor de espaço de trabalho: o nome do tenant, à direita do cabeçalho.
+
+   Ele fica no tom mais baixo da barra de propósito. Numa agência com quinze
+   marcas é o que responde "de quem é esta tela", mas nunca é o que se veio
+   olhar — se disputar com a marca à esquerda ou com o veredito no corpo da
+   página, está errado (TOKENS.md: onde tudo é destaque, nada é). */
+
+/* Um espaço só: texto, porque não há troca a oferecer. É a forma que o
+   cabeçalho sempre teve, e ela continua sendo a de quase todo cliente. */
+.ka-espaco__unico {
+  margin: 0;
+  color: var(--cor-tinta-suave);
+  font-size: var(--texto-rotulo);
+  white-space: nowrap;
+}
+
+.ka-espaco {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+/* O gatilho carrega o mesmo peso visual do texto que ele substitui; o que o
+   declara controle é a seta e a reação ao ponteiro, não um tom mais forte. */
+.ka-espaco__gatilho {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-width: 0;
+  padding: var(--e-1) var(--e-2);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio-2);
+  background: transparent;
+  color: var(--cor-tinta-suave);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-rotulo);
+  line-height: var(--altura-densa);
+  text-align: left;
+  transition:
+    background-color var(--duracao-rapida) var(--ease-padrao),
+    border-color var(--duracao-rapida) var(--ease-padrao),
+    color var(--duracao-rapida) var(--ease-padrao);
+}
+
+.ka-espaco__gatilho:hover {
+  background: var(--cor-superficie-alta);
+  color: var(--cor-tinta);
+}
+
+.ka-espaco__gatilho[aria-expanded='true'] {
+  border-color: var(--cor-contorno);
+  background: var(--cor-superficie-alta);
+  color: var(--cor-tinta);
+}
+
+.ka-espaco__nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ka-espaco__seta {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-top: 5px solid var(--cor-tinta-fraca);
+}
+
+/* Ancorado à esquerda do gatilho, como o menu de contas.
+
+   Nasceu ancorado à direita, para não empurrar a largura do documento — e no
+   navegador, a 390px, o menu abriu com metade fora da tela pela esquerda: o
+   gatilho fica perto da borda esquerda, então `right: 0` joga um menu de 13rem
+   para coordenada negativa. Achado rodando o produto, não em teste. A largura
+   máxima é que segura o outro lado. */
+.ka-espaco__menu {
+  position: absolute;
+  top: calc(100% + var(--e-2));
+  left: 0;
+  z-index: var(--z-sobreposicao);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  min-width: 11rem;
+  max-width: min(20rem, calc(100vw - var(--e-8)));
+  padding: var(--e-2);
+  border: var(--borda-fina) solid var(--cor-linha);
+  border-radius: var(--raio-4);
+  background: var(--cor-superficie);
+}
+
+.ka-espaco__rotulo {
+  padding: var(--e-2) var(--e-3) var(--e-1);
+  color: var(--cor-tinta-fraca);
+  font-size: var(--texto-micro);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ka-espaco__item {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  padding: var(--e-2) var(--e-3);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio-3);
+  background: transparent;
+  color: var(--cor-tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-densa);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color var(--duracao-rapida) var(--ease-padrao);
+}
+
+.ka-espaco__item:hover {
+  background: var(--cor-superficie-alta);
+}
+
+/* Mesmo filete de acento do seletor de conta: um só jeito de dizer "é este que
+   está aberto" nos dois menus do cabeçalho. */
+.ka-espaco__item[data-selecionado='sim'] {
+  border-left-color: var(--cor-acento);
+  border-left-width: var(--borda-acento);
+  padding-left: calc(var(--e-3) - var(--borda-acento) + var(--borda-fina));
+}

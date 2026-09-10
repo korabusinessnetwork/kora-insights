@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 
-import { inicialDaConta } from './SeletorDeConta.jsx'
+import SeletorDeConta, { inicialDaConta } from './SeletorDeConta.jsx'
 
 describe('inicial da conta', () => {
   it('usa a primeira letra do nome, em maiúscula', () => {
@@ -26,5 +28,22 @@ describe('inicial da conta', () => {
 
   it('mantém a acentuação da letra, sem normalizar o nome do cliente', () => {
     expect(inicialDaConta('Ótica Silva')).toBe('Ó')
+  })
+})
+
+describe('SeletorDeConta', () => {
+  const CONTAS = [{ id: 'conta-a', nome: 'Casa Oliveira', username: 'casa.oliveira', status: 'ativa' }]
+
+  it('conta da URL fora deste espaço não derruba o cabeçalho', () => {
+    // Link antigo, conta excluída ou endereço de outro cliente: o contexto
+    // devolve `null` de propósito, e a barra derrubava a aplicação inteira em
+    // tela branca. O seletor continua de pé e convida a escolher uma conta.
+    render(
+      <MemoryRouter>
+        <SeletorDeConta contas={CONTAS} selecionada={null} />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('button', { name: /Escolher conta/ })).toBeInTheDocument()
   })
 })

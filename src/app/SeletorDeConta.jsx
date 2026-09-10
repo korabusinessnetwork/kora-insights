@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import { ROTAS, rotaDaConta } from '../constants/rotas.js'
+import useMenuSuspenso, { PROPS_DO_ITEM } from './useMenuSuspenso.js'
 import './SeletorDeConta.css'
 
 /**
@@ -12,6 +12,10 @@ import './SeletorDeConta.css'
  * ele não mostra que uma conta parou de coletar. Como cada item é um link real,
  * "abrir em nova aba" continua funcionando e a URL segue sendo a fonte de
  * verdade de qual conta está aberta.
+ *
+ * Abrir, fechar e andar pelo teclado moram em `useMenuSuspenso`: é o mesmo
+ * comportamento do seletor de espaço de trabalho, e comportamento duplicado
+ * conserta pela metade.
  */
 
 /**
@@ -56,116 +60,19 @@ const AVISO_DE_STATUS = Object.freeze({
  * @returns {JSX.Element|null} `null` quando não há conta conectada
  */
 export default function SeletorDeConta({ contas = [], selecionada = null }) {
-  const [aberto, setAberto] = useState(false)
-  const [focoAoAbrir, setFocoAoAbrir] = useState(0)
-  const raizRef = useRef(null)
-  const gatilhoRef = useRef(null)
-  const menuRef = useRef(null)
-  const idDoMenu = useId()
-  const { pathname } = useLocation()
-
-  const itensDoMenu = useCallback(() => {
-    if (!menuRef.current) return []
-    return Array.from(menuRef.current.querySelectorAll('[data-item-do-menu]'))
-  }, [])
-
-  const focarItem = useCallback(
-    (indice) => {
-      const itens = itensDoMenu()
-      if (itens.length === 0) return
-      itens[(indice + itens.length) % itens.length].focus()
-    },
-    [itensDoMenu],
-  )
-
-  const fechar = useCallback((devolverFoco = false) => {
-    setAberto(false)
-    // Sem devolver o foco, quem navega por teclado é jogado para o começo da
-    // página a cada vez que desiste do menu.
-    if (devolverFoco) gatilhoRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    if (aberto) focarItem(focoAoAbrir)
-  }, [aberto, focoAoAbrir, focarItem])
-
-  // Escolher uma conta troca de rota; o menu não pode sobreviver à troca.
-  useEffect(() => {
-    setAberto(false)
-  }, [pathname])
-
-  useEffect(() => {
-    if (!aberto) return undefined
-
-    /** @param {PointerEvent} evento */
-    function aoApontarFora(evento) {
-      if (raizRef.current?.contains(evento.target)) return
-      setAberto(false)
-    }
-
-    document.addEventListener('pointerdown', aoApontarFora)
-    return () => document.removeEventListener('pointerdown', aoApontarFora)
-  }, [aberto])
-
-  /** @param {import('react').KeyboardEvent} evento */
-  function aoTeclarNoGatilho(evento) {
-    if (aberto) return
-    if (evento.key !== 'ArrowDown' && evento.key !== 'ArrowUp') return
-    evento.preventDefault()
-    setFocoAoAbrir(evento.key === 'ArrowDown' ? 0 : -1)
-    setAberto(true)
-  }
-
-  /** @param {import('react').KeyboardEvent} evento */
-  function aoTeclar(evento) {
-    if (evento.key === 'Escape' && aberto) {
-      evento.preventDefault()
-      fechar(true)
-      return
-    }
-    if (!aberto) return
-
-    const itens = itensDoMenu()
-    const atual = itens.indexOf(document.activeElement)
-
-    if (evento.key === 'ArrowDown') {
-      evento.preventDefault()
-      focarItem(atual + 1)
-    } else if (evento.key === 'ArrowUp') {
-      evento.preventDefault()
-      focarItem(atual - 1)
-    } else if (evento.key === 'Home') {
-      evento.preventDefault()
-      focarItem(0)
-    } else if (evento.key === 'End') {
-      evento.preventDefault()
-      focarItem(itens.length - 1)
-    } else if (evento.key === 'Tab') {
-      // Sair do menu pelo Tab fecha, mas o foco segue o caminho natural.
-      fechar(false)
-    }
-  }
+  const { aberto, fechar, propsDaRaiz, propsDoGatilho, propsDoMenu } = useMenuSuspenso()
 
   if (contas.length === 0) return null
 
   return (
-    <div className="ka-seletor" ref={raizRef} onKeyDown={aoTeclar}>
-      <button
-        type="button"
-        id={`${idDoMenu}-gatilho`}
-        ref={gatilhoRef}
-        className="ka-seletor__gatilho"
-        aria-haspopup="menu"
-        aria-expanded={aberto}
-        aria-controls={aberto ? idDoMenu : undefined}
-        onClick={() => {
-          setFocoAoAbrir(0)
-          setAberto((atual) => !atual)
-        }}
-        onKeyDown={aoTeclarNoGatilho}
-      >
+    <div className="ka-seletor" {...propsDaRaiz}>
+      <button className="ka-seletor__gatilho" {...propsDoGatilho}>
+        {/* `selecionada` é nulo quando a URL nomeia uma conta que não é deste
+            espaço — link antigo, conta excluída, endereço de outro cliente. O
+            contexto devolve nulo de propósito, e sem o `?.` aqui o cabeçalho
+            derrubava a aplicação inteira com tela branca. */}
         <span className="ka-seletor__avatar" aria-hidden="true">
-          {inicialDaConta(selecionada.nome)}
+          {inicialDaConta(selecionada?.nome)}
         </span>
         <span className="ka-seletor__identificacao">
           <span className="ka-seletor__nome">
@@ -180,13 +87,7 @@ export default function SeletorDeConta({ contas = [], selecionada = null }) {
       </button>
 
       {aberto ? (
-        <div
-          id={idDoMenu}
-          ref={menuRef}
-          className="ka-seletor__menu"
-          role="menu"
-          aria-label="Contas conectadas"
-        >
+        <div className="ka-seletor__menu" aria-label="Contas conectadas" {...propsDoMenu}>
           <p className="ka-seletor__rotulo" aria-hidden="true">
             Contas conectadas
           </p>
@@ -201,9 +102,9 @@ export default function SeletorDeConta({ contas = [], selecionada = null }) {
                 className="ka-seletor__item"
                 role="menuitemradio"
                 aria-checked={ehSelecionada}
-                data-item-do-menu=""
                 data-selecionada={ehSelecionada ? 'sim' : undefined}
                 onClick={() => fechar(true)}
+                {...PROPS_DO_ITEM}
               >
                 <span className="ka-seletor__avatar" aria-hidden="true">
                   {inicialDaConta(conta.nome)}
@@ -228,8 +129,8 @@ export default function SeletorDeConta({ contas = [], selecionada = null }) {
             className="ka-seletor__item"
             data-acao="conectar"
             role="menuitem"
-            data-item-do-menu=""
             onClick={() => fechar(true)}
+            {...PROPS_DO_ITEM}
           >
             Conectar outra conta
           </Link>
