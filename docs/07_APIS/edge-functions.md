@@ -105,11 +105,14 @@ um na internet dispararia a coleta de todas as contas do produto.
 |---|---|---|
 | `dia` | string `YYYY-MM-DD` | `diaFechadoAnterior(agora)` — o dia fechado anterior em America/Sao_Paulo |
 
-**Resposta `data`:** `{ dia, contas, coletadas, comFalha }`.
+**Resposta `data`:** `{ dia, contas, coletadas, comFalha, pausadas, renovadas }`
+— `contas` são as coletáveis (`ativa`), `pausadas` as que a varredura visitou só
+para renovar e `renovadas` quantos tokens de conta pausada foram de fato trocados
+nesta execução.
 
 **Falhas:** `SEM_PERMISSAO` (chamada sem chave de serviço), `FALHA_INESPERADA`
-(ambiente incompleto, ou não foi possível listar as contas ativas — que também
-vira evento com `ig_conta_id` nulo).
+(ambiente incompleto, ou não foi possível listar as contas da varredura — que
+também vira evento com `ig_conta_id` nulo).
 
 Falha **de uma conta** não é falha da função: ela vira linha em `coleta_eventos`
 e a execução continua. A resposta 200 com `comFalha > 0` é o resultado esperado
@@ -119,6 +122,13 @@ num dia em que uma conta teve o token vencido.
 `token_expira_em`. Faltando 15 dias ou menos, ela troca o token por um novo
 (`fb_exchange_token`), grava no cofre com o mesmo nome — o que preserva
 `token_ref` — e atualiza `token_expira_em`.
+
+**A varredura inclui a conta `pausada` (ADR-011).** Quem entra na lista vem de
+`public.contas_da_varredura`, que devolve `ativa` e `pausada` e marca em `coletar`
+quem pode virar snapshot. Na pausada a função só renova: nenhuma chamada de
+insights, nenhum snapshot, nenhuma linha em `coleta_eventos` e nenhuma mudança de
+status. Sem isso, uma pausa de mais de 60 dias mataria o token e viraria
+desconexão de fato.
 
 Falha de renovação **não** derruba a coleta e **não** vira `coleta_eventos`: o
 token de hoje continua válido, e um evento ali desenharia lacuna na tela num dia

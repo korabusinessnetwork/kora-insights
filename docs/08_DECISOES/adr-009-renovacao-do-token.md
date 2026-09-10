@@ -87,14 +87,18 @@ a tela importam. Prazo escrito duas vezes vira dois prazos no primeiro ajuste
 - Positivas: a conta conectada nao morre mais por decurso de prazo, que era a
   unica forma garantida de o produto perder o historico do cliente. O aviso, por
   ser raro, significa alguma coisa quando aparece.
-- Negativas: a renovacao so acontece se a coleta rodar. Conta `pausada` ou
-  `desconectada` nao e varrida e o token dela envelhece ate morrer — para
-  `pausada` isso e uma divida real, registrada em `docs/09_BACKLOG`. E a Edge
+- Negativas: a renovacao so acontece se a coleta rodar, e a varredura escrita
+  aqui so passava por `ativa` — entao o token de conta `pausada` ou
+  `desconectada` envelhecia ate morrer. Para `pausada` isso era uma divida real,
+  e o **ADR-011 a pagou**: a varredura passou a incluir a conta pausada, so para
+  renovar. Para `desconectada` continua sendo o comportamento certo, porque o
+  segredo dela ja saiu do cofre. E a Edge
   Function segue sem teste automatizado (nao ha Deno no CI): o que esta coberto e
   a decisao pura, em `src/token/validade.test.js`, e a faixa de aviso, em
   `src/app/Casca.test.jsx`.
 
 ## Ligacoes
+- ADR-011 — quem a varredura toca (supera este ADR nesse ponto)
 - `src/token/validade.js` — os dois prazos e o estado derivado
 - `supabase/functions/coleta-diaria/index.ts` — `renovarSeNecessario`
 - `docs/03_REGRAS_DE_NEGOCIO/modulo-conexao.md`, secao 4

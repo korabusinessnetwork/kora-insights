@@ -4,13 +4,13 @@
 ./scripts/testar-isolamento.sh
 ```
 
-Um comando, um PostgreSQL efêmero, três suítes: **isolamento entre tenants**,
-**cofre do token** e **painel de saúde**.
+Um comando, um PostgreSQL efêmero, quatro suítes: **isolamento entre tenants**,
+**cofre do token**, **painel de saúde** e **varredura diária**.
 
 ## Isolamento entre tenants
 
 Sobe um PostgreSQL efêmero, aplica as **migrations reais** de produção sobre um
-stub mínimo do Supabase, semeia duas agências que não se conhecem e faz 22
+stub mínimo do Supabase, semeia duas agências que não se conhecem e faz 26
 asserções contando linha — como `authenticated`, com a identidade trocada pelo
 mesmo `request.jwt.claims` que o Supabase usa.
 
@@ -25,6 +25,7 @@ sem custo.
 | `20-isolamento.sql` | As asserções de isolamento |
 | `30-cofre.sql` | As asserções do cofre do token |
 | `40-saude.sql` | As asserções do painel de saúde da operação |
+| `50-varredura.sql` | As asserções da lista que a coleta diária varre |
 
 O dado das duas agências colide de propósito. Vazamento de multi-tenant não
 aparece como erro na tela: aparece como um número maior do que deveria, e passa
@@ -85,6 +86,29 @@ não herda o estado da vizinha — o erro clássico de `join` mal escrito.
 O acesso à view é cobrado em `20-isolamento.sql`, junto das outras travas: o
 cliente é recusado, o `service_role` não.
 
+## Varredura diária
+
+`public.contas_da_varredura` responde duas perguntas de uma vez: quem a coleta
+diária toca, e quem dentro dessa lista pode virar snapshot. As duas juntas são o
+que separa **pausar** de **desconectar**.
+
+O defeito que ela existe para não ter de volta era silencioso. A renovação do
+token mora dentro da coleta (ADR-009) e a coleta só varria `ativa`, então o token
+de uma conta `pausada` envelhecia até morrer: uma pausa de mais de 60 dias virava
+desconexão de fato, e o cliente voltava para um pedido de reconexão que ele não
+provocou.
+
+O teste monta as quatro pontas do ciclo de vida ao mesmo tempo, porque o que se
+cobra é a fronteira — três estados diferentes de "não coletar" com três respostas
+diferentes: `pausada` entra na lista com `coletar = false`, `desconectada` fica
+fora (o segredo dela já saiu do cofre) e `token_expirado` também (a Meta já
+recusa a troca). Cobre ainda que a lista leva `token_ref` e `token_expira_em`
+junto: uma lista certa sem eles deixaria a função sem como ler o segredo ou sem
+como decidir a troca — o mesmo token morto, por outro caminho.
+
+A contagem vem antes das outras asserções de propósito: sem ela, uma view que
+devolvesse `ig_contas` inteira passaria em todo o resto.
+
 ## Ele sabe falhar
 
 Verificado nos dois sentidos: com a política de `snapshots_conta` sabotada para
@@ -113,6 +137,20 @@ coleta OK — o bug que ela existe para não ter —, reprova com
 FALHOU: conta parada ha 5 dias aparece com 5, e nao com 0 — esperado 5, obtido 0
 ```
 
+O da varredura foi verificado em três sabotagens, uma por regra, todas saindo com
+código 3:
+
+```
+-- where c.status = 'ativa'            (o defeito original, a pausada some)
+FALHOU: a varredura tem exatamente as duas contas que renovam token — esperado 2, obtido 1
+
+-- true as coletar                     (a pausada é varrida e coletada junto)
+FALHOU: a conta pausada entra SO para renovar — esperado false, obtido true
+
+-- where c.status <> 'token_expirado'  (a desconectada entra na lista)
+FALHOU: a varredura tem exatamente as duas contas que renovam token — esperado 2, obtido 3
+```
+
 Um teste que não sabe falhar não é teste.
 
 ## Duas dependências que ele expôs
@@ -136,4 +174,7 @@ Um teste que não sabe falhar não é teste.
   stub são as documentadas — é essa fidelidade que faz o teste dizer algo sobre o
   código de produção em vez de sobre o stub.
 - As Edge Functions. Elas orquestram estas funções, e não há Deno no CI: o que
-  está coberto é o que o banco garante a elas.
+  está coberto é o que o banco garante a elas. Vale para `50-varredura.sql`
+  também: ele prova a **lista** que a coleta recebe, não o que a coleta faz com
+  cada linha dela — que `coletar = false` não vira snapshot é leitura de código,
+  não asserção.

@@ -18,9 +18,12 @@
 | [008](adr-008-variacao-sobre-valor-exibido.md) | Variação calculada sobre o valor que a tela mostra | `src/rules/0.3.0/cadencia.js` |
 | [009](adr-009-renovacao-do-token.md) | Renovação do token a 15 dias, aviso de reconexão a 7 | `src/token/validade.js`, `coleta-diaria` |
 | [010](adr-010-hospedagem-cloudflare-pages.md) | Hospedagem no Cloudflare Pages, no gratuito que permite uso comercial | `public/_headers`, `.node-version` |
+| [011](adr-011-varredura-inclui-conta-pausada.md) | A varredura diária passa pela conta `pausada`, só para renovar o token | `supabase/migrations/20260910120000_varredura_da_coleta.sql`, `coleta-diaria` |
 
 O ADR-010 **supera o ADR-001 no ponto do deploy** — "Vercel" deixou de valer. O
-resto do ADR-001 continua de pé, e nenhum outro ADR foi supersedido.
+ADR-011 **supera o ADR-009 no ponto de quem a varredura toca** — "só `ativa`"
+deixou de valer. O resto dos dois continua de pé, e nenhum ADR foi supersedido
+por inteiro.
 
 ## Como escrever o próximo
 

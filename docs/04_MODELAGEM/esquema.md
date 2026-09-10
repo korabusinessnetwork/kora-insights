@@ -149,7 +149,7 @@ tenants são deste usuário?".
 | `fb_page_id` | a Página do Facebook vinculada, exigida pela variante do ADR-002 |
 | `token_ref` | **referência** ao Supabase Vault, nunca o token. Fora de todo `grant` para `authenticated` |
 | `token_expira_em` | data de vencimento do token longo (~60 dias). A coleta diária renova a 15 dias do prazo e a tela pede reconexão a 7 (ADR-009) |
-| `status` | governa quem coleta e quem diagnostica. A coleta só roda em `ativa` |
+| `status` | governa quem coleta e quem diagnostica. A coleta só roda em `ativa`; a varredura diária passa também por `pausada`, só para renovar o token (ADR-011, e a lista está em `public.contas_da_varredura`) |
 | `tem_trafego_pago` | quando falso, o motor **obriga** a tela a declarar que tudo ali vale para alcance orgânico. Sem esse dado, a tela atribuiria ao conteúdo um alcance que veio de anúncio |
 | `conectada_em` | ordena a listagem e a fila de coleta; é também o marco a partir do qual existe histórico próprio (ADR-004) |
 
@@ -373,6 +373,6 @@ teto de testers do Development mode.
 | Conflito | Estado |
 |---|---|
 | ADR-005 chama a tabela de `diagnoses`; o schema usa `diagnosticos` | resolvido por emenda no próprio ADR |
-| `ig_contas.status = 'pausada'` e `tenants.status` não têm escritor | intenção pendente, registrada em `modulo-assinatura.md` |
+| `ig_contas.status = 'pausada'` e `tenants.status` não têm escritor | intenção pendente, registrada em `modulo-assinatura.md`. A varredura já trata `pausada` (ADR-011) para que o escritor, quando chegar, não nasça matando o token na pausa |
 | `tenant_membros.papel` não é usado por nenhuma política | autorização por papel não foi escrita |
 | Teste de isolamento entre tenants com banco real | no backlog, e é definition of done de tabela nova |

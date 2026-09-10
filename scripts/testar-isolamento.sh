@@ -3,7 +3,8 @@
 #
 # Sobe um cluster efemero, aplica as migrations REAIS de producao sobre um stub
 # minimo do Supabase, semeia duas agencias que nao se conhecem e verifica que
-# nenhuma alcanca o dado da outra.
+# nenhuma alcanca o dado da outra — e, junto, o cofre do token, o painel de
+# saude e a lista que a varredura diaria recebe.
 #
 #   ./scripts/testar-isolamento.sh
 #
@@ -69,3 +70,6 @@ psql -v ON_ERROR_STOP=1 -q -f "$RAIZ/supabase/testes/30-cofre.sql"
 
 echo "→ asserções do painel de saúde"
 psql -v ON_ERROR_STOP=1 -q -f "$RAIZ/supabase/testes/40-saude.sql"
+
+echo "→ asserções da varredura diária"
+psql -v ON_ERROR_STOP=1 -q -f "$RAIZ/supabase/testes/50-varredura.sql"

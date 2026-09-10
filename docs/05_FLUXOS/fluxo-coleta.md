@@ -27,9 +27,16 @@ sequenceDiagram
     Disparo->>Funcao: pg_net http_post com Bearer da chave de servico
     Funcao->>Funcao: ehChamadaDeServico? (comparacao em tempo constante)
     Funcao->>Funcao: dia = diaFechadoAnterior(agora)
-    Funcao->>PG: select contas where status = 'ativa' order by conectada_em
+    Funcao->>PG: select * from contas_da_varredura (ativa + pausada)
 
-    loop para cada conta ativa
+    loop para cada conta pausada (coletar = false)
+        Funcao->>Funcao: precisaRenovar? senao pula sem tocar no cofre
+        Funcao->>Vault: ler_token(conta.token_ref)
+        Funcao->>Meta: POST /oauth/access_token (fb_exchange_token)
+        Funcao->>PG: guardar_token + update token_expira_em
+    end
+
+    loop para cada conta ativa (coletar = true)
         Funcao->>Funcao: novo OrcamentoDeChamadas (teto de 180)
         Funcao->>Vault: ler_token(conta.token_ref)
         Funcao->>Meta: GET /{ig_user_id}/insights (period=day, since/until do dia)
@@ -52,7 +59,9 @@ sequenceDiagram
 
 | Decisão | Motivo |
 |---|---|
-| **Só contas `ativa`** | conta com token vencido gastaria orçamento das que ainda funcionam, e a tela já tem o que dizer ao cliente |
+| **Só contas `ativa` são coletadas** | conta com token vencido gastaria orçamento das que ainda funcionam, e a tela já tem o que dizer ao cliente |
+| **Conta `pausada` é varrida, mas só renova** (ADR-011) | pausar é o cliente parando a coleta, não soltando a conexão; sem essa passagem uma pausa de mais de 60 dias mata o token e vira desconexão de fato. Ela não gera snapshot nem evento: a lacuna de uma conta pausada é a pausa, e nomeá-la `token_expirado` seria o produto se acusando de um problema que não existe |
+| **Coletáveis primeiro na fila** | o dia de uma conta ativa não volta se o teto da Meta estourar antes da vez dela; a renovação de uma pausada tem quinze dias de folga para acontecer amanhã |
 | **Dia fechado anterior**, nunca o dia em curso | coletar o dia em curso gravaria meia jornada como dia inteiro, e o motor compararia uma segunda-feira pela metade com semanas completas — uma queda que não aconteceu |
 | **7 dias de mídia** (`DIAS_DE_MIDIA`) | métrica de mídia é total acumulado e continua se movendo depois da publicação; reler a última semana mantém o número da semana corrente vivo até ela fechar. A chave `unique (ig_media_id, data, metrica)` garante que reler não duplica |
 | **`insights` aninhado no `fields` da mídia** | uma chamada por lote em vez de uma por mídia; com 200 chamadas/hora, cada ida evitada é uma conta a mais coletada no mesmo dia |

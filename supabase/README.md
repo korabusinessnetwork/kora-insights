@@ -14,8 +14,10 @@ nunca cruza para cima e o diagnóstico nunca é calculado embaixo do usuário.**
 | `migrations/20260905120000_esquema_inicial.sql` | tabelas, índices, funções de pertencimento e de cofre |
 | `migrations/20260905120100_politicas_rls.sql` | `enable row level security`, políticas e `grant` por coluna |
 | `migrations/20260905120200_agendamento_da_coleta.sql` | pg_cron + pg_net: coleta 04:00 e motor 04:40 (America/Sao_Paulo) |
+| `migrations/20260907140000_saude_das_contas.sql` | `saude_das_contas`: o painel de operação, sem limiar |
+| `migrations/20260910120000_varredura_da_coleta.sql` | `contas_da_varredura`: quem a coleta varre, e quem dentro dela pode virar snapshot (ADR-011) |
 | `seeds/metricas_canonicas.sql` | dicionário canônico espelhado no banco (ADR-003) |
-| `functions/coleta-diaria/` | snapshot diário; toda falha vira linha em `coleta_eventos` (ADR-004) |
+| `functions/coleta-diaria/` | snapshot diário; toda falha vira linha em `coleta_eventos` (ADR-004). Também passa pela conta `pausada`, só para renovar o token (ADR-011) |
 | `functions/gerar-diagnostico/` | motor de regras no servidor, grava com `ruleset_version` (ADR-005) |
 | `functions/conectar-conta/` | troca o `code` do OAuth por token longo e guarda no Vault |
 | `functions/excluir-dados/` | exclusão exigida pela LGPD e pelo App Review, com protocolo |
@@ -211,7 +213,14 @@ pacote pelo npm, e as funções não passam pelo bundler do Vite.
 - **Teste de isolamento entre tenants com banco real** existe e roda no CI:
   `./scripts/testar-isolamento.sh` sobe um PostgreSQL efêmero, aplica as
   migrations reais e faz as asserções descritas em `supabase/testes/README.md`.
-  Junto dele vão as do cofre do token e as do painel de saúde.
+  Junto dele vão as do cofre do token, as do painel de saúde e as da varredura
+  diária.
+- **A conta `pausada` renovava token? Não, e agora renova.** A renovação mora
+  dentro da coleta (ADR-009) e a coleta só varria `ativa`, então uma pausa de
+  mais de 60 dias matava o token e virava desconexão de fato. `contas_da_varredura`
+  passou a responder quem é varrido e quem pode ser coletado (ADR-011). Hoje
+  nenhum código grava `pausada` — o conserto veio antes do escritor, de
+  propósito.
 
 ---
 
@@ -241,7 +250,7 @@ O que procurar, e por quê:
 | `dias_sem_coleta` | maior que 1 | o cron não rodou, ou esta conta falha há dias |
 | `motivo_da_ultima_falha` | `token_expirado` | a renovação automática não deu conta (ADR-009) |
 | `dias_sem_diagnostico` | maior que `dias_sem_coleta` | a coleta anda e o motor não — falha só no log |
-| `dias_ate_o_token_vencer` | menor que 15 numa conta `ativa` | deveria ter renovado sozinho; ver `src/token/validade.js` |
+| `dias_ate_o_token_vencer` | menor que 15 numa conta `ativa` ou `pausada` | deveria ter renovado sozinho — as duas entram na varredura (ADR-011); ver `src/token/validade.js` |
 
 **A view não julga de propósito.** Ela devolve contagem de dias e nada mais: os
 prazos do produto vivem em `src/token/validade.js` e `src/motor/frescor.js`, e
