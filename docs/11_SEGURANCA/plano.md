@@ -132,6 +132,14 @@ conferem pertencimento à mão (`service_role` ignora RLS), tratam
 `LIMITE_DE_TAXA` e `TOKEN_EXPIRADO` como estados de negócio e não como exceção
 silenciosa.
 
+**Hospedagem (Cloudflare Pages).** Cabeçalhos de resposta em `public/_headers`,
+e uma Content-Security-Policy gerada no build a partir de `VITE_SUPABASE_URL`
+(ADR-010). Sem `'unsafe-inline'` e sem `'unsafe-eval'`: é essa ausência que faz a
+política valer contra XSS. `font-src 'self'` fecha a porta pela qual as fontes
+saíam para o Google — nenhuma requisição de terceiro parte das páginas públicas.
+Variável de ambiente malformada **para o build**, porque uma CSP com host errado
+não degrada: ela bloqueia o login em produção sem erro visível.
+
 **Meta.** Mínimo de permissões (ADR-002). Token no cabeçalho. Orçamento de
 chamadas que para antes de a Meta recusar.
 
