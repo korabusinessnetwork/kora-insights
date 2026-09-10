@@ -195,6 +195,20 @@ diagnostico: a manchete e a tabela.
 > original entrar, troca-se **um token** e o produto inteiro acompanha. Isso e
 > o teste do design system: identidade nao mora em componente.
 
+**As duas familias sao servidas pela propria origem**, de `public/fontes/`, com
+`@font-face` em `public/fontes.css`. Vinham do Google Fonts ate 2026-09-10, e
+isso entregava o IP de todo visitante ao Google antes de qualquer consentimento —
+inclusive em `/privacidade` e `/dados`. A razao completa esta no ADR-010; o que
+importa aqui e a consequencia para quem mexe em tipografia:
+
+| | |
+|---|---|
+| Pesos disponiveis | Inter **400-600**, Newsreader **400-500** — a faixa que os arquivos declaram |
+| Pedir um peso fora da faixa | o navegador limita a faixa, e nao sintetiza negrito falso. Nao quebra, mas tambem nao muda nada na tela |
+| Precisar de um peso novo | e um arquivo novo em `public/fontes/` e um `@font-face` novo, nao so um `--peso-*`. Trocar o token nao basta |
+| Trocar de familia (white-label) | idem: o token aponta o nome, mas o arquivo precisa existir e ser declarado |
+| Acentuacao pt-BR | cabe inteira no subset `latin`. `latin-ext` existe e so e baixado se um caractere fora dele aparecer |
+
 | Token | Tamanho | Uso |
 |---|---|---|
 | `--texto-veredito` | `clamp(1.75rem, 3.4vw, 2.75rem)` | a frase do diagnostico |
