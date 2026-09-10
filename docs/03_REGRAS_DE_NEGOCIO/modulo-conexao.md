@@ -58,6 +58,7 @@ stateDiagram-v2
     token_expirado --> ativa: cliente reconecta pelo mesmo fluxo de OAuth
     ativa --> pausada: SEM ESCRITOR HOJE (ver secao 6)
     pausada --> ativa: SEM ESCRITOR HOJE
+    pausada --> pausada: a varredura diaria renova o token, sem coletar (ADR-011)
     ativa --> desconectada: desconectar-conta apaga o token e para a coleta
     token_expirado --> desconectada: idem
     desconectada --> ativa: cliente reconecta pelo mesmo fluxo de OAuth
@@ -69,7 +70,7 @@ stateDiagram-v2
 | Estado | Coleta roda? | Diagnóstico é gerado? | Token no Vault? | A tela mostra |
 |---|---|---|---|---|
 | `ativa` | sim | sim | sim | diagnóstico normal |
-| `pausada` | **não** | sim | sim | histórico + lacuna crescente |
+| `pausada` | **não** — mas a varredura passa por ela para renovar o token (ADR-011) | sim | sim, e mantido vivo | histórico + lacuna crescente |
 | `token_expirado` | **não** | sim | referência existe, segredo pode não | pedido de reconexão + lacuna nomeada |
 | `desconectada` | não | **não** | não | histórico congelado, com a data do último diagnóstico e o convite a reconectar |
 | linha apagada | — | — | não | a conta some; sobra o protocolo em `exclusoes_de_dados` |
@@ -78,11 +79,26 @@ Regra que amarra a tabela inteira:
 
 ```
 -- coleta-diaria
-contas = SELECT ... FROM ig_contas WHERE status = 'ativa'
+contas = SELECT ... FROM contas_da_varredura      -- ativa + pausada
+           coletar = true  -> coleta e renova     -- so 'ativa'
+           coletar = false -> renova, e so        -- 'pausada'
 
 -- gerar-diagnostico
 contas = SELECT ... FROM ig_contas WHERE status IN ('ativa','pausada','token_expirado')
 ```
+
+**A varredura da coleta e a coleta em si deixaram de ser a mesma lista.** Conta
+`pausada` e visitada todo dia para o token dela ser trocado, e nada mais: sem
+chamada de insights, sem snapshot, sem evento e sem mudança de status. Pausar é o
+cliente parando a **coleta** — soltar a conexão é o outro botão, e é ele que
+apaga o token do cofre. A regra mora em `public.contas_da_varredura`, com
+asserção em Postgres de verdade (`supabase/testes/50-varredura.sql`), e a coluna
+`coletar` é a metade que erra em silêncio: coletar uma conta pausada desfaria a
+decisão do cliente sem levantar erro nenhum.
+
+`desconectada` e `token_expirado` ficam de fora da varredura por motivos
+diferentes — na primeira o segredo já saiu do cofre, na segunda a Meta já recusa
+a troca. Nas duas, tentar gastaria chamada para receber uma recusa previsível.
 
 **Conta com token vencido continua sendo diagnosticada de propósito.** O
 histórico dela não some porque a coleta parou; o que precisa aparecer é a
@@ -198,7 +214,10 @@ em `Casca`, vale em toda tela e varre **todas** as contas do tenant: conta perde
 dia de histórico esteja ou não em foco.
 
 Conta `desconectada` não gera aviso — foi o cliente que desligou. Conta `pausada`
-gera, porque a pausa é temporária e o token vencido a torna definitiva.
+gera, porque a pausa é temporária e o token vencido a torna definitiva. Desde o
+ADR-011 o aviso na conta pausada é, como na ativa, o último recurso: a varredura
+diária já passa por ela para renovar, então o aviso só aparece se a troca
+automática vier falhando há mais de uma semana.
 
 ---
 
@@ -232,6 +251,12 @@ decidido.
 
 Estado sem escritor não é bug, é intenção pendente — mas precisa estar escrito,
 senão vira mistério na primeira leitura do schema.
+
+**A varredura já trata `pausada` (ADR-011), e isso é de propósito.** Enquanto o
+estado não tem escritor, nenhuma conta passa por lá e o código novo não muda
+nada na prática. É a ordem certa: o dia em que a suspensão de assinatura for
+escrita, ela não nasce carregando uma perda silenciosa — uma pausa de mais de 60
+dias matando o token e virando desconexão de fato.
 
 ---
 

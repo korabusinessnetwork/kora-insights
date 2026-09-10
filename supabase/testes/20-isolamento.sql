@@ -127,14 +127,30 @@ exception
     raise notice 'ok: o painel de saude e inalcancavel pelo cliente';
 end
 $$;
+
+-- `contas_da_varredura` e a lista que a coleta diaria recebe, e ela carrega
+-- `token_ref` — a coluna que o schema tira do alcance do cliente com `grant` por
+-- coluna. Uma view sem trava devolveria pela porta dos fundos exatamente o que a
+-- porta da frente nega, e para todos os tenants de uma vez.
+do $$
+begin
+  perform 1 from public.contas_da_varredura limit 1;
+  raise exception 'FALHOU: authenticated alcancou contas_da_varredura';
+exception
+  when insufficient_privilege then
+    raise notice 'ok: a lista da varredura e inalcancavel pelo cliente';
+end
+$$;
 commit;
 
--- E o service_role alcanca, senao a trava acima passaria de graca num banco em
--- que a view nao existe para ninguem.
+-- E o service_role alcanca, senao as travas acima passariam de graca num banco
+-- em que a view nao existe para ninguem.
 begin;
 set local role service_role;
 select pg_temp.conferir('service_role enxerga as duas contas no painel de saude',
   (select count(*) from public.saude_das_contas), 2);
+select pg_temp.conferir('service_role enxerga as duas contas ativas na varredura',
+  (select count(*) from public.contas_da_varredura), 2);
 commit;
 
 -- ── Cliente nao escreve linha de coleta ─────────────────────────────────────

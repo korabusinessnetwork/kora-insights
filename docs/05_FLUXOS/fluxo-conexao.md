@@ -194,8 +194,9 @@ A ordem dos dois últimos passos é regra, não gosto:
 4. NAO apagar snapshots, diagnosticos nem eventos
 ```
 
-**Status antes do cofre.** A coleta só varre `status = 'ativa'`, então o passo 2
-é o que de fato para a coleta. Apagar o token primeiro e falhar no passo
+**Status antes do cofre.** A coleta só recolhe métrica de `status = 'ativa'` — e
+`desconectada` fica fora até da varredura de renovação (ADR-011) —, então o passo
+2 é o que de fato para a coleta. Apagar o token primeiro e falhar no passo
 seguinte deixaria a conta na fila da madrugada seguinte sem token nenhum: ela
 falharia com "token expirado", e a tela pediria **reconexão** a um cliente que
 acabou de pedir desconexão.

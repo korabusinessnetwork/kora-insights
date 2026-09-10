@@ -13,6 +13,12 @@
  * descobre que a queda do grafico foi o token dele vencendo, e nao o conteudo
  * dele piorando (ADR-004, e "honestidade de dado" em memory/identity.md).
  *
+ * A varredura tem duas metades, e a lista delas vem do banco
+ * (`public.contas_da_varredura`): conta `ativa` e coletada, conta `pausada` e
+ * apenas visitada para renovar o token. Pausar e o cliente pedindo para parar a
+ * COLETA — nao e ele soltando a conexao, e um token morto durante a pausa a
+ * tornaria definitiva (ADR-011).
+ *
  * Nota de fronteira: o adaptador vem de `src/metricas/adaptadores/` em vez de
  * ser copiado para ca. Ele e o unico lugar do produto que conhece nome de
  * metrica da Meta (ADR-003) e ja e versionado e testado — duas copias dariam
@@ -40,8 +46,12 @@ import {
   responderOk,
 } from '../_compartilhado/respostas.ts'
 
-/** Colunas de `ig_contas` que a coleta usa. Nenhum `select *` (CLAUDE.md). */
-const CAMPOS_DA_CONTA = 'id, tenant_id, ig_user_id, token_ref, status, token_expira_em'
+/**
+ * Colunas de `public.contas_da_varredura` que a coleta usa. Nenhum `select *`
+ * (CLAUDE.md). `coletar` e a decisao que a view toma por esta funcao: quem entra
+ * na lista, e quem dentro dela pode virar snapshot.
+ */
+const CAMPOS_DA_CONTA = 'id, tenant_id, ig_user_id, token_ref, status, token_expira_em, coletar'
 
 /**
  * Quantos dias para tras a busca de midias olha.
@@ -67,6 +77,8 @@ interface Conta {
   token_ref: string
   status: string
   token_expira_em: string | null
+  /** `true` em conta `ativa`; `false` em conta `pausada`, que so renova token. */
+  coletar: boolean
 }
 
 interface LinhaDeConta {
@@ -181,18 +193,21 @@ async function gravarSnapshots(
  * num dia que tem dado.
  *
  * @param cliente cliente com service_role
- * @param conta conta ativa, com `token_expira_em`
+ * @param conta conta varrida, com `token_expira_em`
  * @param token token atual, ja lido do cofre
  * @param agora instante da execucao
- * @returns o token a usar nesta coleta: o novo, ou o atual se a troca falhou
+ * @returns o token a usar daqui para frente — o novo, ou o atual se a troca
+ *   falhou ou nem foi preciso — e se houve troca
  */
 async function renovarSeNecessario(
   cliente: SupabaseClient,
   conta: Conta,
   token: string,
   agora: Date,
-): Promise<string> {
-  if (!precisaRenovar({ tokenExpiraEm: conta.token_expira_em }, agora)) return token
+): Promise<{ token: string; trocado: boolean }> {
+  if (!precisaRenovar({ tokenExpiraEm: conta.token_expira_em }, agora)) {
+    return { token, trocado: false }
+  }
 
   try {
     const renovado = await renovarTokenLongo(token)
@@ -217,7 +232,7 @@ async function renovarSeNecessario(
     // Log sem token e sem referencia do cofre: so o que responde "a renovacao
     // esta funcionando?" no suporte (docs/11_SEGURANCA).
     registrar('coleta.token_renovado', { conta: conta.id, expira_em: renovado.expiraEm })
-    return renovado.token
+    return { token: renovado.token, trocado: true }
   } catch (erro) {
     const causa = erro instanceof ErroDaGraph ? erro.codigo : 'falha'
     registrar('coleta.token_nao_renovado', {
@@ -225,15 +240,75 @@ async function renovarSeNecessario(
       causa,
       expira_em: conta.token_expira_em,
     })
-    return token
+    return { token, trocado: false }
   }
+}
+
+/**
+ * Le o token da conta no cofre.
+ *
+ * Separada da coleta de proposito: a conta `pausada` precisa da mesma leitura
+ * sem nada do que vem depois dela. Devolver nulo em vez de lancar e o que deixa
+ * cada chamador dar o proprio significado a uma referencia sem segredo — para
+ * quem coleta e conexao quebrada, e vira evento; para quem so renova nao ha
+ * evento nenhum a gravar.
+ *
+ * @param cliente cliente com service_role
+ * @param conta conta varrida
+ * @returns o token, ou null se a referencia nao tem segredo no cofre
+ */
+async function lerTokenDoCofre(cliente: SupabaseClient, conta: Conta): Promise<string | null> {
+  const { data, error } = await cliente.rpc('ler_token', { p_ref: conta.token_ref })
+  if (error || typeof data !== 'string' || data.length === 0) return null
+  return data
+}
+
+/**
+ * Mantem vivo o token de uma conta que a varredura NAO coleta.
+ *
+ * Esta e a diferenca entre pausar e desconectar. Pausar e o cliente pedindo para
+ * parar a coleta; o token dele nao tem nada com isso. Sem esta passagem, uma
+ * pausa de mais de 60 dias matava o token e virava desconexao de fato: o cliente
+ * volta, precisa reconectar, e os meses que ele achava estar guardando pararam
+ * de crescer sem ninguem dizer nada.
+ *
+ * Nada aqui grava snapshot — renovar nao desfaz a pausa — e nada aqui grava
+ * `coleta_eventos`: aquela tabela alimenta `montarHistorico`, e a lacuna da
+ * conta pausada e a pausa em si, nao uma falha nossa. Chamar de `token_expirado`
+ * a lacuna de quem pediu pausa seria acusar o produto de um problema que nao
+ * existe. Pelo mesmo motivo o status nao muda: a decisao de pausar e do cliente.
+ *
+ * @param cliente cliente com service_role
+ * @param conta conta pausada
+ * @param agora instante da execucao
+ * @returns true se o token foi trocado nesta passagem
+ */
+async function manterTokenVivo(
+  cliente: SupabaseClient,
+  conta: Conta,
+  agora: Date,
+): Promise<boolean> {
+  // O prazo antes do cofre: sem isto, toda conta pausada custaria uma leitura de
+  // segredo por dia para descobrir que ainda faltam 40 dias.
+  if (!precisaRenovar({ tokenExpiraEm: conta.token_expira_em }, agora)) return false
+
+  const doCofre = await lerTokenDoCofre(cliente, conta)
+  if (doCofre === null) {
+    // Sem token nao ha o que renovar, e nao ha coleta parando hoje por causa
+    // disso. O cliente descobre ao despausar, pelo mesmo pedido de reconexao.
+    registrar('coleta.token_ausente_no_cofre', { conta: conta.id, status: conta.status })
+    return false
+  }
+
+  const { trocado } = await renovarSeNecessario(cliente, conta, doCofre, agora)
+  return trocado
 }
 
 /**
  * Coleta uma conta e devolve o resumo do que gravou.
  *
  * @param cliente cliente com service_role
- * @param conta conta ativa
+ * @param conta conta ativa — a varredura nao chama esta funcao para conta pausada
  * @param dia dia coletado, `YYYY-MM-DD`
  * @param orcamento orcamento de chamadas desta conta
  * @param agora instante da execucao, para decidir a renovacao do token
@@ -247,16 +322,14 @@ async function coletarConta(
   orcamento: OrcamentoDeChamadas,
   agora: Date,
 ): Promise<{ leiturasDeConta: number; midias: number; ignoradas: string[] }> {
-  const { data: doCofre, error: erroDoToken } = await cliente.rpc('ler_token', {
-    p_ref: conta.token_ref,
-  })
-  if (erroDoToken || typeof doCofre !== 'string' || doCofre.length === 0) {
+  const doCofre = await lerTokenDoCofre(cliente, conta)
+  if (doCofre === null) {
     // Referencia sem segredo no cofre significa conexao quebrada, e o cliente
     // precisa reconectar — mesma acao de token vencido.
     throw new ErroDaGraph(CODIGOS.TOKEN_EXPIRADO, 'Token ausente no cofre para esta conta.')
   }
 
-  const token = await renovarSeNecessario(cliente, conta, doCofre, agora)
+  const { token } = await renovarSeNecessario(cliente, conta, doCofre, agora)
 
   const adaptador = adaptadorVigente()
   const versoes = { api_version: adaptador.apiVersion, adapter_version: adaptador.versao }
@@ -369,23 +442,44 @@ Deno.serve(async (requisicao: Request) => {
   const agora = new Date()
   const dia = typeof corpo.dia === 'string' ? corpo.dia : diaFechadoAnterior(agora)
 
+  // Quem a varredura toca esta decidido em `contas_da_varredura`, e nao aqui:
+  // ativa para coletar, pausada so para renovar o token. A regra mora no banco
+  // porque virou duas ("quem e varrido" e "quem pode ser coletado") e porque e
+  // la que ela tem teste — nao ha Deno no CI (supabase/testes/README.md).
+  //
+  // Coletaveis primeiro, e essa ordem e a prioridade do produto: o dia de uma
+  // conta ativa nao volta se o limite da Meta estourar antes da vez dela, e a
+  // renovacao de uma pausada tem quinze dias de folga para acontecer amanha.
   const { data: contas, error: erroDasContas } = await cliente
-    .from('ig_contas')
+    .from('contas_da_varredura')
     .select(CAMPOS_DA_CONTA)
-    .eq('status', 'ativa')
+    .order('coletar', { ascending: false })
     .order('conectada_em', { ascending: true })
 
   if (erroDasContas) {
-    await registrarEvento(cliente, null, 'falha_inesperada', 'Não foi possível listar as contas ativas.')
+    await registrarEvento(cliente, null, 'falha_inesperada', 'Não foi possível listar as contas da varredura.')
     return responderFalha(CODIGOS.FALHA_INESPERADA, null, origem)
   }
 
-  const ativas = (contas ?? []) as Conta[]
+  const varredura = (contas ?? []) as Conta[]
+  const paraColetar = varredura.filter((conta) => conta.coletar).length
   let coletadas = 0
   let comFalha = 0
+  let renovadas = 0
   let barradoPorLimite = false
 
-  for (const conta of ativas) {
+  for (const conta of varredura) {
+    // Conta pausada: renova e sai. Sem snapshot, sem evento e sem mudanca de
+    // status — a pausa e decisao do cliente, e a renovacao so mantem a porta
+    // destrancada para quando ele voltar.
+    if (!conta.coletar) {
+      // Barrado por limite, a troca falharia gastando chamada. Ela espera o dia
+      // seguinte, que e para isso que servem os quinze dias de folga do ADR-009.
+      if (barradoPorLimite) continue
+      if (await manterTokenVivo(cliente, conta, agora)) renovadas += 1
+      continue
+    }
+
     // Uma conta ja barrada por limite significa que a janela da hora acabou para
     // esta execucao. As contas restantes NAO sao ignoradas em silencio: cada uma
     // ganha o proprio evento, senao a lacuna do dia apareceria sem motivo na tela
@@ -428,7 +522,11 @@ Deno.serve(async (requisicao: Request) => {
   }
 
   // Log sem id de conta e sem payload: o que interessa ao operador e o formato
-  // do dia, e o detalhe de cada conta ja esta em `coleta_eventos`.
-  registrar('coleta.concluida', { dia, contas: ativas.length, coletadas, comFalha })
-  return responderOk({ dia, contas: ativas.length, coletadas, comFalha }, origem)
+  // do dia, e o detalhe de cada conta ja esta em `coleta_eventos`. `pausadas` e
+  // `renovadas` respondem a unica pergunta que a conta pausada nao responde em
+  // lugar nenhum: a porta dela continua destrancada?
+  const pausadas = varredura.length - paraColetar
+  const resumo = { dia, contas: paraColetar, coletadas, comFalha, pausadas, renovadas }
+  registrar('coleta.concluida', resumo)
+  return responderOk(resumo, origem)
 })
